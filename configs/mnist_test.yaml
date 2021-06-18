@@ -1,0 +1,65 @@
+data:
+  test:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: torchvision.datasets
+        class: MNIST
+        MNIST:
+          root: '''dataset/MNIST/'''
+          train: False
+          download: True
+          transform: transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+      batch_size: 128
+      shuffle: False
+
+model:
+  module: flame.core.model.net
+  class: Net
+
+metrics:
+  module: flame.handlers.metrics.metrics
+  class: Metrics
+  Metrics:
+    metrics:
+      loss:
+        module: flame.handlers.metrics.loss
+        class: Loss
+        Loss:
+          loss_fn: torch.nn.NLLLoss()
+      accuracy:
+        module: ignite.metrics
+        class: Accuracy
+      precision:
+        module: ignite.metrics
+        class: Precision
+        Precision:
+          average: True
+    attach_to:
+      engine: '''test'''
+
+screenlogger:
+  module: flame.handlers.screenlogger
+  class: ScreenLogger
+  ScreenLogger:
+    eval_names:
+      - '''test'''
+
+checkpoint_loader:
+  module: flame.handlers.checkpoint
+  class: CheckpointLoader
+  CheckpointLoader:
+    checkpoint_path: '''checkpoint/MNIST/2009050834/best_model_9_accuracy=0.9901.pt'''
+    mode: '''test'''
+
+engine:
+  module: flame.core.engine.engine
+  class: Evaluator
+  Evaluator:
+    dataset: config['data']['test']
+    device: '''cpu'''
+
+extralibs:
+  torch: torch
+  transforms: torchvision.transforms
