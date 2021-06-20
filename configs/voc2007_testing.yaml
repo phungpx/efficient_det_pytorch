@@ -1,0 +1,126 @@
+data:
+  test:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.voc2007_dataset
+        class: VOC2007Dataset
+        VOC2007Dataset:
+          compound_coef: 1
+          image_dir: '''dataset/VOC2007/test'''
+          label_dir: '''dataset/VOC2007/test'''
+          image_pattern: '''*.jpg'''
+          label_pattern: '''*.xml'''
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          classes:
+            aeroplane: 0
+            bicycle: 1
+            bird: 2
+            boat: 3
+            bottle: 4
+            bus: 5
+            car: 6
+            cat: 7
+            chair: 8
+            cow: 9
+            diningtable: 10
+            dog: 11
+            horse: 12
+            motorbike: 13
+            person: 14
+            pottedplant: 15
+            sheep: 16
+            sofa: 17
+            train: 18
+            tvmonitor: 19
+      batch_size: 4
+      shuffle: False
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+
+model:
+  module: flame.core.model.efficientdet
+  class: EfficientDet
+  EfficientDet:
+    # pretrained_weight: ''''''
+    head_only: False
+    num_classes: 20
+    compound_coef: 1
+    backbone_pretrained: False
+    scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
+    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    iou_threshold: 0.7
+    score_threshold: 0.2
+
+metrics:
+  module: flame.handlers.metrics.metrics
+  class: Metrics
+  Metrics:
+    metrics:
+      mAP:
+        module: flame.handlers.metrics.mAP
+        class: mAP
+        mAP:
+          num_classes: 20
+          iou_threshold: 0.5
+          box_format: '''corners'''
+          output_transform: 'lambda x: (x[0], x[1])'
+    attach_to:
+      engine: '''test'''
+
+screenlogger:
+  module: flame.handlers.screenlogger
+  class: ScreenLogger
+  ScreenLogger:
+    eval_names:
+      - '''test'''
+
+checkpoint_loader:
+  module: flame.handlers.checkpoint
+  class: CheckpointLoader
+  CheckpointLoader:
+    checkpoint_path: '''checkpoint/VOC2007/2106190503/best_model_49_mAP=0.8066.pt'''
+    mode: '''test'''
+
+predictor:
+  module: flame.handlers.voc2007_predictor
+  class: RegionPredictor
+  RegionPredictor:
+    evaluator_name: '''engine'''
+    output_dir: '''checkpoint/VOC2007/2106190503/best_model_49_mAP=0.8066/train'''
+    compound_coef: 1
+    classes:
+      aeroplane: [[128, 0, 0], 0]  # color, class_idx, area_threshold
+      bicycle: [[0, 128, 0], 1]
+      bird: [[128, 128, 0], 2]
+      boat: [[0, 0, 128], 3]
+      bottle: [[128, 0, 128], 4]
+      bus: [[0, 128, 128], 5]
+      car: [[128, 128, 128], 6]
+      cat: [[64, 0, 0], 7]
+      chair: [[192, 0, 0], 8]
+      cow: [[64, 128, 0], 9]
+      diningtable: [[192, 128, 0], 10]
+      dog: [[64, 0, 128], 11]
+      horse: [[192, 0, 128], 12]
+      motorbike: [[64, 128, 128], 13]
+      person: [[192, 128, 128], 14]
+      pottedplant: [[0, 64, 0], 15]
+      sheep: [[128, 64, 0], 16]
+      sofa: [[0, 192, 0], 17]
+      train: [[128, 192, 0], 18]
+      tvmonitor: [[0, 64, 128], 19]
+    thresh_score: 0.0
+    thresh_iou_nms: 0.0
+    output_transform: 'lambda x: (x[0], x[-1])'
+
+engine:
+  module: flame.core.engine.engine
+  class: Evaluator
+  Evaluator:
+    dataset: config['data']['test']
+    device: '''cuda'''
+
+extralibs:
+  torch: torch
