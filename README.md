@@ -3,7 +3,7 @@
 [[`EfficientDet(paper)`](https://arxiv.org/pdf/1911.09070.pdf)] || [[`EfficientDet(Github)`](https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch)]
 
 ## 1. Download pretrained weight of Efficient Net
-```bash
+```python
 mkdir checkpoint/efficientnet_pretrained_weight
 ```
 
