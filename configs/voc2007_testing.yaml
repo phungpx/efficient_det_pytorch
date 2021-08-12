@@ -8,8 +8,8 @@ data:
         class: VOC2007Dataset
         VOC2007Dataset:
           compound_coef: 1
-          image_dir: '''dataset/VOC2007/test'''
-          label_dir: '''dataset/VOC2007/test'''
+          image_dir: '''dataset/PASCALVOC2007/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages/'''
+          label_dir: '''dataset/PASCALVOC2007/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/Annotations/'''
           image_pattern: '''*.jpg'''
           label_pattern: '''*.xml'''
           mean: [0.485, 0.456, 0.406]
@@ -35,7 +35,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 4
+      batch_size: 8
       shuffle: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
@@ -80,7 +80,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/VOC2007/2106190503/best_model_49_mAP=0.8066.pt'''
+    checkpoint_path: '''checkpoint/VOC2007/efficientdet-d1/2106201631/best_model_80_mAP=0.7842.pt'''
     mode: '''test'''
 
 predictor:
@@ -88,7 +88,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/VOC2007/2106190503/best_model_49_mAP=0.8066/train'''
+    output_dir: '''checkpoint/VOC2007/efficientdet-d1/2106201631/best_model_80_mAP=0.7842/valid/'''
     compound_coef: 1
     classes:
       aeroplane: [[128, 0, 0], 0]  # color, class_idx, area_threshold
