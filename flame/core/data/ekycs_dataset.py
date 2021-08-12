@@ -9,7 +9,7 @@ from pathlib import Path
 from natsort import natsorted
 from torch.utils.data import Dataset
 from typing import Dict, Tuple, List, Optional
-from imgaug.augmentables.segmaps import SegmentationMapsOnImage
+from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
 class EkycDataset(Dataset):
@@ -47,12 +47,12 @@ class EkycDataset(Dataset):
     def __len__(self):
         return len(self.data_pairs)
 
-    def _label_info(self, lable_path: str, classes: dict) -> Tuple[List[np.ndarray], List[int]]:
+    def _label_info(self, lable_path: str, classes: dict) -> Dict:
         root = ET.parse(str(lable_path)).getroot()
         page = root.find('{}Page'.format(''.join(root.tag.partition('}')[:2])))
         width, height = int(page.get('imageWidth')), int(page.get('imageHeight'))
 
-        masks, labels = [], []
+        label_info = []
         for card_type, label in classes.items():
             regions = root.findall('.//*[@value=\"{}\"]/../..'.format(card_type)) + root.findall('.//*[@name=\"{}\"]/../..'.format(card_type))
             for region in regions:
@@ -60,61 +60,58 @@ class EkycDataset(Dataset):
                 # assert len(points) >= 4, 'Length of points must be greater than or equal 4.'
                 mask = np.zeros(shape=(height, width), dtype=np.uint8)
                 cv2.fillPoly(img=mask, pts=np.int32([points]), color=(255, 255, 255))
-                masks.append(mask)
-                labels.append(label)
 
-        if (not len(masks)) and (not len(labels)):
-            masks, labels = [np.zeros(shape=(height, width), dtype=np.uint8)], [-1]
+                x1 = min([point[0] for point in points])
+                y1 = min([point[1] for point in points])
+                x2 = max([point[0] for point in points])
+                y2 = max([point[1] for point in points])
+                bbox = (x1, y1, x2, y2)
 
-        return masks, labels
+                label_info.append({'mask': mask, 'label': label, 'bbox': bbox})
 
-    def __getitem__(self, idx):
+        if not len(label_info):
+            label_info.append({'mask': np.zeros(shape=(height, width), dtype=np.uint8),
+                               'label': -1,
+                               'bbox': (0, 0, 1, 1)})
+
+        return label_info
+
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, Dict, Tuple[str, Tuple[int, int]]]:
         image_path, label_path = self.data_pairs[idx]
+        label_info = self._label_info(lable_path=str(label_path), classes=self.classes)
+
         image = cv2.imread(str(image_path))
+        image_info = (str(image_path), image.shape[1::-1])
+
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        boxes = [label['bbox'] for label in label_info]
+        labels = [label['label'] for label in label_info]
 
-        masks, labels = self._label_info(lable_path=str(label_path), classes=self.classes)
-        if (not len(masks)) and (not len(labels)):
-            raise ValueError('image {} has no label.'.format(image_path.stem))
-
-        image_info = [str(image_path), image.shape[1::-1]]
-
-        # create SegmentationMapsOnImage
-        masks = [SegmentationMapsOnImage(mask, image.shape[:2]) for mask in masks]
-
-        # transform masks and image
+        # Pad to square to keep object's ratio
+        bbs = BoundingBoxesOnImage([BoundingBox(x1=box[0], y1=box[1], x2=box[2], y2=box[3], label=label)
+                                    for box, label in zip(boxes, labels)], shape=image.shape)
         for transform in random.sample(self.transforms, k=random.randint(0, len(self.transforms))):
-            _transform = transform.to_deterministic()
-            image = _transform(image=image)
-            masks = [_transform(segmentation_maps=mask) for mask in masks]
-        masks = [mask.get_arr() for mask in masks]
+            image, bbs = transform(image=image, bounding_boxes=bbs)
 
-        # padding image, masks to square and then resize image and masks
-        image = cv2.resize(self.pad_to_square(image=image), dsize=(self.imsize, self.imsize))
-        masks = [cv2.resize(self.pad_to_square(image=mask), dsize=(self.imsize, self.imsize)) for mask in masks]
+        # Rescale image and bounding boxes
+        image, bbs = self.pad_to_square(image=image, bounding_boxes=bbs)
+        sample, bbs = iaa.Resize(size=self.imsize)(image=image, bounding_boxes=bbs)
+        bbs = bbs.on(sample)
 
-        # get boxes in masks
-        boxes = []
-        for i, mask in enumerate(masks):
-            pos = np.where(mask == 255)
-            if len(pos) != 0 and len(pos[1]) != 0:
-                xmin, xmax = np.min(pos[1]), np.max(pos[1])
-                ymin, ymax = np.min(pos[0]), np.max(pos[0])
-                boxes.append([xmin, ymin, xmax, ymax])
-            else:
-                boxes.append([0, 0, 1, 1])
-                labels[i] = -1
+        # Convert from Bouding Box Object to boxes, labels list
+        boxes = [[bb.x1, bb.y1, bb.x2, bb.y2] for bb in bbs.bounding_boxes]
+        labels = [bb.label for bb in bbs.bounding_boxes]
 
         # Convert to Torch Tensor
         labels = torch.tensor(labels, dtype=torch.int64)
         boxes = torch.tensor(boxes, dtype=torch.float32)
         image_id = torch.tensor([idx], dtype=torch.int64)
 
-        # Target
+        # # Target
         target = {'boxes': boxes, 'labels': labels, 'image_id': image_id}
 
         # Image
-        sample = torch.from_numpy(np.ascontiguousarray(image))
+        sample = torch.from_numpy(np.ascontiguousarray(sample))
         sample = sample.permute(2, 0, 1).contiguous()
         sample = (sample.float().div(255.) - self.mean) / self.std
 
