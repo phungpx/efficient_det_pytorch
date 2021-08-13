@@ -84,7 +84,7 @@ checkpoint_loader:
     mode: '''test'''
 
 predictor:
-  module: flame.handlers.voc2007_predictor
+  module: flame.handlers.region_predictor
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
