@@ -1,0 +1,131 @@
+data:
+  test:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.ekycs_dataset
+        class: EkycDataset
+        EkycDataset:
+          compound_coef: 0
+          dirname: '''dataset/EKYCs/test'''
+          image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
+          label_patterns: ['''*.xml''']
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          classes:
+            BLX: 0
+            BLX_BACK: 1
+            BLX_OLD: 2
+            BLX_BACK_OLD: 3
+            CMND: 4
+            CMND_BACK: 5
+            CCCD: 6
+            CCCD_BACK: 7
+            CMCC: 8
+            CCCD_front_chip: 9
+            CCCD_back_chip: 10
+            CMQD_A: 11
+            CMQD_A_BACK: 12
+            CMQD_B: 13
+            CMQD_B_BACK: 14
+            CMQD_C: 15
+            CMQD_C_BACK: 16
+            CMQD_D: 17
+            CMQD_D_BACK: 18
+            CMQD_B_VT: 19
+            CMQD_B_VT_BACK: 20
+            PASSPORT: 21
+            PASSPORT_OTHER: 22
+      batch_size: 8
+      shuffle: False
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+
+model:
+  module: flame.core.model.efficientdet
+  class: EfficientDet
+  EfficientDet:
+    # pretrained_weight: ''''''
+    head_only: False
+    num_classes: 23
+    compound_coef: 0
+    backbone_pretrained: False
+    scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
+    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    iou_threshold: 0.2
+    score_threshold: 0.2
+
+metrics:
+  module: flame.handlers.metrics.metrics
+  class: Metrics
+  Metrics:
+    metrics:
+      mAP:
+        module: flame.handlers.metrics.mAP
+        class: mAP
+        mAP:
+          num_classes: 23
+          iou_threshold: 0.5
+          box_format: '''corners'''
+          output_transform: 'lambda x: (x[0], x[1])'
+    attach_to:
+      engine: '''test'''
+
+screenlogger:
+  module: flame.handlers.screenlogger
+  class: ScreenLogger
+  ScreenLogger:
+    eval_names:
+      - '''test'''
+
+checkpoint_loader:
+  module: flame.handlers.checkpoint
+  class: CheckpointLoader
+  CheckpointLoader:
+    checkpoint_path: '''checkpoint/EKYCS/efficientdet-d0/2108120715/best_model_23_mAP=0.9277.pt'''
+    mode: '''test'''
+
+predictor:
+  module: flame.handlers.voc2007_predictor
+  class: RegionPredictor
+  RegionPredictor:
+    evaluator_name: '''engine'''
+    output_dir: '''checkpoint/EKYCS/efficientdet-d0/2108120715/best_model_23_mAP=0.9277/test/'''
+    compound_coef: 0
+    classes:
+      BLX: [[128, 0, 0], 0]
+      BLX_BACK: [[0, 128, 0], 1]
+      BLX_OLD: [[128, 128, 0], 2]
+      BLX_BACK_OLD: [[0, 0, 128], 3]
+      CMND: [[128, 0, 128], 4]
+      CMND_BACK: [[0, 128, 128], 5]
+      CCCD: [[128, 128, 128], 6]
+      CCCD_BACK: [[64, 0, 0], 7]
+      CMCC: [[192, 0, 0], 8]
+      CCCD_front_chip: [[64, 128, 0], 9]
+      CCCD_back_chip: [[192, 128, 0], 10]
+      CMQD_A: [[64, 0, 128], 11]
+      CMQD_A_BACK: [[192, 0, 128], 12]
+      CMQD_B: [[64, 128, 128], 13]
+      CMQD_B_BACK: [[192, 128, 128], 14]
+      CMQD_C: [[0, 64, 0], 15]
+      CMQD_C_BACK: [[128, 64, 0], 16]
+      CMQD_D: [[0, 192, 0], 17]
+      CMQD_D_BACK: [[128, 192, 0], 18]
+      CMQD_B_VT: [[0, 64, 128], 19]
+      CMQD_B_VT_BACK: [[100, 64, 128], 20]
+      PASSPORT: [[10, 164, 128], 21]
+      PASSPORT_OTHER: [[200, 64, 10], 22]
+    thresh_score: 0.0
+    thresh_iou_nms: 0.0
+    output_transform: 'lambda x: (x[0], x[-1])'
+
+engine:
+  module: flame.core.engine.engine
+  class: Evaluator
+  Evaluator:
+    dataset: config['data']['test']
+    device: '''cuda'''
+
+extralibs:
+  torch: torch

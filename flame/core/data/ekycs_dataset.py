@@ -47,7 +47,7 @@ class EkycDataset(Dataset):
     def __len__(self):
         return len(self.data_pairs)
 
-    def _label_info(self, lable_path: str, classes: dict) -> Dict:
+    def _get_label_info(self, lable_path: str, classes: dict) -> Dict:
         root = ET.parse(str(lable_path)).getroot()
         page = root.find('{}Page'.format(''.join(root.tag.partition('}')[:2])))
         width, height = int(page.get('imageWidth')), int(page.get('imageHeight'))
@@ -78,7 +78,7 @@ class EkycDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, Dict, Tuple[str, Tuple[int, int]]]:
         image_path, label_path = self.data_pairs[idx]
-        label_info = self._label_info(lable_path=str(label_path), classes=self.classes)
+        label_info = self._get_label_info(lable_path=str(label_path), classes=self.classes)
 
         image = cv2.imread(str(image_path))
         image_info = (str(image_path), image.shape[1::-1])
