@@ -10,9 +10,14 @@ from .box_transform import Anchors, BBoxTransform, ClipBoxes
 
 
 class EfficientDetBackBone(nn.Module):
-    def __init__(self, num_classes=80, compound_coef=0, load_weights=False,
-                 scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)], aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
-                 iou_threshold=0.2, score_threshold=0.2):
+    def __init__(self,
+                 num_classes=80,
+                 compound_coef=0,
+                 load_weights=False,
+                 scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
+                 aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
+                 iou_threshold=0.2,
+                 score_threshold=0.2):
         super(EfficientDetBackBone, self).__init__()
         self.compound_coef = compound_coef
 
@@ -27,10 +32,11 @@ class EfficientDetBackBone(nn.Module):
         self.iou_threshold = iou_threshold
         self.score_threshold = score_threshold
         self.aspect_ratios = aspect_ratios
+        self.num_classes = num_classes
         self.num_scales = len(scales)
 
+        # the channels of P3 / P4 / P5.
         conv_channel_coef = {
-            # the channels of P3 / P4 / P5.
             0: [40, 112, 320],
             1: [40, 112, 320],
             2: [48, 120, 352],
@@ -42,8 +48,7 @@ class EfficientDetBackBone(nn.Module):
             8: [80, 224, 640],
         }
 
-        self.num_classes = num_classes
-        num_anchors = len(self.aspect_ratios) * self.num_scales
+        num_anchors = len(aspect_ratios) * len(scales)
 
         self.bifpn = nn.Sequential(
             *[BiFPN(self.fpn_num_filters[self.compound_coef],
@@ -126,13 +131,24 @@ class EfficientDetBackBone(nn.Module):
 
 
 class EfficientDet(nn.Module):
-    def __init__(self, pretrained_weight=None, head_only=False,
-                 num_classes=80, compound_coef=0, backbone_pretrained=False,
-                 scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)], aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
-                 iou_threshold=0.2, score_threshold=0.2):
+    def __init__(self,
+                 pretrained_weight=None,
+                 head_only=False,
+                 num_classes=80,
+                 compound_coef=0,
+                 backbone_pretrained=False,
+                 scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
+                 aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
+                 iou_threshold=0.2,
+                 score_threshold=0.2):
         super(EfficientDet, self).__init__()
-        self.model = EfficientDetBackBone(num_classes=num_classes, compound_coef=compound_coef, load_weights=backbone_pretrained,
-                                          scales=scales, aspect_ratios=aspect_ratios, iou_threshold=iou_threshold, score_threshold=score_threshold)
+        self.model = EfficientDetBackBone(num_classes=num_classes,
+                                          compound_coef=compound_coef,
+                                          load_weights=backbone_pretrained,
+                                          scales=scales,
+                                          aspect_ratios=aspect_ratios,
+                                          iou_threshold=iou_threshold,
+                                          score_threshold=score_threshold)
 
         if pretrained_weight is not None:
             state_dict = torch.load(pretrained_weight, map_location='cpu')
