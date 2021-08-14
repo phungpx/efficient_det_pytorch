@@ -95,7 +95,7 @@ model:
   EfficientDet:
     pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
     head_only: False
-    num_classes: 23
+    num_classes: 1
     compound_coef: 0
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
@@ -135,7 +135,7 @@ metrics:
         module: flame.handlers.metrics.mAP
         class: mAP
         mAP:
-          num_classes: 23
+          num_classes: 1
           iou_threshold: 0.5
           box_format: '''corners'''
           output_transform: 'lambda x: (x[0], x[1])'
