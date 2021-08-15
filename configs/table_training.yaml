@@ -93,13 +93,13 @@ model:
   module: flame.core.model.efficientdet
   class: EfficientDet
   EfficientDet:
-    pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
+    # pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
     head_only: False
     num_classes: 1
     compound_coef: 0
-    backbone_pretrained: False
+    backbone_pretrained: True
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)', '(1.8, 0.3)']
     iou_threshold: 0.2
     score_threshold: 0.2
 

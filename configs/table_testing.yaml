@@ -8,7 +8,7 @@ data:
         class: TableDataset
         TableDataset:
           compound_coef: 0
-          dirname: '''dataset/TABLE/valid'''
+          dirname: '''dataset/TABLE/test'''
           image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
@@ -63,7 +63,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2108132350/best_model_39_mAP=0.9630.pt'''
+    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2108141140/best_model_11_mAP=0.9557.pt'''
     mode: '''test'''
 
 predictor:
@@ -71,7 +71,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/TABLE/efficientdet-d0/2108132350/best_model_39_mAP=0.9630/valid/'''
+    output_dir: '''checkpoint/TABLE/efficientdet-d0/2108141140/best_model_11_mAP=0.9557/test/'''
     compound_coef: 0
     classes:
       TABLE: [[0, 0, 255], 0]

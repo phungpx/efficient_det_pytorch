@@ -20,6 +20,8 @@ class EfficientDetBackBone(nn.Module):
                  score_threshold=0.2):
         super(EfficientDetBackBone, self).__init__()
         self.compound_coef = compound_coef
+        self.iou_threshold = iou_threshold
+        self.score_threshold = score_threshold
 
         self.pyramid_levels = [5, 5, 5, 5, 5, 5, 5, 5, 6]
         self.fpn_cell_repeats = [3, 4, 5, 6, 7, 7, 8, 8, 8]
@@ -29,8 +31,6 @@ class EfficientDetBackBone(nn.Module):
         self.fpn_num_filters = [64, 88, 112, 160, 224, 288, 384, 384, 384]
         # self.input_sizes = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536]
 
-        self.iou_threshold = iou_threshold
-        self.score_threshold = score_threshold
         self.aspect_ratios = aspect_ratios
         self.num_classes = num_classes
         self.num_scales = len(scales)
@@ -51,9 +51,10 @@ class EfficientDetBackBone(nn.Module):
         num_anchors = len(aspect_ratios) * len(scales)
 
         self.bifpn = nn.Sequential(
-            *[BiFPN(self.fpn_num_filters[self.compound_coef],
-                    conv_channel_coef[compound_coef],
-                    True if _ == 0 else False,
+            *[BiFPN(num_channels=self.fpn_num_filters[self.compound_coef],
+                    conv_channels=conv_channel_coef[compound_coef],
+                    first_time=True if _ == 0 else False,
+                    epsilon=1e-4, onnx_export=False,
                     attention=True if compound_coef < 6 else False,
                     use_p8=compound_coef > 7) for _ in range(self.fpn_cell_repeats[compound_coef])])
 
@@ -70,7 +71,8 @@ class EfficientDetBackBone(nn.Module):
 
         self.anchors = Anchors(anchor_scale=self.anchor_scale[compound_coef],
                                pyramid_levels=(torch.arange(self.pyramid_levels[self.compound_coef]) + 3).tolist(),
-                               ratio=aspect_ratios, scales=scales)
+                               ratios=aspect_ratios,
+                               scales=scales)
 
         self.backbone_net = EfficientNet(self.backbone_compound_coef[compound_coef], load_weights)
 
