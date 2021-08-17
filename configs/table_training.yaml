@@ -173,7 +173,7 @@ lr_scheduler:
     score_name: '''mAP'''
     evaluator_name: '''valid_evaluator'''
     mode: '''max'''
-    patience: 10
+    patience: 5
     verbose: True
 
 # early_stopping:

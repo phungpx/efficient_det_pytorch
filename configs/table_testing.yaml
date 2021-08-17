@@ -32,7 +32,7 @@ model:
     compound_coef: 0
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)', '(1.8, 0.3)']
     iou_threshold: 0.2
     score_threshold: 0.2
 
@@ -63,7 +63,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2108141140/best_model_11_mAP=0.9557.pt'''
+    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2108161629/best_model_67_mAP=0.9785.pt'''
     mode: '''test'''
 
 predictor:
@@ -71,7 +71,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/TABLE/efficientdet-d0/2108141140/best_model_11_mAP=0.9557/test/'''
+    output_dir: '''checkpoint/TABLE/efficientdet-d0/2108161629/best_model_67_mAP=0.9785/test/'''
     compound_coef: 0
     classes:
       TABLE: [[0, 0, 255], 0]
