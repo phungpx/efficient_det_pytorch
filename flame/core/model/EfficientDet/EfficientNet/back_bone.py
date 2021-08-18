@@ -5,8 +5,12 @@ from .model import EfficientNet
 
 
 class EfficientNetBackBone(nn.Module):
-    def __init__(self, compound_coef: int = 0, weight_path: str = None):
+    def __init__(self, compound_coef: int = 0,
+                 R_input: List[int] = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536],
+                 weight_path: str = None):
         super(EfficientNetBackBone, self).__init__()
+        self.input_size = R_input[compound_coef]
+
         efficient_net = EfficientNet.from_pretrained(model_name=f'efficientnet-b{compound_coef}',
                                                      weights_path=weight_path)
         del efficient_net._conv_head
@@ -29,14 +33,14 @@ class EfficientNetBackBone(nn.Module):
             . P4: B, C4, H / 2 ^ 4, W / 2 ^ 4
             . P5: B, C5, H / 2 ^ 5, W / 2 ^ 5
         '''
+        assert x.shape[2] == x.shape[3] == self.input_size, f'H={x.shape[2]}, W={x.shape[3]} do not match with input_size={self.input_size}'
+
         x = self.model._conv_stem(x)
         x = self.model._bn0(x)
         x = self.model._swish(x)
 
         feature_maps = []
 
-        # TODO: temporarily storing extra tensor last_x and del it later might not be a good idea,
-        # try recording stride changing when creating efficientnet, and then apply it here.
         last_x = None
         for i, block in enumerate(self.model._blocks):
             drop_connect_rate = self.model._global_params.drop_connect_rate
