@@ -189,7 +189,7 @@ best_saver:
   module: flame.handlers.checkpoint
   class: BestSaver
   BestSaver:
-    dirname: '''checkpoint/TABLE/efficientdet-d0'''
+    dirname: '''checkpoint/TABLE/efficientdet-d0_v2'''
     score_name: '''mAP'''
     mode: '''max'''
     evaluator_name: '''valid_evaluator'''
@@ -207,7 +207,7 @@ backup_saver:
       - '''history'''
       - '''lr_scheduler'''
       # - '''early_stopping'''
-    dirname: '''checkpoint/TABLE/efficientdet-d0'''
+    dirname: '''checkpoint/TABLE/efficientdet-d0_v2'''
     save_interval: 1
     n_saved: 1
 
