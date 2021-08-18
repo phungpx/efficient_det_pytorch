@@ -26,7 +26,7 @@ class BiFPN(nn.Module):
 
         self.epsilon = epsilon
         self.use_P8 = True if compound_coef > 7 else False  # add P8 when using D7x version
-        self.use_attention = False if compound_coef > 7 else True  # no use attention for D7x version
+        self.use_attention = True if compound_coef < 6 else False  # no use attention for D6, D7, D7x version
 
         # Conv Layers for P6, P7, P8 after P3, P4, P5 output features of Efficient Net -------------------------------
         '''
@@ -105,25 +105,25 @@ class BiFPN(nn.Module):
         # Weight ---------------------------------------------------------------------------------------------------
         # top-down pathway
         # Ex: P6_td = td_Conv[(w1 * P6_in + w2 * up_Resize(P7_in)) / (w1 + w2 + epsilon)]
-        self.P6_W1 = nn.Parameter(data=torch.ones(size=2, dtype=torch.float32), requires_grad=True)
-        self.P6_W1_ReLU = nn.ReLU(inplace=True)
-        self.P5_W1 = nn.Parameter(data=torch.ones(size=2, dtype=torch.float32), requires_grad=True)
-        self.P5_W1_ReLU = nn.ReLU(inplace=True)
-        self.P4_W1 = nn.Parameter(data=torch.ones(size=2, dtype=torch.float32), requires_grad=True)
-        self.P4_W1_ReLU = nn.ReLU(inplace=True)
-        self.P3_W1 = nn.Parameter(data=torch.ones(size=2, dtype=torch.float32), requires_grad=True)
-        self.P3_W1_ReLU = nn.ReLU(inplace=True)
+        self.P6_W1 = nn.Parameter(data=torch.ones(size=(2, ), dtype=torch.float32), requires_grad=True)
+        self.P6_W1_ReLU = nn.ReLU()
+        self.P5_W1 = nn.Parameter(data=torch.ones(size=(2, ), dtype=torch.float32), requires_grad=True)
+        self.P5_W1_ReLU = nn.ReLU()
+        self.P4_W1 = nn.Parameter(data=torch.ones(size=(2, ), dtype=torch.float32), requires_grad=True)
+        self.P4_W1_ReLU = nn.ReLU()
+        self.P3_W1 = nn.Parameter(data=torch.ones(size=(2, ), dtype=torch.float32), requires_grad=True)
+        self.P3_W1_ReLU = nn.ReLU()
 
         # bottom-up pathway
         # Ex: P6_out = out_Conv[(w1 * P6_in + w2 * P6_td + w3 * down_Resize(P5_out)) / (w1 + w2 + w3 + epsilon)]
-        self.P4_W2 = nn.Parameter(data=torch.ones(size=3, dtype=torch.float32), requires_grad=True)
-        self.P4_W2_ReLU = nn.ReLU(inplace=True)
-        self.P5_W2 = nn.Parameter(data=torch.ones(size=3, dtype=torch.float32), requires_grad=True)
-        self.P5_W2_ReLU = nn.ReLU(inplace=True)
-        self.P6_W2 = nn.Parameter(data=torch.ones(size=3, dtype=torch.float32), requires_grad=True)
-        self.P6_W2_ReLU = nn.ReLU(inplace=True)
-        self.P7_W2 = nn.Parameter(data=torch.ones(size=2, dtype=torch.float32), requires_grad=True)
-        self.P7_W2_ReLU = nn.ReLU(inplace=True)
+        self.P4_W2 = nn.Parameter(data=torch.ones(size=(3, ), dtype=torch.float32), requires_grad=True)
+        self.P4_W2_ReLU = nn.ReLU()
+        self.P5_W2 = nn.Parameter(data=torch.ones(size=(3, ), dtype=torch.float32), requires_grad=True)
+        self.P5_W2_ReLU = nn.ReLU()
+        self.P6_W2 = nn.Parameter(data=torch.ones(size=(3, ), dtype=torch.float32), requires_grad=True)
+        self.P6_W2_ReLU = nn.ReLU()
+        self.P7_W2 = nn.Parameter(data=torch.ones(size=(2, ), dtype=torch.float32), requires_grad=True)
+        self.P7_W2_ReLU = nn.ReLU()
 
         # activation
         self.swish = MemoryEfficientSwish() if not onnx_export else Swish()
@@ -159,22 +159,22 @@ class BiFPN(nn.Module):
         # Top-Down PathWay: P7_td, P6_td, P5_td, P4_td, P3_td -------------------------------------------------------
         # P6_td = td_Conv[(w1 * P6_in + w2 * up_Resize(P7_in)) / (w1 + w2 + epsilon)]
         P6_W1 = self.P6_W1_ReLU(self.P6_W1)
-        W6 = P6_W1 / (P6_W1.sum(dim=1) + self.epsilon)
+        W6 = P6_W1 / (P6_W1.sum(dim=0) + self.epsilon)
         P6_td = self.P6_td_Conv(self.swish(W6[0] * P6_in + W6[1] * self.P7_Up_Resize(P7_in)))
 
         # P5_td = td_Conv[(w1 * P5_in + w2 * up_Resize(P6_td)) / (w1 + w2 + epsilon)]
         P5_W1 = self.P5_W1_ReLU(self.P5_W1)
-        W5 = P5_W1 / (P5_W1.sum(dim=1) + self.epsilon)
+        W5 = P5_W1 / (P5_W1.sum(dim=0) + self.epsilon)
         P5_td = self.P5_td_Conv(self.swish(W5[0] * P5_in + W5[1] * self.P6_Up_Resize(P6_td)))
 
         # P4_td = td_Conv[(w1 * P4_in + w2 * up_Resize(P5_td)) / (w1 + w2 + epsilon)]
         P4_W1 = self.P4_W1_ReLU(self.P4_W1)
-        W4 = P4_W1 / (P4_W1.sum(dim=1) + self.epsilon)
+        W4 = P4_W1 / (P4_W1.sum(dim=0) + self.epsilon)
         P4_td = self.P4_td_Conv(self.swish(W4[0] * P4_in + W4[1] * self.P5_Up_Resize(P5_td)))
 
         # P3_td = td_Conv[(w1 * P3_in + w2 * up_Resize(P4_td)) / (w1 + w2 + epsilon)]
         P3_W1 = self.P3_W1_ReLU(self.P3_W1)
-        W3 = P3_W1 / (P3_W1.sum(dim=1) + self.epsilon)
+        W3 = P3_W1 / (P3_W1.sum(dim=0) + self.epsilon)
         P3_td = self.P3_td_Conv(self.swish(W3[0] * P3_in + W3[1] * self.P4_Up_Resize(P4_td)))
 
         # Bottom-Up Pathway: P7_out, P6_out, P5_out, P4_out, P3_out ------------------------------------------------

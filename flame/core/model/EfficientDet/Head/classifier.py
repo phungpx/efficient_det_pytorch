@@ -5,8 +5,11 @@ from .utils import SeparableConvBlock
 
 
 class Classifier(nn.Module):
-    def __init__(self, n_anchors: int, n_classes: int,
-                 compound_coef: int, D_class: List[int], W_bifpn: List[int],
+    def __init__(self, n_anchors: int = 9,
+                 n_classes: int = 80,
+                 compound_coef: int = 0,
+                 D_class: List[int] = [3, 3, 3, 4, 4, 4, 5, 5, 5],
+                 W_bifpn: List[int] = [64, 88, 112, 160, 224, 288, 384, 384, 384],
                  onnx_export: bool = False):
         super(Classifier, self).__init__()
         self.n_anchors = n_anchors

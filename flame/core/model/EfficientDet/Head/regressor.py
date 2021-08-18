@@ -5,8 +5,11 @@ from .utils import SeparableConvBlock
 
 
 class Regressor(nn.Module):
-    def __init__(self, n_anchors: int, compound_coef: int,
-                 D_box: List[int], W_bifpn: List[int], onnx_export: bool = False) -> None:
+    def __init__(self, n_anchors: int = 9,
+                 compound_coef: int = 0,
+                 D_box: List[int] = [3, 3, 3, 4, 4, 4, 5, 5, 5],
+                 W_bifpn: List[int] = [64, 88, 112, 160, 224, 288, 384, 384, 384],
+                 onnx_export: bool = False) -> None:
         '''
         Args:
             n_anchors = num_scales * num_aspect_ratios
@@ -49,7 +52,7 @@ class Regressor(nn.Module):
         '''
         features = []
         for x in inputs:
-            for _ in self.n_layers:
+            for _ in range(self.n_layers):
                 x = self.separable_conv(x)
 
             x = self.head_conv(x)
