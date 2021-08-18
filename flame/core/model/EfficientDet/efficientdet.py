@@ -1,9 +1,9 @@
-from BiFPN.bifpn import BiFPN
-from Head.regressor import Regressor
-from Head.classifier import Classifier
-from Anchor.anchor import AnchorGeneration
-from Anchor.transform import ClipBoxes, BBoxTransform
-from EfficientNet.back_bone import EfficientNetBackBone
+from .BiFPN.bifpn import BiFPN
+from .Head.regressor import Regressor
+from .Head.classifier import Classifier
+from .Anchor.anchor import AnchorGeneration
+from .Anchor.transform import ClipBoxes, BBoxTransform
+from .EfficientNet.back_bone import EfficientNetBackBone
 
 import torch
 from torch import nn
