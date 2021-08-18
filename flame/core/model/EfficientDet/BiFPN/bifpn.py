@@ -128,8 +128,20 @@ class BiFPN(nn.Module):
         # activation
         self.swish = MemoryEfficientSwish() if not onnx_export else Swish()
 
-    def forward(self, inputs: Tuple[torch.Tensor]) -> Tuple[torch.Tensor]:
-        P3, P4, P5 = inputs
+    def forward(self, feature_maps: Tuple[torch.Tensor]) -> Tuple[torch.Tensor]:
+        '''
+        Args:
+            feature_maps:
+            .P3:
+            .P4:
+            .P5:
+        Outputs:
+            feature_fusions:
+
+        '''
+        assert len(feature_maps) == 3, f'Must be used P3, P4, P5 in feature_maps output from EfficientBackbone'
+
+        P3, P4, P5 = feature_maps
 
         # P3_in, P4_in, P5_in, P6_in, P7_in, P8_in
         P3_in = self.P3_to_P3_in_Conv(P3)
@@ -139,19 +151,17 @@ class BiFPN(nn.Module):
         P7_in = self.P6_in_to_P7_in_Conv(P6_in)
         if self.use_P8:
             P8_in = self.P7_in_to_P8_in_Conv(P7_in)
-            feature_fusion = (P3_in, P4_in, P5_in, P6_in, P7_in, P8_in)
+            feature_fusions = (P3_in, P4_in, P5_in, P6_in, P7_in, P8_in)
         else:
-            feature_fusion = (P3_in, P4_in, P5_in, P6_in, P7_in)
+            feature_fusions = (P3_in, P4_in, P5_in, P6_in, P7_in)
 
-        if self.use_attention and (not self.use_P8):
-            for _ in range(self.bifpn_num_layers):
-                feature_fusion = self._fast_normalized_weighted_fusion(inputs=feature_fusion)
+        for _ in range(self.bifpn_num_layers):
+            if self.use_attention:
+                feature_fusions = self._fast_normalized_weighted_fusion(inputs=feature_fusions)
+            else:
+                feature_fusions = self._normal_fusion(inputs=feature_fusions)
 
-        if self.use_P8 or (not self.use_attention):
-            for _ in range(self.bifpn_num_layers):
-                feature_fusion = self._normal_fusion(inputs=feature_fusion)
-
-        return feature_fusion
+        return feature_fusions
 
     def _fast_normalized_weighted_fusion(self, inputs: Tuple[torch.Tensor]) -> Tuple[torch.Tensor]:
         P3_in, P4_in, P5_in, P6_in, P7_in = inputs
