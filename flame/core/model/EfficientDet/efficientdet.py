@@ -32,9 +32,9 @@ class EfficientDet(nn.Module):
 
         # in / out channels of each Conv Layer in Head: W_pred = W_bifpn (#channels)
         self.W_pred = [64, 88, 112, 160, 224, 288, 384, 384, 384]
-        # the number of BiFPN Layers: D_bifpn = 3 + compound_coef (#layers)
+        # the number of Regression Head Layers: D_class = D_box = 3 + [compound_coef / 3] (#layers)
         self.D_box = [3, 3, 3, 4, 4, 4, 5, 5, 5]
-        # the number of BiFPN Layers: D_bifpn = 3 + compound_coef (#layers)
+        # the number of Classification Head Layers: D_class = D_box = 3 + [compound_coef / 3] (#layers)
         self.D_class = [3, 3, 3, 4, 4, 4, 5, 5, 5]
 
         # out_channels of P3, P4, P5 after feature extractor class
