@@ -1,14 +1,17 @@
 # [Efficient Det](https://arxiv.org/pdf/1911.09070.pdf)
 
-[[`EfficientDet(paper)`](https://arxiv.org/pdf/1911.09070.pdf)] || [[`EfficientDet(Github)`](https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch)]
+## 0. References
+- EfficientDet(paper): https://arxiv.org/pdf/1911.09070.pdf
+- EfficientDet(Github): https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch
 
-## 1. Download Pretrained Weight
+## 1. Download
+> Weights Location
 ```python
 mkdir checkpoint/efficientnet_pretrained_weight
 mkdir checkpoint/efficientdet_pretrained_weight
 ```
 
-* EfficientNet Pretrained Weight
+> EfficientNet Pretrained Weight
 ```bash
 https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficientnet-b0-355c32eb.pth
 https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficientnet-b1-f1951068.pth
@@ -20,13 +23,16 @@ https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficien
 https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficientnet-b7-dcc49843.pth
 ```
 
-## 2. Run
-* Training
+> EfficientDet Pretrained Weight
+
+
+## 2. Usage
+> Training
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_training.yaml
 ```
 
-* Testing
+> Testing
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_testing.yaml
 ```
