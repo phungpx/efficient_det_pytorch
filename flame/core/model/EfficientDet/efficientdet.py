@@ -7,7 +7,7 @@ from .EfficientNet.back_bone import EfficientNetBackBone
 
 import torch
 from torch import nn
-from typing import List, Tuple, Optional
+from typing import List, Optional
 from torchvision.ops.boxes import batched_nms
 
 
@@ -17,7 +17,7 @@ class EfficientDet(nn.Module):
                  compound_coef: int = 0,
                  backbone_weight_path: Optional[str] = None,
                  scales: List[float] = None,
-                 aspect_ratios: List[Tuple[float, float]] = None,
+                 aspect_ratios: List[float] = None,
                  score_threshold: float = 0.2,
                  iou_threshold: float = 0.2) -> None:
         super(EfficientDet, self).__init__()

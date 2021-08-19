@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from typing import Optional, List, Tuple
+from typing import Optional, List
 from .efficientdet import EfficientDet
 
 
@@ -12,7 +12,7 @@ class Model(nn.Module):
                  model_weight_path: Optional[str] = None,
                  backbone_weight_path: Optional[str] = None,
                  scales: List[float] = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
-                 aspect_ratios: List[Tuple[float, float]] = [(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
+                 aspect_ratios: List[float] = [0.5, 1., 2.],
                  iou_threshold: float = 0.2, score_threshold: float = 0.2) -> None:
         super(Model, self).__init__()
         self.model = EfficientDet(
