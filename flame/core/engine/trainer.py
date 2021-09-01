@@ -50,7 +50,7 @@ class Trainer(Engine):
         params = [param.to(self.device) if torch.is_tensor(param) else param for param in batch]
         samples = torch.stack([image.to(self.device) for image in params[0]], dim=0)
         targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in params[1]]
-        cls_preds, reg_preds, anchors = self.model._forward(samples)
+        cls_preds, reg_preds, anchors = self.model(samples)
         cls_loss, reg_loss = self.loss(cls_preds, reg_preds, anchors, targets)
         loss = cls_loss.mean() + reg_loss.mean()
         loss.backward()

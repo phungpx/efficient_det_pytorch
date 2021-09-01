@@ -233,19 +233,19 @@ lr_scheduler:
   module: flame.handlers.lr_scheduler
   class: ReduceLROnPlateau
   ReduceLROnPlateau:
-    score_name: '''mAP'''
+    score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
-    mode: '''max'''
-    patience: 3
+    mode: '''min'''
+    patience: 5
     verbose: True
 
 early_stopping:
   module: flame.handlers.early_stopping
   class: EarlyStopping
   EarlyStopping:
-    score_name: '''mAP'''
+    score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
-    mode: '''max'''
+    mode: '''min'''
     patience: 50
 
 best_saver:
