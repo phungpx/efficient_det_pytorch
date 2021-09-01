@@ -80,13 +80,13 @@ class MeanAveragePrecision:
                     FP[i] = 1  # count as false positive
 
             # compute precision, recall and average precision
-            acc_TP = np.cumsum(np.array(TP))
-            acc_FP = np.cumsum(np.array(FP))
+            acc_TP = np.cumsum(TP).tolist()
+            acc_FP = np.cumsum(FP).tolist()
 
             prec, rec = [], []
             for _acc_TP, _acc_FP in zip(acc_TP, acc_FP):
                 rec.append(_acc_TP / len(c_gts) if len(c_gts) != 0 else 0.)
-                prec.append(_acc_TP / (_acc_FP + _acc_TP) if (_acc_FP + _acc_TP) != 0 else 0.)
+                prec.append(_acc_TP / (_acc_FP + _acc_TP) if (_acc_FP + _acc_TP) != 0. else 0.)
 
             # prec = np.divide(acc_TP, (acc_FP + acc_TP)).tolist()
             # rec = (acc_TP / len(c_gts)).tolist()
