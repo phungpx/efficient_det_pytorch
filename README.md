@@ -36,3 +36,9 @@ CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_training.yaml
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_testing.yaml
 ```
+
+> mAP testing
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1LQWWi0IfUKFEtrJk-oAZcXKlf9hQ7cQ5?usp=sharing)
+
+> Inference
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://drive.google.com/file/d/1n4QoUcpv3wz6lXsWJSBAbRk4ZdO6NnEb/view?usp=sharing)
