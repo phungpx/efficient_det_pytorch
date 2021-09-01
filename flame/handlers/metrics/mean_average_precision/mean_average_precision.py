@@ -22,7 +22,17 @@ class MeanAveragePrecision:
             detections: list with all detections ([image_id, class_id, confidence, [x1, y1, x2, y2]])
             ground_truths: list with all ground_truths ([image_id, class_id, 1., [x1, y1, x2, y2]])
         Outputs:
-
+            A list of dictionaries. Each dictionary contains information and metrics of each class.
+            The keys of each dictionary are:
+            dict['class']: class representing the current dictionary;
+            dict['precision']: array with the precision values;
+            dict['recall']: array with the recall values;
+            dict['AP']: average precision;
+            dict['interpolated precision']: interpolated precision values;
+            dict['interpolated recall']: interpolated recall values;
+            dict['total ground truths']: total number of ground truth positives;
+            dict['total TP']: total number of True Positive detections;
+            dict['total FP']: total number of False Negative detections;
         '''
         results = []
 
@@ -143,10 +153,10 @@ class MeanAveragePrecision:
             recall_valid.append(r)
             rho_interp.append(prec_max)
 
-        # By definition AP = sum(max(precision whose recall is above r)) / 11
+        # by definition AP = sum(max(precision whose recall is above r)) / 11
         ap = sum(rho_interp) / 11
 
-        # Generating values for the plot
+        # generating values for the plot
         rvals = [recall_valid[0]] + recall_valid + [0.]
         pvals = [0.] + rho_interp + [0.]
 
