@@ -50,7 +50,7 @@ data:
             # - iaa.Crop(percent=(0, 0.1))
             # - iaa.Pad(percent=(0, 0.1), keep_size=False)
             # - iaa.ChangeColorTemperature()
-      batch_size: 16
+      batch_size: 32
       shuffle: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
@@ -92,7 +92,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 16
+      batch_size: 32
       shuffle: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
@@ -134,7 +134,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 16
+      batch_size: 32
       shuffle: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
