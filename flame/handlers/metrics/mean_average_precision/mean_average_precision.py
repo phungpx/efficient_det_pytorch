@@ -14,8 +14,8 @@ class MeanAveragePrecision(nn.Module):
         method: str = 'every_point_interpolation'  # or '11_point_interpolation'
     ):
         super(MeanAveragePrecision, self).__init__()
+        self.classes = {class_id: class_name for class_name, class_id in classes.items()}
         self.iou_threshold = iou_threshold
-        self.classes = classes
         self.method = method
 
     def forward(self, detections: list, ground_truths: list) -> dict:
@@ -39,7 +39,7 @@ class MeanAveragePrecision(nn.Module):
         '''
         results = []
 
-        class_indices = sorted(map(int, self.classes.values()))
+        class_indices = sorted(map(int, self.classes.keys()))
         for class_id in class_indices:
             # get only detection of class_id -> c_dets
             c_dets = [det for det in detections if det[1] == class_id]
