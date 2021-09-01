@@ -40,13 +40,15 @@ class MeanAveragePrecision:
         for class_id in class_indices:
             # get only detection of class_id -> c_dets
             c_dets = [det for det in detections if det[1] == class_id]
+            num_detections = len(c_dets)
 
             # get only ground truth of class_id -> c_gts
             c_gts = [gt for gt in ground_truths if gt[1] == class_id]
+            num_ground_truths = len(c_gts)
 
             # initialize TP, FP with all 0 values
-            TP = [0] * len(c_dets)
-            FP = [0] * len(c_dets)
+            TP = [0] * num_detections
+            FP = [0] * num_detections
 
             # create dictionary with amount of gts for each image
             # Ex: amount_c_gts = {0: [0,0,0], 1: [0,0,0,0,0]}
@@ -80,16 +82,14 @@ class MeanAveragePrecision:
                     FP[i] = 1  # count as false positive
 
             # compute precision, recall and average precision
-            acc_TP = np.cumsum(TP).tolist()
-            acc_FP = np.cumsum(FP).tolist()
+            acc_TP = np.cumsum(TP)
+            acc_FP = np.cumsum(FP)
 
-            prec, rec = [], []
-            for _acc_TP, _acc_FP in zip(acc_TP, acc_FP):
-                rec.append(_acc_TP / len(c_gts) if len(c_gts) else 0.)
-                prec.append(_acc_TP / (_acc_FP + _acc_TP) if (_acc_FP + _acc_TP) != 0. else 0.)
-
-            # prec = np.divide(acc_TP, (acc_FP + acc_TP)).tolist()
-            # rec = (acc_TP / len(c_gts)).tolist()
+            if num_ground_truths > 0:
+                prec = np.divide(acc_TP, (acc_FP + acc_TP)).tolist()
+                rec = (acc_TP / num_ground_truths).tolist()
+            else:
+                prec, rec = [0] * num_detections, [0], * num_detections
 
             if self.method == 'every_point_interpolation':
                 ap, mrec, mprec = self.every_points_interpolated_AP(rec=rec, prec=prec)
@@ -105,7 +105,8 @@ class MeanAveragePrecision:
                 'AP': ap,
                 'interpolated precision': mprec,
                 'interpolated recall': mrec,
-                'total ground truths': len(c_gts),
+                'total ground truths': num_ground_truths,
+                'total detections': num_detections,
                 'total TP': sum(TP),
                 'total FP': sum(FP)
             }
