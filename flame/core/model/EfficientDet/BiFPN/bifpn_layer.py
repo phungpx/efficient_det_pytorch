@@ -128,7 +128,7 @@ class BiFPNLayer(nn.Module):
             .P4:
             .P5:
         Outputs:
-            feature_fusions:
+            pyramid_features:
 
         '''
         if self.first_time:
@@ -144,18 +144,18 @@ class BiFPNLayer(nn.Module):
             P7_in = self.P6_in_to_P7_in_Conv(P6_in)
             if self.use_P8:
                 P8_in = self.P7_in_to_P8_in_Conv(P7_in)
-                feature_fusions = (P3_in, P4_in, P5_in, P6_in, P7_in, P8_in)
+                pyramid_features = (P3_in, P4_in, P5_in, P6_in, P7_in, P8_in)
             else:
-                feature_fusions = (P3_in, P4_in, P5_in, P6_in, P7_in)
+                pyramid_features = (P3_in, P4_in, P5_in, P6_in, P7_in)
         else:
-            feature_fusions = inputs
+            pyramid_features = inputs
 
         if self.use_attention:
-            feature_fusions = self._fast_normalized_weighted_fusion(inputs=feature_fusions)
+            pyramid_features = self._fast_normalized_weighted_fusion(inputs=pyramid_features)
         else:
-            feature_fusions = self._normal_fusion(inputs=feature_fusions)
+            pyramid_features = self._normal_fusion(inputs=pyramid_features)
 
-        return feature_fusions
+        return pyramid_features
 
     def _fast_normalized_weighted_fusion(self, inputs: Tuple[torch.Tensor]) -> Tuple[torch.Tensor]:
         P3_in, P4_in, P5_in, P6_in, P7_in = inputs

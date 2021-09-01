@@ -7,7 +7,7 @@ from .EfficientNet.back_bone import EfficientNetBackBone
 
 import torch
 from torch import nn
-from typing import List, Optional
+from typing import List, Tuple, Dict, Optional
 from torchvision.ops.boxes import batched_nms
 
 
@@ -79,20 +79,14 @@ class EfficientDet(nn.Module):
         self.bbox_regressor = BBoxTransform()
         self.bbox_clipper = ClipBoxes()
 
-    def forward(self, inputs: torch.Tensor):
-        feature_maps = self.feature_extractor(x=inputs)  # P1, P2, P3, P4, P5
-        P3, P4, P5 = feature_maps[-3:]
-        pyramid_features = self.bifpn(feature_maps=(P3, P4, P5))
-        anchor_boxes = self.anchor_generator(inputs=inputs, pyramid_features=pyramid_features)
-        cls_preds = self.classifier(pyramid_features=pyramid_features)
-        loc_preds = self.regressor(pyramid_features=pyramid_features)
-
-        if self.training:
-            return cls_preds, loc_preds, anchor_boxes
-
+    def _predict(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
         predictions = []
+
+        cls_preds, loc_preds, anchor_boxes = self._forward(inputs=inputs)
+
         transformed_anchors = self.bbox_regressor(anchor_boxes, loc_preds)
         transformed_anchors = self.bbox_clipper(transformed_anchors, inputs)
+
         scores = torch.max(cls_preds, dim=2, keepdim=True)[0]
         scores_over_thresh = (scores > self.score_threshold)[:, :, 0]
 
@@ -123,3 +117,27 @@ class EfficientDet(nn.Module):
                                     'scores': torch.FloatTensor([0])})
 
         return predictions
+
+    def _forward(self, inputs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        '''
+        Args:
+            inputs: B x C x H x W
+        Outputs:
+            ** num_anchors: = H3 * W3 * n_anchors + H4 * W4 * n_anchors
+                            + H5 * W5 * n_anchors + H6 * W6 * n_anchors
+                            + H7 * W7 * n_anchors
+            cls_preds: Tensor [B, num_anchors, n_classes]
+            loc_preds: Tensor [B, num_anchors, 4]
+            anchors: Tensor [1, num_anchors, 4]
+        '''
+        feature_maps = self.feature_extractor(x=inputs)  # P1, P2, P3, P4, P5
+
+        P3, P4, P5 = feature_maps[-3:]
+        pyramid_features = self.bifpn(feature_maps=(P3, P4, P5))
+
+        anchors = self.anchor_generator(inputs=inputs, pyramid_features=pyramid_features)
+
+        cls_preds = self.classifier(pyramid_features=pyramid_features)
+        loc_preds = self.regressor(pyramid_features=pyramid_features)
+
+        return cls_preds, loc_preds, anchors

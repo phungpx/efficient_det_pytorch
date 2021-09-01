@@ -28,8 +28,8 @@ data:
             - iaa.Flipud(p=0.5)
             - iaa.Crop(percent=(0, 0.1))
             - iaa.Pad(percent=(0, 0.1), keep_size=False)
-            - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
-            - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
+            # - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
+            # - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
       batch_size: 16
       shuffle: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'

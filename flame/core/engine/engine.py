@@ -50,7 +50,7 @@ class Trainer(Engine):
         params = [param.to(self.device) if torch.is_tensor(param) else param for param in batch]
         samples = torch.stack([image.to(self.device) for image in params[0]], dim=0)
         targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in params[1]]
-        cls_preds, reg_preds, anchors = self.model(samples)
+        cls_preds, reg_preds, anchors = self.model._forward(samples)
         cls_loss, reg_loss = self.loss(cls_preds, reg_preds, anchors, targets)
         loss = cls_loss.mean() + reg_loss.mean()
         loss.backward()
@@ -78,6 +78,6 @@ class Evaluator(Engine):
             targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in batch[1]]
             image_infos = [image_info for image_info in params[2]]
 
-            predictions = self.model(samples)
+            cls_preds, reg_preds, anchors = self.model._forward(samples)
 
-            return predictions, targets, image_infos
+            return cls_preds, reg_preds, anchors, targets, image_infos

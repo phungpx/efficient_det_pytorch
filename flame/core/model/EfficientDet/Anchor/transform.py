@@ -32,16 +32,17 @@ class BBoxTransform(nn.Module):
 
 class ClipBoxes(nn.Module):
 
-    def __init__(self):
+    def __init__(self, compound_coef):
         super(ClipBoxes, self).__init__()
+        self.compound_coef = compound_coef
 
-    def forward(self, boxes, img):
-        batch_size, num_channels, height, width = img.shape
+    def forward(self, boxes):
+        image_height = image_width = 512 + 128 * self.compound_coef
 
         boxes[:, :, 0] = torch.clamp(boxes[:, :, 0], min=0)
         boxes[:, :, 1] = torch.clamp(boxes[:, :, 1], min=0)
 
-        boxes[:, :, 2] = torch.clamp(boxes[:, :, 2], max=width - 1)
-        boxes[:, :, 3] = torch.clamp(boxes[:, :, 3], max=height - 1)
+        boxes[:, :, 2] = torch.clamp(boxes[:, :, 2], max=image_width - 1)
+        boxes[:, :, 3] = torch.clamp(boxes[:, :, 3], max=image_height - 1)
 
         return boxes
