@@ -253,8 +253,8 @@ best_saver:
   class: BestSaver
   BestSaver:
     dirname: '''checkpoint/VOC2007/efficientdet-d0'''
-    score_name: '''mAP'''
-    mode: '''max'''
+    score_name: '''focal_loss'''
+    mode: '''min'''
     evaluator_name: '''valid_evaluator'''
     n_saved: 1
 
