@@ -116,6 +116,9 @@ class MeanAveragePrecision(nn.Module):
 
             results.append(result)
 
+        APs = [result['AP'] for result in results]
+        print(f'MeanAveragePrecision: {sum(APs) / len(APs) if len(APs) else 0.}')
+
         return results
 
     def every_points_interpolated_AP(

@@ -11,23 +11,23 @@ class Evaluator(Metric):
         detections, ground_truths = [], []
 
         image_idx = target['image_id'].item()
-        target_boxes = target['boxes'].detach().cpu().numpy()
-        target_labels = target['labels'].detach().cpu().numpy()
+        target_boxes = target['boxes'].detach().cpu().numpy().tolist()
+        target_labels = target['labels'].detach().cpu().numpy().tolist()
 
-        pred_boxes = pred['boxes'].detach().cpu().numpy()
-        pred_labels = pred['labels'].detach().cpu().numpy()
-        pred_scores = pred['scores'].detach().cpu().numpy()
+        pred_boxes = pred['boxes'].detach().cpu().numpy().tolist()
+        pred_labels = pred['labels'].detach().cpu().numpy().tolist()
+        pred_scores = pred['scores'].detach().cpu().numpy().tolist()
 
         for class_id, bbox in zip(target_labels, target_boxes):
             # [image_idx, class_target, 1, [x1, y1, x2, y2]]
-            ground_truth = [image_idx, class_id, 1, bbox[0], bbox[1], bbox[2], bbox[3]]
+            ground_truth = [image_idx, class_id, 1, bbox]
             ground_truths.append(ground_truth)
 
         for class_id, score, bbox in zip(pred_labels, pred_scores, pred_boxes):
             # [train_idx, class_prediction, prob_score, [x1, y1, x2, y2]]
             if class_id == -1 and score == 0:
                 continue
-            detection = [image_idx, class_id, score, bbox[0], bbox[1], bbox[2], bbox[3]]
+            detection = [image_idx, class_id, score, bbox]
             detections.append(detection)
 
         return detections, ground_truths

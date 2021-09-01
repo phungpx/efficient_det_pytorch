@@ -12,13 +12,14 @@ class Loss(Metric):
         self._num_examples = 0
 
     def update(self, output):
-        average_loss = self._loss_fn(*output)
+        cls_loss, reg_loss = self._loss_fn(*output)
+        loss = cls_loss.mean() + reg_loss.mean()
 
-        if len(average_loss.shape) != 0:
+        if len(loss.shape) != 0:
             raise ValueError('loss_fn did not return the average loss.')
 
         N = output[0].shape[0]
-        self._sum += average_loss.item() * N
+        self._sum += loss.item() * N
         self._num_examples += N
 
     def compute(self):
