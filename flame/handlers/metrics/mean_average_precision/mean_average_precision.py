@@ -89,7 +89,7 @@ class MeanAveragePrecision:
                 prec = np.divide(acc_TP, (acc_FP + acc_TP)).tolist()
                 rec = (acc_TP / num_ground_truths).tolist()
             else:
-                prec, rec = [0] * num_detections, [0], * num_detections
+                prec, rec = [0] * num_detections, [0] * num_detections
 
             if self.method == 'every_point_interpolation':
                 ap, mrec, mprec = self.every_points_interpolated_AP(rec=rec, prec=prec)
@@ -99,14 +99,14 @@ class MeanAveragePrecision:
                 raise RuntimeError('Interpolation Method is Wrong.')
 
             result = {
-                'class': class_id,
-                'precision': prec,
-                'recall': rec,
                 'AP': ap,
-                'interpolated precision': mprec,
+                'class': class_id,
+                'recall': rec,
+                'precision': prec,
                 'interpolated recall': mrec,
-                'total ground truths': num_ground_truths,
+                'interpolated precision': mprec,
                 'total detections': num_detections,
+                'total ground truths': num_ground_truths,
                 'total TP': sum(TP),
                 'total FP': sum(FP)
             }
