@@ -78,6 +78,6 @@ class Evaluator(Engine):
             targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in batch[1]]
             image_infos = [image_info for image_info in params[2]]
 
-            cls_preds, reg_preds, anchors = self.model._forward(samples)
+            cls_preds, reg_preds, anchors = self.model(samples)
 
             return cls_preds, reg_preds, anchors, targets, image_infos

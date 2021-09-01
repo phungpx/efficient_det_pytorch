@@ -95,10 +95,20 @@ class EfficientDetBackBone(nn.Module):
         regression = self.regressor(features)
         classification = self.classifier(features)
 
-        if self.training:
-            return classification, regression, anchors
+        return classification, regression, anchors
 
+    def inference(self, inputs):
         predictions = []
+
+        _, p3, p4, p5 = self.backbone_net(inputs)
+
+        features = (p3, p4, p5)
+        features = self.bifpn(features)
+
+        anchors = self.anchors(inputs, inputs.dtype)
+        regression = self.regressor(features)
+        classification = self.classifier(features)
+
         transformed_anchors = self.regressBoxes(anchors, regression)
         transformed_anchors = self.clipBoxes(transformed_anchors, inputs)
         scores = torch.max(classification, dim=2, keepdim=True)[0]
@@ -176,3 +186,6 @@ class EfficientDet(nn.Module):
 
     def forward(self, inputs):
         return self.model(inputs)
+
+    def inference(self, inputs):
+        return self.model.inference(inputs)

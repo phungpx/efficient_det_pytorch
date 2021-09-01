@@ -2,21 +2,23 @@ from collections import Counter
 from typing import List, Tuple, Dict
 
 import numpy as np
+from torch import nn
 from shapely import geometry
 
 
-class MeanAveragePrecision:
+class MeanAveragePrecision(nn.Module):
     def __init__(
         self,
         classes: Dict[str, int],
         iou_threshold: float = 0.5,
-        method: str = 'every_point_interpolation'  # 11_point_interpolation
+        method: str = 'every_point_interpolation'  # or '11_point_interpolation'
     ):
+        super(MeanAveragePrecision, self).__init__()
         self.classes = {class_id: class_name for class_name, class_id in classes.items()}
         self.iou_threshold = iou_threshold
         self.method = method
 
-    def __call__(self, detections: list, ground_truths: list) -> dict:
+    def forward(self, detections: list, ground_truths: list) -> dict:
         r'''
         Args
             detections: list with all detections ([image_id, class_id, confidence, [x1, y1, x2, y2]])
@@ -31,6 +33,7 @@ class MeanAveragePrecision:
             dict['interpolated precision']: interpolated precision values;
             dict['interpolated recall']: interpolated recall values;
             dict['total ground truths']: total number of ground truth positives;
+            dict['total detections']: total number of detections;
             dict['total TP']: total number of True Positive detections;
             dict['total FP']: total number of False Negative detections;
         '''
@@ -194,4 +197,5 @@ class MeanAveragePrecision:
         boxB = geometry.box(*[boxB[0], boxB[1], boxB[2] + 1, boxB[3] + 1])
         if boxA.intersects(boxB):
             iou = boxA.intersection(boxB).area / boxA.union(boxB).area
+
         return iou

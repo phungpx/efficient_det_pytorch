@@ -148,7 +148,7 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.efficientdet
+  module: flame.core.model.EfficientDetV1.efficientdet
   class: EfficientDet
   EfficientDet:
     pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
@@ -189,14 +189,19 @@ metrics:
   class: Metrics
   Metrics:
     metrics:
-      mAP:
-        module: flame.handlers.metrics.mAP
-        class: mAP
-        mAP:
-          num_classes: 20
-          iou_threshold: 0.5
-          box_format: '''corners'''
-          output_transform: 'lambda x: (x[0], x[1])'
+      focal_loss:
+        module: flame.handlers.metrics.focal_loss.loss
+        class: Loss
+        Loss:
+          loss_fn:
+            module: flame.handlers.metrics.focal_loss.focal_loss
+            class: FocalLoss
+            FocalLoss:
+              alpha: 0.25
+              gamma: 2.0
+              lamda: 50.0
+              device: '''cuda'''
+          output_transform: 'lambda x: (x[0], x[1], x[2], x[3])'
     attach_to:
       train_evaluator: '''train'''
       valid_evaluator: '''valid'''
@@ -270,7 +275,7 @@ backup_saver:
     n_saved: 1
 
 engine:
-  module: flame.core.engine.engine
+  module: flame.core.engine.trainer
   class: Trainer
   Trainer:
     dataset: config['data']['train']

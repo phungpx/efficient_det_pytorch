@@ -1,4 +1,4 @@
-from ..core.engine.engine import Evaluator
+from ..core.engine.trainer import Evaluator
 from ignite.engine import Events
 
 
