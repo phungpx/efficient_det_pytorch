@@ -147,7 +147,7 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.efficientdet
+  module: flame.core.model.EfficientDetV1.efficientdet
   class: EfficientDet
   EfficientDet:
     pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
@@ -157,8 +157,8 @@ model:
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.2
-    score_threshold: 0.2
+    # iou_threshold: 0.2
+    # score_threshold: 0.2
 
 optim:
   module: torch.optim
@@ -188,14 +188,19 @@ metrics:
   class: Metrics
   Metrics:
     metrics:
-      mAP:
-        module: flame.handlers.metrics.mAP
-        class: mAP
-        mAP:
-          num_classes: 23
-          iou_threshold: 0.5
-          box_format: '''corners'''
-          output_transform: 'lambda x: (x[0], x[1])'
+      focal_loss:
+        module: flame.handlers.metrics.focal_loss.loss
+        class: Loss
+        Loss:
+          loss_fn:
+            module: flame.handlers.metrics.focal_loss.focal_loss
+            class: FocalLoss
+            FocalLoss:
+              alpha: 0.25
+              gamma: 2.0
+              lamda: 50.0
+              device: '''cuda'''
+          output_transform: 'lambda x: (x[0], x[1], x[2], x[3])'
     attach_to:
       train_evaluator: '''train'''
       valid_evaluator: '''valid'''
@@ -227,9 +232,9 @@ lr_scheduler:
   module: flame.handlers.lr_scheduler
   class: ReduceLROnPlateau
   ReduceLROnPlateau:
-    score_name: '''mAP'''
+    score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
-    mode: '''max'''
+    mode: '''min'''
     patience: 3
     verbose: True
 
@@ -237,9 +242,9 @@ early_stopping:
   module: flame.handlers.early_stopping
   class: EarlyStopping
   EarlyStopping:
-    score_name: '''mAP'''
+    score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
-    mode: '''max'''
+    mode: '''min'''
     patience: 50
 
 best_saver:
@@ -247,8 +252,8 @@ best_saver:
   class: BestSaver
   BestSaver:
     dirname: '''checkpoint/EKYCS/efficientdet-d0'''
-    score_name: '''mAP'''
-    mode: '''max'''
+    score_name: '''focal_loss'''
+    mode: '''min'''
     evaluator_name: '''valid_evaluator'''
     n_saved: 1
 
@@ -269,7 +274,7 @@ backup_saver:
     n_saved: 1
 
 engine:
-  module: flame.core.engine.engine
+  module: flame.core.engine.trainer
   class: Trainer
   Trainer:
     dataset: config['data']['train']
