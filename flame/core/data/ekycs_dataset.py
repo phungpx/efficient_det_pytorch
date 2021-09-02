@@ -103,12 +103,20 @@ class EkycDataset(Dataset):
         labels = [bb.label for bb in bbs.bounding_boxes]
 
         # Convert to Torch Tensor
+        iscrowd = torch.zeros((len(labels),), dtype=torch.int64)  # suppose all instances are not crowd
         labels = torch.tensor(labels, dtype=torch.int64)
         boxes = torch.tensor(boxes, dtype=torch.float32)
         image_id = torch.tensor([idx], dtype=torch.int64)
+        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
 
-        # # Target
-        target = {'boxes': boxes, 'labels': labels, 'image_id': image_id}
+        # Target
+        target = {
+            'image_id': image_id,
+            'boxes': boxes,
+            'labels': labels,
+            'area': area,
+            'iscrowd': iscrowd,
+        }
 
         # Image
         sample = torch.from_numpy(np.ascontiguousarray(sample))

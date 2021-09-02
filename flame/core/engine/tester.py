@@ -5,7 +5,11 @@ from ignite import engine as e
 from abc import abstractmethod
 
 
-class Engine(Module):
+class Evaluator(Module):
+    '''
+        Engine controls evaluating process.
+        See Engine documentation for more details about parameters.
+    '''
     '''
         Base class for all engines. Your engine should subclass this class.
         Class Engine contains an Ignite Engine that controls running process over a dataset.
@@ -17,30 +21,20 @@ class Engine(Module):
     '''
 
     def __init__(self, dataset, device, max_epochs=1):
-        super(Engine, self).__init__()
-        self.dataset = dataset
+        super(Evaluator, self).__init__()
         self.device = device
+        self.dataset = dataset
         self.max_epochs = max_epochs
         self.engine = e.Engine(self._update)
 
     def run(self):
         return self.engine.run(self.dataset, self.max_epochs)
 
-    @abstractmethod
-    def _update(self, engine, batch):
-        pass
-
-
-class Evaluator(Engine):
-    '''
-        Engine controls evaluating process.
-        See Engine documentation for more details about parameters.
-    '''
-
     def init(self):
         assert 'model' in self.frame, 'The frame does not have model.'
         self.model = self.frame['model'].to(self.device)
 
+    @abstractmethod
     def _update(self, engine, batch):
         self.model.eval()
         with torch.no_grad():
