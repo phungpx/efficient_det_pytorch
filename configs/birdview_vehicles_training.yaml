@@ -25,11 +25,11 @@ data:
             - iaa.Crop(percent=(0, 0.1))
             - iaa.Pad(percent=(0, 0.1), keep_size=False)
             - iaa.ChangeColorTemperature()
-      batch_size: 32
+      batch_size: 4
       shuffle: True
       drop_last: True
       pin_memory: True
-      num_workers: 4
+      num_workers: 2
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   train_eval:
@@ -45,11 +45,11 @@ data:
           label_path: '''dataset/birdview_vehicles/annotations/instances_train.json'''
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
-      batch_size: 32
+      batch_size: 4
       shuffle: False
       drop_last: True
       pin_memory: True
-      num_workers: 4
+      num_workers: 2
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   valid:
@@ -65,11 +65,11 @@ data:
           label_path: '''dataset/birdview_vehicles/annotations/instances_val.json'''
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
-      batch_size: 32
+      batch_size: 4
       shuffle: False
       drop_last: True
       pin_memory: True
-      num_workers: 4
+      num_workers: 2
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 loss:
