@@ -25,6 +25,7 @@ class CoCoDataset(Dataset):
         self.class2idx = dict()
         self.coco_label_to_label = dict()
         self.label_to_coco_label = dict()
+
         categories = self.coco.loadCats(ids=self.coco.getCatIds())
         categories = sorted(categories, key=lambda x: x['id'])
         for category in categories:
@@ -46,7 +47,6 @@ class CoCoDataset(Dataset):
         boxes, labels = self._load_annot(image_idx=idx)
         if not len(boxes) and not len(labels):
             print(image_info[0])
-            # raise
 
         bboxes = [BoundingBox(x1=box[0], y1=box[1], x2=box[2], y2=box[3], label=label)
                   for box, label in zip(boxes, labels)]
@@ -103,21 +103,21 @@ class CoCoDataset(Dataset):
             if annot_info['bbox'][2] < 1 or annot_info['bbox'][3] < 1:
                 continue
 
-            bbox = self.__xywh2xyxy(annot_info['bbox'])
+            bbox = self._xywh2xyxy(annot_info['bbox'])
             label = self.coco_label_to_label[annot_info['category_id']]
             boxes.append(bbox)
             labels.append(label)
 
         return boxes, labels
 
-    def __xywh2xyxy(self, box):
+    def _xywh2xyxy(self, box):
         box[2] = box[0] + box[2]
         box[3] = box[1] + box[3]
         return box
 
-    def _image_aspect_ratio(self, image_index):
-        image_info = self.coco.loadImgs(self.image_indices[image_index])[0]
-        return float(image_info['width']) / float(image_info['height'])
+    # def _image_aspect_ratio(self, image_index):
+    #     image_info = self.coco.loadImgs(self.image_indices[image_index])[0]
+    #     return float(image_info['width']) / float(image_info['height'])
 
-    def _num_classes(self):
-        return len(list(self.idx2class.keys()))
+    # def _num_classes(self):
+    #     return len(list(self.idx2class.keys()))

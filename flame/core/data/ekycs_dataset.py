@@ -81,7 +81,7 @@ class EkycDataset(Dataset):
         label_info = self._get_label_info(lable_path=str(label_path), classes=self.classes)
 
         image = cv2.imread(str(image_path))
-        image_info = (str(image_path), image.shape[1::-1])
+        image_info = (str(image_path), image.shape[1::-1])  # image path, (w, h)
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         boxes = [label['bbox'] for label in label_info]
