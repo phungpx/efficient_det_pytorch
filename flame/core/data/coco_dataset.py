@@ -5,13 +5,22 @@ import numpy as np
 import imgaug.augmenters as iaa
 
 from pathlib import Path
+from typing import Tuple
 from pycocotools.coco import COCO
 from torch.utils.data import Dataset
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
 class CoCoDataset(Dataset):
-    def __init__(self, compound_coef, image_dir, label_path, mean, std, transforms=None):
+    def __init__(
+            self,
+            compound_coef: int,
+            image_dir: str,
+            label_path: str,
+            mean: Tuple[float],
+            std: Tuple[float],
+            transforms: list = None
+    ):
         super(CoCoDataset, self).__init__()
         self.imsize = 512 + compound_coef * 128
         self.transforms = transforms if transforms else []
@@ -43,10 +52,10 @@ class CoCoDataset(Dataset):
         return len(self.image_indices)
 
     def __getitem__(self, idx):
-        image, image_info = self._load_image(image_idx=idx)
-        boxes, labels = self._load_annot(image_idx=idx)
+        image, image_info = self.load_image(image_idx=idx)
+        boxes, labels = self.load_annot(image_idx=idx)
         if not len(boxes) and not len(labels):
-            print(image_info[0])
+            print(f'Sample {image_info[0]} has no labels')
 
         bboxes = [BoundingBox(x1=box[0], y1=box[1], x2=box[2], y2=box[3], label=label)
                   for box, label in zip(boxes, labels)]
@@ -64,12 +73,20 @@ class CoCoDataset(Dataset):
         labels = [bbox.label for bbox in bboxes.bounding_boxes]
 
         # Convert to Torch Tensor
+        iscrowd = torch.zeros((len(labels),), dtype=torch.int64)  # suppose all instances are not crowd
         labels = torch.tensor(labels, dtype=torch.int64)
         boxes = torch.tensor(boxes, dtype=torch.float32)
         image_id = torch.tensor([idx], dtype=torch.int64)
+        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
 
         # Target
-        target = {'boxes': boxes, 'labels': labels, 'image_id': image_id}
+        target = {
+            'image_id': image_id,
+            'boxes': boxes,
+            'labels': labels,
+            'area': area,
+            'iscrowd': iscrowd,
+        }
 
         # Sample
         sample = torch.from_numpy(np.ascontiguousarray(image))
@@ -78,9 +95,10 @@ class CoCoDataset(Dataset):
 
         return sample, target, image_info
 
-    def _load_image(self, image_idx):
+    def load_image(self, image_idx):
         image_info = self.coco.loadImgs(ids=self.image_indices[image_idx])[0]
         image_path = str(self.image_dir.joinpath(image_info['file_name']))
+
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -91,10 +109,11 @@ class CoCoDataset(Dataset):
 
         return image, image_info
 
-    def _load_annot(self, image_idx):
+    def load_annot(self, image_idx):
         boxes, labels = [], []
         annot_indices = self.coco.getAnnIds(imgIds=self.image_indices[image_idx], iscrowd=False)
         if not len(annot_indices):
+            labels, boxes = [[-1]], [[0, 0, 1, 1]]
             return boxes, labels
 
         annot_infos = self.coco.loadAnns(ids=annot_indices)
@@ -103,21 +122,22 @@ class CoCoDataset(Dataset):
             if annot_info['bbox'][2] < 1 or annot_info['bbox'][3] < 1:
                 continue
 
-            bbox = self._xywh2xyxy(annot_info['bbox'])
+            bbox = self.xywh2xyxy(annot_info['bbox'])
             label = self.coco_label_to_label[annot_info['category_id']]
             boxes.append(bbox)
             labels.append(label)
 
         return boxes, labels
 
-    def _xywh2xyxy(self, box):
+    def xywh2xyxy(self, box):
         box[2] = box[0] + box[2]
         box[3] = box[1] + box[3]
         return box
 
-    # def _image_aspect_ratio(self, image_index):
-    #     image_info = self.coco.loadImgs(self.image_indices[image_index])[0]
-    #     return float(image_info['width']) / float(image_info['height'])
+    def image_aspect_ratio(self, image_idx):
+        image_info = self.coco.loadImgs(self.image_indices[image_idx])[0]
+        return float(image_info['width']) / float(image_info['height'])
 
-    # def _num_classes(self):
-    #     return len(list(self.idx2class.keys()))
+    @property
+    def num_classes(self):
+        return len(list(self.idx2class.keys()))
