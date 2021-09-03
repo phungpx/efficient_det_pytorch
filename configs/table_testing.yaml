@@ -4,9 +4,9 @@ data:
     class: DataLoader
     DataLoader:
       dataset:
-        module: flame.core.data.table_dataset
-        class: TableDataset
-        TableDataset:
+        module: flame.core.data.labelme_dataset
+        class: LabelmeDataset
+        LabelmeDataset:
           compound_coef: 0
           dirname: '''dataset/TABLE/test'''
           image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']

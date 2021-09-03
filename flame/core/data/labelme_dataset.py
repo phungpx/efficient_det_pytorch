@@ -1,9 +1,9 @@
 import cv2
+import json
 import torch
 import random
 import numpy as np
 import imgaug.augmenters as iaa
-import xml.etree.ElementTree as ET
 
 from pathlib import Path
 from natsort import natsorted
@@ -12,16 +12,16 @@ from typing import Dict, Tuple, List, Optional
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
-class EkycDataset(Dataset):
+class LabelmeDataset(Dataset):
     def __init__(self, dirname: str = None,
                  image_patterns: List[str] = ['*.jpg'],
-                 label_patterns: List[str] = ['*.xml'],
+                 label_patterns: List[str] = ['*.json'],
                  classes: Dict[str, int] = None,
                  mean: List[float] = [0.485, 0.456, 0.406],
                  std: List[float] = [0.229, 0.224, 0.225],
                  compound_coef: int = 0,
                  transforms: Optional[List] = None):
-        super(EkycDataset, self).__init__()
+        super(LabelmeDataset, self).__init__()
         self.classes = classes
         self.imsize = 512 + compound_coef * 128
         self.std = torch.tensor(std, dtype=torch.float).view(3, 1, 1)
@@ -48,31 +48,24 @@ class EkycDataset(Dataset):
         return len(self.data_pairs)
 
     def _get_label_info(self, lable_path: str, classes: dict) -> Dict:
-        root = ET.parse(str(lable_path)).getroot()
-        page = root.find('{}Page'.format(''.join(root.tag.partition('}')[:2])))
-        width, height = int(page.get('imageWidth')), int(page.get('imageHeight'))
+        with open(file=lable_path, mode='r', encoding='utf-8') as f:
+            json_info = json.load(f)
 
         label_info = []
-        for card_type, label in classes.items():
-            regions = root.findall('.//*[@value=\"{}\"]/../..'.format(card_type)) + root.findall('.//*[@name=\"{}\"]/../..'.format(card_type))
-            for region in regions:
-                points = [[int(float(coord)) for coord in point.split(',')] for point in region[0].get('points').split()]
-                # assert len(points) >= 4, 'Length of points must be greater than or equal 4.'
-                mask = np.zeros(shape=(height, width), dtype=np.uint8)
-                cv2.fillPoly(img=mask, pts=np.int32([points]), color=(255, 255, 255))
-
+        for shape in json_info['shapes']:
+            label = shape['label']
+            points = shape['points']
+            if label in self.classes and len(points) > 0:
                 x1 = min([point[0] for point in points])
                 y1 = min([point[1] for point in points])
                 x2 = max([point[0] for point in points])
                 y2 = max([point[1] for point in points])
                 bbox = (x1, y1, x2, y2)
 
-                label_info.append({'mask': mask, 'label': label, 'bbox': bbox})
+                label_info.append({'label': self.classes[label], 'bbox': bbox})
 
         if not len(label_info):
-            label_info.append({'mask': np.zeros(shape=(height, width), dtype=np.uint8),
-                               'label': -1,
-                               'bbox': (0, 0, 1, 1)})
+            label_info.append({'label': -1, 'bbox': (0, 0, 1, 1)})
 
         return label_info
 
@@ -81,7 +74,7 @@ class EkycDataset(Dataset):
         label_info = self._get_label_info(lable_path=str(label_path), classes=self.classes)
 
         image = cv2.imread(str(image_path))
-        image_info = (str(image_path), image.shape[1::-1])  # image path, (w, h)
+        image_info = (str(image_path), image.shape[1::-1])
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         boxes = [label['bbox'] for label in label_info]

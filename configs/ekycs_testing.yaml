@@ -4,9 +4,9 @@ data:
     class: DataLoader
     DataLoader:
       dataset:
-        module: flame.core.data.ekycs_dataset
-        class: EkycDataset
-        EkycDataset:
+        module: flame.core.data.altheia_dataset
+        class: AltheiaDataset
+        AltheiaDataset:
           compound_coef: 0
           dirname: '''dataset/EKYCs/test'''
           image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
