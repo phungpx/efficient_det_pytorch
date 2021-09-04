@@ -12,28 +12,51 @@ from typing import Dict, List, Optional
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
-class VOC2007Dataset(Dataset):
-    def __init__(self, image_dir: str = None, label_dir: str = None,
-                 image_pattern: str = '*.jpg', label_pattern: str = '*.xml',
-                 classes: Dict[str, int] = None,
-                 mean: List[float] = [0.485, 0.456, 0.406], std: List[float] = [0.229, 0.224, 0.225],
-                 compound_coef: int = 0, transforms: Optional[List] = None):
-        super(VOC2007Dataset, self).__init__()
+class PascalDataset(Dataset):
+    def __init__(
+        self,
+        VOC2007: Dict[str, str] = None,
+        VOC2012: Dict[str, str] = None,
+        image_extent: str = '.jpg',
+        label_extent: str = '.xml',
+        classes: Dict[str, int] = None,
+        mean: List[float] = [0.485, 0.456, 0.406],
+        std: List[float] = [0.229, 0.224, 0.225],
+        compound_coef: int = 0,
+        transforms: Optional[List] = None
+    ):
+        super(PascalDataset, self).__init__()
         self.classes = classes
         self.imsize = 512 + compound_coef * 128
         self.std = torch.tensor(std, dtype=torch.float).view(3, 1, 1)
         self.mean = torch.tensor(mean, dtype=torch.float).view(3, 1, 1)
-
+        self.pad_to_square = iaa.PadToSquare(position='right-bottom')
         self.transforms = transforms if transforms else []
 
-        image_paths = natsorted(list(Path(image_dir).glob(f'{image_pattern}')), key=lambda x: str(x.stem))
-        label_paths = natsorted(list(Path(label_dir).glob(f'{label_pattern}')), key=lambda x: str(x.stem))
+        # VOC2007
+        image_dir, label_dir = Path(VOC2007['image_dir']), Path(VOC2007['label_dir'])
+        image_paths = natsorted(list(Path(image_dir).glob(f'*{image_extent}')), key=lambda x: str(x.stem))
+        label_paths = natsorted(list(Path(label_dir).glob(f'*{label_extent}')), key=lambda x: str(x.stem))
+        voc2007_pairs = [[image, label] for image, label in zip(image_paths, label_paths) if image.stem == label.stem]
 
-        self.data_pairs = [[image, label] for image, label in zip(image_paths, label_paths)]
+        # VOC2012
+        image_dir, label_dir, txt_path = Path(VOC2012['image_dir']), Path(VOC2012['label_dir']), Path(VOC2012['txt_path'])
+        with txt_path.open(mode='r', encoding='utf-8') as fp:
+            image_names = fp.read().splitlines()
 
-        self.pad_to_square = iaa.PadToSquare(position='right-bottom')
+        voc2012_pairs = []
+        for image_name in image_names:
+            image_path = image_dir.joinpath(f'{image_name}{image_extent}')
+            label_path = label_dir.joinpath(f'{image_name}{label_extent}')
+            if image_path.exists() and label_path.exists():
+                voc2012_pairs.append([image_path, label_path])
 
-        print(f'{Path(image_dir).stem}: {len(self.data_pairs)}')
+        self.data_pairs = voc2007_pairs + voc2012_pairs
+
+        print(f'- {txt_path.stem}:')
+        print(f'\t VOC2007: {len(voc2007_pairs)}')
+        print(f'\t VOC2012: {len(voc2012_pairs)}')
+        print(f'\t Total: {len(self.data_pairs)}')
 
     def __len__(self):
         return len(self.data_pairs)
@@ -82,12 +105,20 @@ class VOC2007Dataset(Dataset):
         labels = [bb.label for bb in bbs.bounding_boxes]
 
         # Convert to Torch Tensor
+        iscrowd = torch.zeros((len(labels),), dtype=torch.int64)  # suppose all instances are not crowd
         labels = torch.tensor(labels, dtype=torch.int64)
         boxes = torch.tensor(boxes, dtype=torch.float32)
         image_id = torch.tensor([idx], dtype=torch.int64)
+        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
 
-        # # Target
-        target = {'boxes': boxes, 'labels': labels, 'image_id': image_id}
+        # Target
+        target = {
+            'image_id': image_id,
+            'boxes': boxes,
+            'labels': labels,
+            'area': area,
+            'iscrowd': iscrowd,
+        }
 
         # Image
         sample = torch.from_numpy(np.ascontiguousarray(sample))
