@@ -128,6 +128,8 @@ class MeanAveragePrecision(nn.Module):
         average_precision_stats = PrettyTable(
             [
                 "Class Name",
+                "Total TP",
+                "Total FP",
                 "Total GroundTruths",
                 "Total Detections",
                 f"Average Precision (IoU={self.iou_threshold})"
@@ -139,6 +141,8 @@ class MeanAveragePrecision(nn.Module):
             average_precision_stats.add_row(
                 [
                     result['class_name'],
+                    result['total_TP'],
+                    result['total_FP'],
                     result['total_groundtruths'],
                     result['total_detections'],
                     result['average_precision']

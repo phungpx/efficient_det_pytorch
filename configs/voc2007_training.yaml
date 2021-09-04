@@ -168,21 +168,21 @@ model:
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
 
-# optim:
-#   module: torch.optim
-#   class: SGD
-#   SGD:
-#     params: config['model'].parameters()
-#     lr: 0.08
-#     momentum: 0.9
-#     nesterov: True
-
 optim:
   module: torch.optim
-  class: AdamW
-  AdamW:
+  class: SGD
+  SGD:
     params: config['model'].parameters()
-    lr: 0.001
+    lr: 0.08
+    momentum: 0.9
+    nesterov: True
+
+# optim:
+#   module: torch.optim
+#   class: AdamW
+#   AdamW:
+#     params: config['model'].parameters()
+#     lr: 0.001
 
 train_evaluator:
   module: flame.handlers.metric_evaluator
