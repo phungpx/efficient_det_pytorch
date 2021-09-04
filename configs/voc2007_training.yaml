@@ -52,6 +52,9 @@ data:
             # - iaa.ChangeColorTemperature()
       batch_size: 32
       shuffle: True
+      pin_memory: True
+      num_workers: 8
+      drop_last: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   train_eval:
@@ -94,6 +97,9 @@ data:
             tvmonitor: 19
       batch_size: 32
       shuffle: False
+      pin_memory: True
+      num_workers: 8
+      drop_last: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   valid:
@@ -136,6 +142,9 @@ data:
             tvmonitor: 19
       batch_size: 32
       shuffle: False
+      pin_memory: True
+      num_workers: 8
+      drop_last: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 loss:

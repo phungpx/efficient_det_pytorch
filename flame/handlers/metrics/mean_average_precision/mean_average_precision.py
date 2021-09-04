@@ -8,12 +8,8 @@ from shapely import geometry
 
 
 class MeanAveragePrecision(nn.Module):
-    def __init__(
-        self,
-        classes: Dict[str, int],
-        iou_threshold: float = 0.5,
-        method: str = 'every_point_interpolation'  # or '11_point_interpolation'
-    ):
+    def __init__(self, classes: Dict[str, int], iou_threshold: float = 0.5,
+                 method: str = 'every_point_interpolation'):  # or '11_point_interpolation'
         super(MeanAveragePrecision, self).__init__()
         self.classes = {class_id: class_name for class_name, class_id in classes.items()}
         self.iou_threshold = iou_threshold
@@ -42,166 +38,175 @@ class MeanAveragePrecision(nn.Module):
 
         class_indices = sorted(map(int, self.classes.keys()))
         for class_id in class_indices:
-            # get only detection of class_id -> c_dets
-            c_dets = [det for det in detections if det[1] == class_id]
-            num_detections = len(c_dets)
+            # get only detection of class_id -> class_detections
+            class_detections = [detection for detection in detections if detection[1] == class_id]
+            num_detections = len(class_detections)
 
-            # get only ground truth of class_id -> c_gts
-            c_gts = [gt for gt in ground_truths if gt[1] == class_id]
-            num_ground_truths = len(c_gts)
+            # get only ground truth of class_id -> class_groundtruths
+            class_groundtruths = [groundtruth for groundtruth in ground_truths if groundtruth[1] == class_id]
+            num_groundtruths = len(class_groundtruths)
 
             # initialize TP, FP with all 0 values
             TP = [0] * num_detections
             FP = [0] * num_detections
 
-            # create dictionary with amount of gts for each image
-            # Ex: amount_c_gts = {0: [0,0,0], 1: [0,0,0,0,0]}
-            amount_c_gts = Counter([gt[0] for gt in c_gts])
-            amount_c_gts = {
-                image_id: [0] * num_gts for image_id, num_gts in amount_c_gts.items()
+            # create dictionary with amount of ground truths for each image (same image id)
+            # Ex: amount_class_groundtruths = {0: [0,0,0], 1: [0,0,0,0,0]}
+            amount_class_groundtruths = Counter([groundtruth[0] for groundtruth in class_groundtruths])
+            amount_class_groundtruths = {
+                image_id: [0] * num_groundtruths
+                for image_id, num_groundtruths in amount_class_groundtruths.items()
             }
 
-            # sort c_dets by decreasing confidence
-            c_dets = sorted(c_dets, key=lambda det: det[2], reverse=True)
+            # sort class_detections by decreasing confidence
+            class_detections = sorted(class_detections, key=lambda detection: detection[2], reverse=True)
 
-            for i, det in enumerate(c_dets):
-                # collect grounth truths which have same image_id with det-> gts
-                gts = [gt for gt in c_gts if gt[0] == det[0]]
+            for id_detection, detection in enumerate(class_detections):
+                # collect grounth truths which have same image_id with detection -> image_groundtruths
+                image_groundtruths = [groundtruth for groundtruth in class_groundtruths if groundtruth[0] == detection[0]]
 
-                j_max, iou_max = 0, 0.
-                for j, gt in enumerate(gts):
-                    iou = self._iou(boxA=det[3], boxB=gt[3])
+                id_groundtruth_max, iou_max = 0, 0.
+                for id_groundtruth, groundtruth in enumerate(image_groundtruths):
+                    iou = self._iou(boxA=detection[3], boxB=groundtruth[3])
                     if iou > iou_max:
                         iou_max = iou
-                        j_max = j
+                        id_groundtruth_max = id_groundtruth
 
-                # assign c_det (detection) as true positive/don't care/false positive
+                # assign class_detection (detection) as true positive/don't care/false positive
                 if iou_max >= self.iou_threshold:
-                    if amount_c_gts[det[0]][j_max] == 0:
-                        TP[i] = 1  # count as true positive
-                        amount_c_gts[det[0]][j_max] == 1  # flag as already 'seen'
+                    if amount_class_groundtruths[detection[0]][id_groundtruth_max] == 0:
+                        TP[id_detection] = 1  # count as true positive
+                        amount_class_groundtruths[detection[0]][id_groundtruth_max] == 1  # flag as already 'seen'
                     else:
-                        FP[i] = 1  # count as false positive
+                        FP[id_detection] = 1  # count as false positive
                 else:
-                    FP[i] = 1  # count as false positive
+                    FP[id_detection] = 1  # count as false positive
 
             # compute precision, recall and average precision
-            acc_TP = np.cumsum(TP)
-            acc_FP = np.cumsum(FP)
+            cumulative_TP = np.cumsum(TP)
+            cumulative_FP = np.cumsum(FP)
 
-            if num_ground_truths > 0:
-                prec = np.divide(acc_TP, (acc_FP + acc_TP)).tolist()
-                rec = (acc_TP / num_ground_truths).tolist()
+            if num_groundtruths > 0:
+                precisions = np.divide(cumulative_TP, (cumulative_FP + cumulative_TP)).tolist()
+                recalls = (cumulative_TP / num_groundtruths).tolist()
             else:
-                prec, rec = [0] * num_detections, [0] * num_detections
+                precisions, recalls = [0] * num_detections, [0] * num_detections
 
             if self.method == 'every_point_interpolation':
-                ap, mrec, mprec = self.every_points_interpolated_AP(rec=rec, prec=prec)
+                average_precision, mrecalls, mprecisions = self.every_points_interpolated_AP(
+                    recalls=recalls,
+                    precisions=precisions
+                )
             elif self.method == 'elevent_point_interpolation':
-                ap, mrec, mprec = self.eleven_points_interpolated_AP(rec=rec, prec=prec)
+                average_precision, mrecalls, mprecisions = self.eleven_points_interpolated_AP(
+                    recalls=recalls,
+                    precisions=precisions
+                )
             else:
                 raise RuntimeError('Interpolation Method is Wrong.')
 
             result = {
-                'AP': ap,
-                'class': self.classes[class_id],
-                'recall': rec,
-                'precision': prec,
-                'interpolated recall': mrec,
-                'interpolated precision': mprec,
-                'total detections': num_detections,
-                'total ground truths': num_ground_truths,
-                'total TP': sum(TP),
-                'total FP': sum(FP)
+                'average_precision': average_precision,
+                'class_name': self.classes[class_id],
+                'recalls': recalls,
+                'precisions': precisions,
+                'interpolated_recalls': mrecalls,
+                'interpolated_precisions': mprecisions,
+                'total_detections': num_detections,
+                'total_groundtruths': num_groundtruths,
+                'total_TP': sum(TP),
+                'total_FP': sum(FP)
             }
 
             results.append(result)
 
-        APs = []
-        ap_stats = PrettyTable(["Class Name", "Total GTs", "Total Dets", "AP"])
+        average_precisions = []
+        average_precision_stats = PrettyTable(
+            [
+                "Class Name",
+                "Total GroundTruths",
+                "Total Detections",
+                f"Average Precision (IoU={self.iou_threshold})"
+            ]
+        )
 
         for result in results:
-            APs.append(result['AP'])
-            ap_stats.add_row(
+            average_precisions.append(result['average_precision'])
+            average_precision_stats.add_row(
                 [
-                    result['class'],
-                    result['total ground truths'],
-                    result['total detections'],
-                    result['AP']
+                    result['class_name'],
+                    result['total_groundtruths'],
+                    result['total_detections'],
+                    result['average_precision']
                 ]
             )
 
-        print(ap_stats)
+        print(average_precision_stats)
 
-        mAP = sum(APs) / len(APs) if len(APs) else 0.
+        mAP = sum(average_precisions) / len(average_precisions) if len(average_precisions) else 0.
 
         return mAP
 
-    def every_points_interpolated_AP(
-        self,
-        rec: List[float],
-        prec: List[float]
-    ) -> Tuple[float, List[float], List[float]]:
+    def every_points_interpolated_AP(self, recalls: List[float],
+                                     precisions: List[float]) -> Tuple[float, List[float], List[float]]:
+        r'''every-point interpolated average precision
+        '''
 
-        mrec = [0.] + rec + [1.]
-        mprec = [0.] + prec + [0.]
+        mrecalls = [0.] + recalls + [1.]
+        mprecisions = [0.] + precisions + [0.]
 
-        # range(start, end=0, step=-1)
-        for i in range(len(mprec) - 1, 0, -1):
-            mprec[i - 1] = max(mprec[i - 1], mprec[i])
+        for i in range(len(mprecisions) - 1, 0, -1):  # range(start, end=0, step=-1)
+            mprecisions[i - 1] = max(mprecisions[i - 1], mprecisions[i])
 
-        ap = 0.
-        # range(start, end, step=1)
-        for i in range(1, len(mrec)):
-            if mrec[i] != mrec[i - 1]:
-                ap += (mrec[i] - mrec[i - 1]) * mprec[i]
+        average_precision = 0.
+        for i in range(1, len(mrecalls)):  # range(start, end, step=1)
+            if mrecalls[i] != mrecalls[i - 1]:
+                average_precision += (mrecalls[i] - mrecalls[i - 1]) * mprecisions[i]
 
-        return ap, mrec[0: len(mrec) - 1], mprec[0: len(mprec) - 1]
+        return average_precision, mrecalls[0:-1], mprecisions[0:-1]
 
-    # 11-point interpolated average precision
-    def eleven_points_interpolated_AP(
-        self,
-        rec: List[float],
-        prec: List[float]
-    ) -> Tuple[float, List[float], List[float]]:
+    def eleven_points_interpolated_AP(self, recalls: List[float],
+                                      precisions: List[float]) -> Tuple[float, List[float], List[float]]:
+        r'''11-point interpolated average precision
+        '''
 
-        rho_interp = []
-        recall_valid = []
+        interp_rhos = []
+        valid_recalls = []
 
         recall_values = np.linspace(start=0, stop=1, num=11).tolist()
         # for each recall_values (0, 0.1, 0.2, ... , 1)
         for r in recall_values[::-1]:
             # obtain all recall values higher or equal than r
-            arg_greater_recalls = np.argwhere(np.array(rec) >= r)
+            arg_greater_recalls = np.argwhere(np.array(recalls) >= r)
 
-            prec_max = 0.
-            # ff there are recalls above r
+            precision_max = 0.
+            # if there are recalls above r
             if arg_greater_recalls.size != 0:
-                prec_max = max(prec[arg_greater_recalls.min():])
+                precision_max = max(precisions[arg_greater_recalls.min():])
 
-            recall_valid.append(r)
-            rho_interp.append(prec_max)
+            valid_recalls.append(r)
+            interp_rhos.append(precision_max)
 
         # by definition AP = sum(max(precision whose recall is above r)) / 11
-        ap = sum(rho_interp) / 11
+        average_precision = sum(interp_rhos) / 11
 
         # generating values for the plot
-        rvals = [recall_valid[0]] + recall_valid + [0.]
-        pvals = [0.] + rho_interp + [0.]
+        mrecalls = [valid_recalls[0]] + valid_recalls + [0.]
+        mprecisions = [0.] + interp_rhos + [0.]
 
-        cc = []
-        for i in range(len(rvals)):
-            p = (rvals[i], pvals[i - 1])
-            if p not in cc:
-                cc.append(p)
-            p = (rvals[i], pvals[i])
-            if p not in cc:
-                cc.append(p)
+        pairs = []
+        for i in range(len(mrecalls)):
+            pair = (mrecalls[i], mprecisions[i - 1])
+            if pair not in pairs:
+                pairs.append(pair)
+            pair = (mrecalls[i], mprecisions[i])
+            if pair not in pairs:
+                pairs.append(pair)
 
-        recall_values = [i[0] for i in cc]
-        rho_interp = [i[1] for i in cc]
+        mrecalls = [pair[0] for pair in pairs]
+        mprecisions = [pair[1] for pair in pairs]
 
-        return ap, recall_values, rho_interp
+        return average_precision, mrecalls, mprecisions
 
     def _iou(self, boxA: List[float], boxB: List[float]) -> float:
         r'''Calculates intersection over union

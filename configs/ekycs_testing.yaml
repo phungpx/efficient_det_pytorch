@@ -37,8 +37,11 @@ data:
             CMQD_B_VT_BACK: 20
             PASSPORT: 21
             PASSPORT_OTHER: 22
-      batch_size: 8
+      batch_size: 32
       shuffle: False
+      num_workers: 8
+      pin_memory: True
+      drop_last: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
@@ -59,7 +62,7 @@ metrics:
   Metrics:
     metrics:
       mAP:
-        module: flame.handlers.metrics.mean_average_precision.eval
+        module: flame.handlers.metrics.mean_average_precision.evaluator
         class: Evaluator
         Evaluator:
           eval_fn:
