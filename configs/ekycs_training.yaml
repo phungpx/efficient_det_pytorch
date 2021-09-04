@@ -49,9 +49,9 @@ data:
             - iaa.Pad(percent=(0, 0.1), keep_size=False)
             - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
             - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
-      batch_size: 16
+      batch_size: 32
       shuffle: True
-      num_workers: 8
+      num_workers: 12
       pin_memory: True
       drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
@@ -94,9 +94,9 @@ data:
             CMQD_B_VT_BACK: 20
             PASSPORT: 21
             PASSPORT_OTHER: 22
-      batch_size: 16
+      batch_size: 32
       shuffle: False
-      num_workers: 8
+      num_workers: 12
       pin_memory: True
       drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
@@ -139,9 +139,9 @@ data:
             CMQD_B_VT_BACK: 20
             PASSPORT: 21
             PASSPORT_OTHER: 22
-      batch_size: 16
+      batch_size: 32
       shuffle: False
-      num_workers: 8
+      num_workers: 12
       pin_memory: True
       drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
@@ -252,7 +252,7 @@ early_stopping:
     score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
-    patience: 50
+    patience: 30
 
 best_saver:
   module: flame.handlers.checkpoint
