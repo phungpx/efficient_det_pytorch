@@ -53,7 +53,7 @@ data:
       batch_size: 32
       shuffle: True
       pin_memory: True
-      num_workers: 8
+      num_workers: 12
       drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
@@ -98,7 +98,7 @@ data:
       batch_size: 32
       shuffle: False
       pin_memory: True
-      num_workers: 8
+      num_workers: 12
       drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
@@ -143,7 +143,7 @@ data:
       batch_size: 32
       shuffle: False
       pin_memory: True
-      num_workers: 8
+      num_workers: 12
       drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
@@ -168,14 +168,21 @@ model:
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
 
+# optim:
+#   module: torch.optim
+#   class: SGD
+#   SGD:
+#     params: config['model'].parameters()
+#     lr: 0.08
+#     momentum: 0.9
+#     nesterov: True
+
 optim:
   module: torch.optim
-  class: SGD
-  SGD:
+  class: AdamW
+  AdamW:
     params: config['model'].parameters()
-    lr: 0.08
-    momentum: 0.9
-    nesterov: True
+    lr: 0.001
 
 train_evaluator:
   module: flame.handlers.metric_evaluator

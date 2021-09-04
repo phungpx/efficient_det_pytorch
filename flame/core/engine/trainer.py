@@ -32,7 +32,7 @@ class Engine(Module):
 
 
 class Trainer(Engine):
-    def __init__(self, dataset, device, max_norm, norm_type=2, max_epochs=1):
+    def __init__(self, dataset, device, max_norm=None, norm_type=2, max_epochs=1):
         super(Trainer, self).__init__(dataset, device, max_epochs)
         self.max_norm = max_norm
         self.norm_type = norm_type
@@ -50,11 +50,16 @@ class Trainer(Engine):
         params = [param.to(self.device) if torch.is_tensor(param) else param for param in batch]
         samples = torch.stack([image.to(self.device) for image in params[0]], dim=0)
         targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in params[1]]
+
         cls_preds, reg_preds, anchors = self.model(samples)
         cls_loss, reg_loss = self.loss(cls_preds, reg_preds, anchors, targets)
         loss = cls_loss.mean() + reg_loss.mean()
+
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
+
+        if self.max_norm is not None:
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
+
         self.optimizer.step()
 
         return loss.item()
