@@ -25,10 +25,7 @@ class RegionPredictor(Module):
         self.evaluator_name = evaluator_name
         self.imsize = 512 + compound_coef * 128
         self.output_transform = output_transform
-
         self.output_dir = Path(output_dir)
-        if not self.output_dir.exists():
-            self.output_dir.mkdir(parents=True)
 
     def init(self):
         assert self.evaluator_name in self.frame, f'The frame does not have {self.evaluator_name}'
@@ -44,8 +41,14 @@ class RegionPredictor(Module):
         image_sizes = [image_info[1] for image_info in image_infos]
 
         for pred, image_path, image_size in zip(preds, image_paths, image_sizes):
-            save_path = str(self.output_dir.joinpath(Path(image_path).name))
+            save_dir = self.output_dir.joinpath(Path(image_path).parent.stem)
+            if not save_dir.exists():
+                save_dir.mkdir(parents=True)
+
+            save_path = str(save_dir.joinpath(Path(image_path).name))
+
             image = cv2.imread(image_path)
+
             labels, boxes, scores = pred['labels'], pred['boxes'], pred['scores']
 
             if self.thresh_iou_nms:
