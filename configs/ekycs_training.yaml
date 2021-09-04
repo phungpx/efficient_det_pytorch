@@ -51,6 +51,9 @@ data:
             - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
       batch_size: 16
       shuffle: True
+      num_workers: 8
+      pin_memory: True
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   train_eval:
@@ -93,6 +96,9 @@ data:
             PASSPORT_OTHER: 22
       batch_size: 16
       shuffle: False
+      num_workers: 8
+      pin_memory: True
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   valid:
@@ -135,6 +141,9 @@ data:
             PASSPORT_OTHER: 22
       batch_size: 16
       shuffle: False
+      num_workers: 8
+      pin_memory: True
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 loss:

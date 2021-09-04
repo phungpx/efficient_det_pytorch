@@ -54,7 +54,7 @@ data:
       shuffle: True
       pin_memory: True
       num_workers: 8
-      drop_last: True
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   train_eval:
@@ -99,7 +99,7 @@ data:
       shuffle: False
       pin_memory: True
       num_workers: 8
-      drop_last: True
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   valid:
@@ -144,7 +144,7 @@ data:
       shuffle: False
       pin_memory: True
       num_workers: 8
-      drop_last: True
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 loss:
@@ -167,8 +167,6 @@ model:
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.2
-    score_threshold: 0.2
 
 optim:
   module: torch.optim
@@ -245,7 +243,7 @@ lr_scheduler:
     score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
-    patience: 5
+    patience: 3
     verbose: True
 
 early_stopping:
@@ -255,7 +253,7 @@ early_stopping:
     score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
-    patience: 50
+    patience: 30
 
 best_saver:
   module: flame.handlers.checkpoint

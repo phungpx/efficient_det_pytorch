@@ -27,7 +27,7 @@ data:
             - iaa.ChangeColorTemperature()
       batch_size: 32
       shuffle: True
-      drop_last: True
+      drop_last: False
       num_workers: 4
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
@@ -46,7 +46,7 @@ data:
           std: [0.229, 0.224, 0.225]
       batch_size: 32
       shuffle: False
-      drop_last: True
+      drop_last: False
       num_workers: 4
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
@@ -65,7 +65,7 @@ data:
           std: [0.229, 0.224, 0.225]
       batch_size: 32
       shuffle: False
-      drop_last: True
+      drop_last: False
       num_workers: 4
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 

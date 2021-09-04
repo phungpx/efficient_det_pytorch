@@ -35,7 +35,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 8
+      batch_size: 64
       shuffle: False
       num_workers: 8
       pin_memory: True
@@ -50,8 +50,8 @@ model:
     compound_coef: 0
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.5
-    score_threshold: 0.05
+    iou_threshold: 0.6
+    score_threshold: 0.3
 
 metrics:
   module: flame.handlers.metrics.metrics
@@ -104,7 +104,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/VOC2007/efficientdet-d1/2106201631/best_model_80_mAP=0.7842.pt'''
+    checkpoint_path: '''checkpoint/VOC2007/efficientdet-d0/2109012258/best_model_23_focal_loss=-1.3519.pt'''
     mode: '''test'''
 
 predictor:
@@ -112,7 +112,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/VOC2007/efficientdet-d1/2106201631/best_model_80_mAP=0.7842/valid/'''
+    output_dir: '''checkpoint/VOC2007/efficientdet-d0/2109012258/best_model_23_focal_loss=-1.3519/valid/'''
     compound_coef: 0
     classes:
       aeroplane: [[128, 0, 0], 0]  # color, class_idx, area_threshold

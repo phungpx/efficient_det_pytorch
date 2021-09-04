@@ -71,36 +71,37 @@ class RegionPredictor(Module):
             image_scale = max(image_size) / self.imsize  # in this case of preprocessing data using padding to square.
 
             for (label, box, score) in zip(labels, boxes, scores):
-                x1, y1, x2, y2 = np.int32([coord * image_scale for coord in box])
-                cv2.rectangle(
-                    img=image,
-                    pt1=(x1, y1),
-                    pt2=(x2, y2),
-                    color=classes[label][1],
-                    thickness=box_thickness
-                )
+                if label != -1:
+                    x1, y1, x2, y2 = np.int32([coord * image_scale for coord in box])
+                    cv2.rectangle(
+                        img=image,
+                        pt1=(x1, y1),
+                        pt2=(x2, y2),
+                        color=classes[label][1],
+                        thickness=box_thickness
+                    )
 
-                title = f"{classes[label][0]}: {score:.4f}"
-                w_text, h_text = cv2.getTextSize(title, cv2.FONT_HERSHEY_SIMPLEX, font_scale, text_thickness)[0]
+                    title = f"{classes[label][0]}: {score:.4f}"
+                    w_text, h_text = cv2.getTextSize(title, cv2.FONT_HERSHEY_SIMPLEX, font_scale, text_thickness)[0]
 
-                cv2.rectangle(
-                    img=image,
-                    pt1=(x1, y1 - int(1.3 * h_text)),
-                    pt2=(x1 + w_text, y1),
-                    color=(0, 0, 255),
-                    thickness=-1
-                )
+                    cv2.rectangle(
+                        img=image,
+                        pt1=(x1, y1 - int(1.3 * h_text)),
+                        pt2=(x1 + w_text, y1),
+                        color=(0, 0, 255),
+                        thickness=-1
+                    )
 
-                cv2.putText(
-                    img=image,
-                    text=title,
-                    org=(x1, y1 - int(0.3 * h_text)),
-                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=font_scale,
-                    color=(255, 255, 255),
-                    thickness=text_thickness,
-                    lineType=cv2.LINE_AA
-                )
+                    cv2.putText(
+                        img=image,
+                        text=title,
+                        org=(x1, y1 - int(0.3 * h_text)),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale=font_scale,
+                        color=(255, 255, 255),
+                        thickness=text_thickness,
+                        lineType=cv2.LINE_AA
+                    )
 
             cv2.imwrite(save_path, image)
 

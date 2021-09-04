@@ -110,7 +110,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/EKYCS/efficientdet-d0/2108120715/best_model_34_mAP=0.9701.pt'''
+    checkpoint_path: '''checkpoint/EKYCS/efficientdet-d0/2109020802/best_model_19_focal_loss=-0.0796.pt'''
     mode: '''test'''
 
 predictor:
@@ -118,7 +118,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/EKYCS/efficientdet-d0/2108120715/best_model_34_mAP=0.9701/test/'''
+    output_dir: '''checkpoint/EKYCS/efficientdet-d0/2109020802/best_model_19_focal_loss=-0.0796/test/'''
     compound_coef: 0
     classes:
       BLX: [[128, 0, 0], 0]
