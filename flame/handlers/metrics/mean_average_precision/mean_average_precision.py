@@ -105,6 +105,10 @@ class MeanAveragePrecision(nn.Module):
             else:
                 raise RuntimeError('Interpolation Method is Wrong.')
 
+            # if predictions have no bounding boxes of label and detection, ap will be 1.
+            if num_groundtruths == 0 and num_detections == 0:
+                average_precision = 1.
+
             result = {
                 'average_precision': average_precision,
                 'class_name': self.classes[class_id],
