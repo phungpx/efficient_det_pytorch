@@ -2,7 +2,6 @@ import torch
 
 from ...module import Module
 from ignite import engine as e
-from abc import abstractmethod
 
 
 class Evaluator(Module):
@@ -34,7 +33,6 @@ class Evaluator(Module):
         assert 'model' in self.frame, 'The frame does not have model.'
         self.model = self.frame['model'].to(self.device)
 
-    @abstractmethod
     def _update(self, engine, batch):
         self.model.eval()
         with torch.no_grad():

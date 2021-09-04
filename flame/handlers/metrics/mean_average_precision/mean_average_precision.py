@@ -1,4 +1,5 @@
 from collections import Counter
+from prettytable import PrettyTable
 from typing import List, Tuple, Dict
 
 import numpy as np
@@ -116,9 +117,22 @@ class MeanAveragePrecision(nn.Module):
 
             results.append(result)
 
-        print(results)
+        APs = []
+        ap_stats = PrettyTable(["Class Name", "Total GTs", "Total Dets", "AP"])
 
-        APs = [result['AP'] for result in results]
+        for result in results:
+            APs.append(result['AP'])
+            ap_stats.add_row(
+                [
+                    result['class'],
+                    result['total ground truths'],
+                    result['total detections'],
+                    result['AP']
+                ]
+            )
+
+        print(ap_stats)
+
         mAP = sum(APs) / len(APs) if len(APs) else 0.
 
         return mAP

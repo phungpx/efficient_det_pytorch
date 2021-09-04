@@ -50,8 +50,8 @@ model:
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.2
-    score_threshold: 0.2
+    iou_threshold: 0.5
+    score_threshold: 0.05
 
 metrics:
   module: flame.handlers.metrics.metrics
@@ -141,8 +141,6 @@ predictor:
       CMQD_B_VT_BACK: [[100, 64, 128], 20]
       PASSPORT: [[10, 164, 128], 21]
       PASSPORT_OTHER: [[200, 64, 10], 22]
-    thresh_score: 0.0
-    thresh_iou_nms: 0.0
     output_transform: 'lambda x: (x[0], x[-1])'
 
 engine:
