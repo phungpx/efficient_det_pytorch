@@ -13,7 +13,7 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
 class LabelmeDataset(Dataset):
-    def __init__(self, dirname: str = None,
+    def __init__(self, dirnames: List[str] = None,
                  image_patterns: List[str] = ['*.jpg'],
                  label_patterns: List[str] = ['*.json'],
                  classes: Dict[str, int] = None,
@@ -26,23 +26,23 @@ class LabelmeDataset(Dataset):
         self.imsize = 512 + compound_coef * 128
         self.std = torch.tensor(std, dtype=torch.float).view(3, 1, 1)
         self.mean = torch.tensor(mean, dtype=torch.float).view(3, 1, 1)
+        self.pad_to_square = iaa.PadToSquare(position='right-bottom')
 
         self.transforms = transforms if transforms else []
 
         image_paths, label_paths = [], []
-        for image_pattern in image_patterns:
-            image_paths.extend(Path(dirname).glob('**/{}'.format(image_pattern)))
-        for label_pattern in label_patterns:
-            label_paths.extend(Path(dirname).glob('**/{}'.format(label_pattern)))
+        for dirname in dirnames:
+            for image_pattern in image_patterns:
+                image_paths.extend(Path(dirname).glob('**/{}'.format(image_pattern)))
+            for label_pattern in label_patterns:
+                label_paths.extend(Path(dirname).glob('**/{}'.format(label_pattern)))
 
         image_paths = natsorted(image_paths, key=lambda x: str(x.stem))
         label_paths = natsorted(label_paths, key=lambda x: str(x.stem))
 
         self.data_pairs = [[image, label] for image, label in zip(image_paths, label_paths)]
 
-        self.pad_to_square = iaa.PadToSquare(position='right-bottom')
-
-        print(f'{Path(dirname).stem}: {len(self.data_pairs)}')
+        print(f'{Path(dirnames[0]).parent.stem}: {len(self.data_pairs)}')
 
     def __len__(self):
         return len(self.data_pairs)
