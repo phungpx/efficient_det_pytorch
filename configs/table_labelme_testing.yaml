@@ -27,7 +27,7 @@ data:
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
-  module: flame.core.model.efficientdet
+  module: flame.core.model.EfficientDetV1.efficientdet
   class: EfficientDet
   EfficientDet:
     head_only: False
@@ -71,7 +71,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2108161629/best_model_67_mAP=0.9785.pt'''
+    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2109051108/best_model_122_focal_loss=-0.2265.pt'''
     mode: '''test'''
 
 predictor:
@@ -79,7 +79,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/TABLE/efficientdet-d0/2108161629/best_model_67_mAP=0.9785/test/'''
+    output_dir: '''checkpoint/TABLE/efficientdet-d0/2109051108/best_model_122_focal_loss=-0.2265/test/'''
     compound_coef: 0
     classes:
       TABLE: [[0, 0, 255], 0]

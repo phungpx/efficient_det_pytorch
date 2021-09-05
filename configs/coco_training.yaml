@@ -28,7 +28,8 @@ data:
       batch_size: 32
       shuffle: True
       drop_last: False
-      num_workers: 4
+      num_workers: 12
+      pin_memory: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   train_eval:
@@ -47,7 +48,8 @@ data:
       batch_size: 32
       shuffle: False
       drop_last: False
-      num_workers: 4
+      num_workers: 12
+      pin_memory: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
   
   valid:
@@ -66,7 +68,8 @@ data:
       batch_size: 32
       shuffle: False
       drop_last: False
-      num_workers: 4
+      num_workers: 12
+      pin_memory: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 loss:
@@ -79,18 +82,16 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.efficientdet
+  module: flame.core.model.EfficientDetV1.efficientdet
   class: EfficientDet
   EfficientDet:
     pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
     head_only: False
-    num_classes: 20
+    num_classes: 80
     compound_coef: 0
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.2
-    score_threshold: 0.2
 
 optim:
   module: torch.optim
@@ -206,7 +207,7 @@ backup_saver:
     n_saved: 1
 
 engine:
-  module: flame.core.engine.engine
+  module: flame.core.engine.trainer
   class: Trainer
   Trainer:
     dataset: config['data']['train']
