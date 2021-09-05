@@ -9,11 +9,12 @@ from shapely import geometry
 
 class MeanAveragePrecision(nn.Module):
     def __init__(self, classes: Dict[str, int], iou_threshold: float = 0.5,
-                 method: str = 'every_point_interpolation'):  # or '11_point_interpolation'
+                 method: str = 'every_point_interpolation', full: bool = False):  # or '11_point_interpolation'
         super(MeanAveragePrecision, self).__init__()
         self.classes = {class_id: class_name for class_name, class_id in classes.items()}
         self.iou_threshold = iou_threshold
         self.method = method
+        self.full = full
 
     def forward(self, detections: list, ground_truths: list) -> dict:
         r'''
@@ -152,6 +153,9 @@ class MeanAveragePrecision(nn.Module):
         print(average_precision_stats)
 
         mAP = sum(average_precisions) / len(average_precisions) if len(average_precisions) else 0.
+
+        if self.full:
+            return mAP, results
 
         return mAP
 
