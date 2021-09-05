@@ -77,9 +77,9 @@ class EfficientDet(nn.Module):
         self.anchor_generator = AnchorGeneration(compound_coef=compound_coef,
                                                  scales=scales, aspect_ratios=aspect_ratios)
         self.bbox_regressor = BBoxTransform()
-        self.bbox_clipper = ClipBoxes()
+        self.bbox_clipper = ClipBoxes(compound_coef=compound_coef)
 
-    def _predict(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
+    def _inference(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
         predictions = []
 
         cls_preds, loc_preds, anchor_boxes = self._forward(inputs=inputs)

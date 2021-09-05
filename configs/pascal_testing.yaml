@@ -4,14 +4,19 @@ data:
     class: DataLoader
     DataLoader:
       dataset:
-        module: flame.core.data.voc2007_dataset
-        class: VOC2007Dataset
-        VOC2007Dataset:
+        module: flame.core.data.pascal_dataset
+        class: PascalDataset
+        PascalDataset:
           compound_coef: 0
-          image_dir: '''dataset/PASCALVOC2007/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages/'''
-          label_dir: '''dataset/PASCALVOC2007/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/Annotations/'''
-          image_pattern: '''*.jpg'''
-          label_pattern: '''*.xml'''
+          VOC2012:
+            image_dir: '''dataset/PASCALVOC2012/JPEGImages/'''
+            label_dir: '''dataset/PASCALVOC2012/Annotations/'''
+            txt_path: '''dataset/PASCALVOC2012/ImageSets/Segmentation/val.txt'''
+          VOC2007:
+            image_dir: '''dataset/PASCALVOC2007/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages/'''
+            label_dir: '''dataset/PASCALVOC2007/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/Annotations/'''
+          image_extent: '''.jpg'''
+          label_extent: '''.xml'''
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
           classes:
@@ -35,11 +40,11 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 64
+      batch_size: 32
       shuffle: False
-      num_workers: 8
       pin_memory: True
-      drop_last: True
+      num_workers: 12
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
@@ -50,8 +55,8 @@ model:
     compound_coef: 0
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.6
-    score_threshold: 0.3
+    iou_threshold: 0.2
+    score_threshold: 0.2
 
 metrics:
   module: flame.handlers.metrics.metrics
@@ -104,7 +109,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/VOC2007/efficientdet-d0/2109012258/best_model_23_focal_loss=-1.3519.pt'''
+    checkpoint_path: '''checkpoint/PASCAL/efficientdet-d0/2109050041/best_model_48_focal_loss=-1.2504.pt'''
     mode: '''test'''
 
 predictor:
@@ -112,7 +117,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/VOC2007/efficientdet-d0/2109012258/best_model_23_focal_loss=-1.3519/valid/'''
+    output_dir: '''checkpoint/PASCAL/efficientdet-d0/2109050041/best_model_48_focal_loss=-1.2504/valid/'''
     compound_coef: 0
     classes:
       aeroplane: [[128, 0, 0], 0]  # color, class_idx, area_threshold

@@ -48,7 +48,7 @@ class Model(nn.Module):
         self.model.load_state_dict(state_dict)
 
     def forward(self, inputs):
-        return self.model._forward(inputs)
+        return self.model(inputs)
 
     def inference(self, inputs):
-        return self.model._inference(inputs)
+        return self.model.inference(inputs)

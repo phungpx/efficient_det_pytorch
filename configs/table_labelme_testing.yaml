@@ -8,25 +8,28 @@ data:
         class: LabelmeDataset
         LabelmeDataset:
           compound_coef: 0
-          dirname: '''dataset/TABLE/test'''
+          dirnames:
+            - '''dataset/TABLE/test/ICDAR2013'''
+            - '''dataset/TABLE/test/PubLayNet'''
           image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
           classes:
-            TABLE: 0
+            # TABLE: 0
             borderless_table: 0
             bordered_table: 0
             color_table: 0
       batch_size: 8
       shuffle: False
+      num_workers: 12
+      pin_memory: True
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
   module: flame.core.model.efficientdet
   class: EfficientDet
   EfficientDet:
-    # pretrained_weight: ''''''
     head_only: False
     num_classes: 1
     compound_coef: 0
@@ -42,12 +45,17 @@ metrics:
   Metrics:
     metrics:
       mAP:
-        module: flame.handlers.metrics.mAP
-        class: mAP
-        mAP:
-          num_classes: 1
-          iou_threshold: 0.5
-          box_format: '''corners'''
+        module: flame.handlers.metrics.mean_average_precision.eval
+        class: Evaluator
+        Evaluator:
+          eval_fn:
+            module: flame.handlers.metrics.mean_average_precision.mean_average_precision
+            class: MeanAveragePrecision
+            MeanAveragePrecision:
+              classes:
+                TABLE: 0
+              iou_threshold: 0.5
+              method: '''every_point_interpolation'''
           output_transform: 'lambda x: (x[0], x[1])'
     attach_to:
       engine: '''test'''
@@ -75,12 +83,10 @@ predictor:
     compound_coef: 0
     classes:
       TABLE: [[0, 0, 255], 0]
-    thresh_score: 0.0
-    thresh_iou_nms: 0.0
     output_transform: 'lambda x: (x[0], x[-1])'
 
 engine:
-  module: flame.core.engine.engine
+  module: flame.core.engine.tester
   class: Evaluator
   Evaluator:
     dataset: config['data']['test']
