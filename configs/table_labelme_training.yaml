@@ -190,28 +190,28 @@ lr_scheduler:
   module: flame.handlers.lr_scheduler
   class: ReduceLROnPlateau
   ReduceLROnPlateau:
-    score_name: '''mAP'''
+    score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
-    mode: '''max'''
+    mode: '''min'''
     patience: 5
     verbose: True
 
-# early_stopping:
-#   module: flame.handlers.early_stopping
-#   class: EarlyStopping
-#   EarlyStopping:
-#     score_name: '''mAP'''
-#     evaluator_name: '''valid_evaluator'''
-#     mode: '''max'''
-#     patience: 50
+early_stopping:
+  module: flame.handlers.early_stopping
+  class: EarlyStopping
+  EarlyStopping:
+    score_name: '''focal_loss'''
+    evaluator_name: '''valid_evaluator'''
+    mode: '''min'''
+    patience: 50
 
 best_saver:
   module: flame.handlers.checkpoint
   class: BestSaver
   BestSaver:
     dirname: '''checkpoint/TABLE/efficientdet-d0'''
-    score_name: '''mAP'''
-    mode: '''max'''
+    score_name: '''focal_loss'''
+    mode: '''min'''
     evaluator_name: '''valid_evaluator'''
     n_saved: 1
 
@@ -226,7 +226,7 @@ backup_saver:
       - '''best_saver'''
       - '''history'''
       - '''lr_scheduler'''
-      # - '''early_stopping'''
+      - '''early_stopping'''
     dirname: '''checkpoint/TABLE/efficientdet-d0'''
     save_interval: 1
     n_saved: 1
