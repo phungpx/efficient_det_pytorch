@@ -36,7 +36,7 @@ metrics:
   Metrics:
     metrics:
       mAP:
-        module: flame.handlers.metrics.mean_average_precision.eval
+        module: flame.handlers.metrics.mean_average_precision.evaluator
         class: Evaluator
         Evaluator:
           eval_fn:

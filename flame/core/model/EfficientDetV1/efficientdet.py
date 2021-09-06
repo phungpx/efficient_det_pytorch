@@ -1,12 +1,12 @@
-# Author: Zylo117
 import torch
 from torch import nn
 from torchvision.ops.boxes import batched_nms
 
 from .bifpn import BiFPN
+from .anchor import Anchors
 from .backbone import EfficientNet
 from .head import Regressor, Classifier
-from .box_transform import Anchors, BBoxTransform, ClipBoxes
+from .transform import ClipBoxes, BBoxTransform
 
 
 class EfficientDetBackBone(nn.Module):
@@ -78,7 +78,7 @@ class EfficientDetBackBone(nn.Module):
 
         # using for inference to find predicted bounding boxes
         self.regressBoxes = BBoxTransform()
-        self.clipBoxes = ClipBoxes()
+        self.clipBoxes = ClipBoxes(compound_coef=compound_coef)
 
     def freeze_bn(self):
         for m in self.modules():
@@ -110,7 +110,7 @@ class EfficientDetBackBone(nn.Module):
         classification = self.classifier(features)
 
         transformed_anchors = self.regressBoxes(anchors, regression)
-        transformed_anchors = self.clipBoxes(transformed_anchors, inputs)
+        transformed_anchors = self.clipBoxes(transformed_anchors)
         scores = torch.max(classification, dim=2, keepdim=True)[0]
         scores_over_thresh = (scores > self.score_threshold)[:, :, 0]
 
