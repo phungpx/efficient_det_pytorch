@@ -4,14 +4,70 @@
 [1] EfficientDet - Scalable and Efficient Object Detection: https://arxiv.org/pdf/1911.09070.pdf
 [2] EfficientDet - zylo117 Github: https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch
 
-## 2. Download
-> Weights Location
+## 2. Dataset
+### 2.0 Todo
+- [x] suport for COCO 2017 dataset format.
+- [x] supporting for PASCAL VOC 2007, 2012 dataset format.
+- [x] supporting for LABELME dataset format.
+- [x] supporting for ALTHEIA dataset format.
+
+### 2.1 Structure of Configs
+```
+flame/data
+	|
+	├── coco_dataset.py
+	├── pascal_dataset.py
+	├── labelme_dataset.py
+	└── altheia_dataset.py
+
+configs/
+	|
+	├── coco_training.yaml
+	├── coco_testing.yaml
+	├── pascal_training.yaml
+	└── pascal_testing.yaml
+```
+
+### 2.2 Download
+* COCO Train/Val/Test 2017
+```bash
+https://cocodataset.org/#download
+```
+
+* Pascal VOC 2007
+```bash
+https://www.kaggle.com/zaraks/pascal-voc-2007
+```
+
+* Pascal VOC 2012
+```bash
+https://www.kaggle.com/huanghanchina/pascal-voc-2012
+```
+
+### 2.3 Dataset Stats
+|ID|Dataset Name|Train|Val|Test|
+|:--:|:--------:|:--------:|:--:|:--:|
+1|COCO 2017 |118,287|5,000|-|
+2|Pascal VOC 2007 |5,011|4,952|-|
+3|Pascal VOC 2012 |1,464|1,449|-|
+
+
+## 3. Pretrained Weights
+### 3.1 Weights Location of Project
+* Create Weight Folder
 ```python
 mkdir checkpoint/efficientnet_pretrained_weight
 mkdir checkpoint/efficientdet_pretrained_weight
 ```
+* Download Weight
+```bash
+!wget <weight-path> -O checkpoint/efficientdet_pretrained_weight/<weight-path-name>
+```
+```bash
+!wget <weight-path> -O checkpoint/efficientnet_pretrained_weight/<weight-path-name>
+```
 
-> EfficientNet Pretrained Weight
+### 3.2 EfficientNet Pretrained Weights
 ```bash
 https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficientnet-b0-355c32eb.pth
 https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficientnet-b1-f1951068.pth
@@ -23,22 +79,32 @@ https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficien
 https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficientnet-b7-dcc49843.pth
 ```
 
-> EfficientDet Pretrained Weight
+### 3.3 EfficientDet Pretrained Weights
+```bash
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d0.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d1.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d2.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d3.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d4.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d5.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d6.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d7.pth
+https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.0/efficientdet-d8.pth
+```
 
-
-## 3. Usage
-> Training
+## 4. Usage
+* Training
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_training.yaml
 ```
 
-> Testing
+* Testing
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_testing.yaml
 ```
 
-> mAP testing
+* mean average precision \
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1LQWWi0IfUKFEtrJk-oAZcXKlf9hQ7cQ5?usp=sharing)
 
-> Inference
+* inference \
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://drive.google.com/file/d/1n4QoUcpv3wz6lXsWJSBAbRk4ZdO6NnEb/view?usp=sharing)
