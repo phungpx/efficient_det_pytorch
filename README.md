@@ -94,13 +94,13 @@ https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch/releases/download/1.
 
 ## 4. Usage
 ### 4.1 Todo
-[x] Applied for many dataset format included coco, pascal, labelme, altheia.
-[x] Rearraged training and testing flow with Ignite Pytorch.
-[x] Refactored Focal Loss and mAP for training and evaluation.
-[x] Applied *region_predictor* function for visualizing predicted results.
-[x] Applied 'lr_scheduler', 'early stopping', dataloader with setting 'num_workers', 'pin_memory', 'drop_last' for optimizing training.
-[] Updating FP16 (automatic mixed precision), DDP (DistributedDataParallel) for faster training on GPUs.
-[] Updating Tensorboard, Profiler.
+- [x] Applied for many dataset format included coco, pascal, labelme, altheia.
+- [x] Rearraged training and testing flow with Ignite Pytorch.
+- [x] Refactored Focal Loss and mAP for training and evaluation.
+- [x] Applied *region_predictor* function for visualizing predicted results.
+- [x] Applied 'lr_scheduler', 'early stopping', dataloader with setting 'num_workers', 'pin_memory', 'drop_last' for optimizing training.
+- [ ] Updating FP16 (automatic mixed precision), DDP (DistributedDataParallel) for faster training on GPUs.
+- [ ] Updating Tensorboard, Profiler.
 
 ### 4.2 Usage
 * Training
@@ -121,5 +121,6 @@ CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_testing.yaml
 
 ## 5. Performance
 <Updating>
+
 ## 6. Explaination
 <Updating>
