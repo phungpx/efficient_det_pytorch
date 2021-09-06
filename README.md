@@ -1,10 +1,10 @@
 # [Efficient Det](https://arxiv.org/pdf/1911.09070.pdf)
 
-## 0. References
-- EfficientDet(paper): https://arxiv.org/pdf/1911.09070.pdf
-- EfficientDet(Github): https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch
+## 1. References
+[1] EfficientDet - Scalable and Efficient Object Detection: https://arxiv.org/pdf/1911.09070.pdf
+[2] EfficientDet - zylo117 Github: https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch
 
-## 1. Download
+## 2. Download
 > Weights Location
 ```python
 mkdir checkpoint/efficientnet_pretrained_weight
@@ -26,7 +26,7 @@ https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/efficien
 > EfficientDet Pretrained Weight
 
 
-## 2. Usage
+## 3. Usage
 > Training
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/voc2007_training.yaml
