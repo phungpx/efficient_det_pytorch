@@ -47,12 +47,18 @@ http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar
 http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
 ```
 
+* Publaynet
+```bash
+https://developer.ibm.com/exchanges/data/all/publaynet/
+```
+
 ### 2.4 Dataset Stats
 |ID|Dataset Name|Train|Val|Test|
 |:--:|:--------:|:--------:|:--:|:--:|
 1|COCO 2017 |118,287|5,000|-|
 2|Pascal VOC 2007 |5,011|4,952|-|
 3|Pascal VOC 2012 |1,464|1,449|-|
+4|PubLayNet |335,703|11,245|-|
 
 
 ## 3. Pretrained Weights
