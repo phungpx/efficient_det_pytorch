@@ -36,29 +36,37 @@ metrics:
   class: Metrics
   Metrics:
     metrics:
-      mAP:
-        module: flame.handlers.metrics.mean_average_precision.evaluator
+      # mAP:
+      #   module: flame.handlers.metrics.mean_average_precision.evaluator
+      #   class: Evaluator
+      #   Evaluator:
+      #     eval_fn:
+      #       module: flame.handlers.metrics.mean_average_precision.mean_average_precision
+      #       class: MeanAveragePrecision
+      #       MeanAveragePrecision:
+      #         classes:
+      #           large-vehicle: 0
+      #           small-vehicle: 1
+      #         iou_threshold: 0.5
+      #         method: '''every_point_interpolation'''
+      #     output_transform: 'lambda x: (x[0], x[1])'
+      coco_eval:
+        module: flame.handlers.metrics.coco_evaluator.evaluator
         class: Evaluator
         Evaluator:
-          eval_fn:
-            module: flame.handlers.metrics.mean_average_precision.mean_average_precision
-            class: MeanAveragePrecision
-            MeanAveragePrecision:
-              classes:
-                large-vehicle: 0
-                small-vehicle: 1
-              iou_threshold: 0.5
-              method: '''every_point_interpolation'''
-          output_transform: 'lambda x: (x[0], x[1])'
+          compound_coef: 0
+          annotation_file: '''dataset/birdview_vehicles/annotations/instances_val.json'''
+          save_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2109052311/birdview_vehicles_val.json'''
+          output_transform: 'lambda x: (x[0], x[1], x[2])'
     attach_to:
       engine: '''test'''
 
-screenlogger:
-  module: flame.handlers.screenlogger
-  class: ScreenLogger
-  ScreenLogger:
-    eval_names:
-      - '''test'''
+# screenlogger:
+#   module: flame.handlers.screenlogger
+#   class: ScreenLogger
+#   ScreenLogger:
+#     eval_names:
+#       - '''test'''
 
 checkpoint_loader:
   module: flame.handlers.checkpoint
