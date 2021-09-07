@@ -31,7 +31,7 @@ data:
       pin_memory: True
       num_workers: 12
       collate_fn: 'lambda batch:tuple(zip(*batch))'
-  
+
   train_eval:
     module: torch.utils.data
     class: DataLoader
@@ -51,7 +51,7 @@ data:
       pin_memory: True
       num_workers: 12
       collate_fn: 'lambda batch:tuple(zip(*batch))'
-  
+
   valid:
     module: torch.utils.data
     class: DataLoader
