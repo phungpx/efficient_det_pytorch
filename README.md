@@ -6,10 +6,10 @@
 
 ## 2. Dataset
 ### 2.1 Todo
-- [x] suport for COCO 2017 dataset format.
-- [x] supporting for PASCAL VOC 2007, 2012 dataset format.
-- [x] supporting for LABELME dataset format.
-- [x] supporting for ALTHEIA dataset format.
+- [x] supporting for COCO 2017, PubLayNet dataset with COCO format.
+- [x] supporting for PASCAL VOC 2007, 2012 dataset with XML format.
+- [x] supporting for dataset with LABELME format.
+- [x] supporting for dataset with ALTHEIA format.
 
 ### 2.2 Structure of Configs
 ```
@@ -22,8 +22,12 @@ flame/data
 
 configs/
 	|
+	├── birdview_vehicles_training.yaml
+	├── birdview_vehicles_testing.yaml
 	├── coco_training.yaml
 	├── coco_testing.yaml
+	├── publaynet_training.yaml
+	├── publaynet_testing.yaml
 	├── pascal_training.yaml
 	└── pascal_testing.yaml
 ```
@@ -53,12 +57,12 @@ https://developer.ibm.com/exchanges/data/all/publaynet/
 ```
 
 ### 2.4 Dataset Stats
-|ID|Dataset Name|Train|Val|Test|
-|:--:|:--------:|:--------:|:--:|:--:|
-1|COCO 2017 |118,287|5,000|-|
-2|Pascal VOC 2007 |5,011|4,952|-|
-3|Pascal VOC 2012 |1,464|1,449|-|
-4|PubLayNet |335,703|11,245|-|
+|ID|Dataset Name|Train|Val|Test|Format|
+|:--:|:--------:|:--------:|:--:|:--:|:--:|
+1|COCO 2017 |118,287|5,000|-|COCO JSON|
+2|Pascal VOC 2007 |5,011|4,952|-|PASCAL XML|
+3|Pascal VOC 2012 |1,464|1,449|-|PASCAL XML|
+4|PubLayNet |335,703|11,245|11,405|COCO JSON|
 
 
 ## 3. Pretrained Weights
