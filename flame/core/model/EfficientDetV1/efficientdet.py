@@ -4,16 +4,16 @@ from torchvision.ops.boxes import batched_nms
 
 from .bifpn import BiFPN
 from .anchor import Anchors
-from .backbone import EfficientNet
 from .head import Regressor, Classifier
 from .transform import ClipBoxes, BBoxTransform
+from .efficientnet.backbone import EfficientNetBackBone
 
 
 class EfficientDetBackBone(nn.Module):
     def __init__(self,
                  num_classes=80,
                  compound_coef=0,
-                 load_weights=False,
+                 backbone_pretrained=False,
                  scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
                  aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
                  iou_threshold=0.2,
@@ -74,7 +74,10 @@ class EfficientDetBackBone(nn.Module):
                                ratios=aspect_ratios,
                                scales=scales)
 
-        self.backbone_net = EfficientNet(self.backbone_compound_coef[compound_coef], load_weights)
+        self.backbone_net = EfficientNetBackBone(
+            compound_coef=self.backbone_compound_coef[compound_coef],
+            load_weights=backbone_pretrained
+        )
 
         # using for inference to find predicted bounding boxes
         self.regressBoxes = BBoxTransform()
@@ -156,7 +159,7 @@ class EfficientDet(nn.Module):
         super(EfficientDet, self).__init__()
         self.model = EfficientDetBackBone(num_classes=num_classes,
                                           compound_coef=compound_coef,
-                                          load_weights=backbone_pretrained,
+                                          backbone_pretrained=backbone_pretrained,
                                           scales=scales,
                                           aspect_ratios=aspect_ratios,
                                           iou_threshold=iou_threshold,

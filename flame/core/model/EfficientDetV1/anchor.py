@@ -1,7 +1,7 @@
-import itertools
 import torch
-import torch.nn as nn
+import itertools
 import numpy as np
+import torch.nn as nn
 
 
 class Anchors(nn.Module):

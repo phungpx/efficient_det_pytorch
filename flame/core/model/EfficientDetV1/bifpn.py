@@ -1,8 +1,12 @@
 import torch
 
 from torch import nn
-from .efficientnet.utils import MemoryEfficientSwish, Swish
-from .efficientnet.utils_extra import Conv2dStaticSamePadding, MaxPool2dStaticSamePadding
+from .efficientnet.layers import (
+    Swish,
+    MemoryEfficientSwish,
+    Conv2dStaticSamePadding,
+    MaxPool2dStaticSamePadding
+)
 
 
 __all__ = ['SeparableConvBlock', 'BiFPN']
