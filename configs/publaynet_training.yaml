@@ -82,7 +82,7 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.EfficientDetV1.efficientdet
+  module: flame.core.model.EfficientDet.efficientdet
   class: EfficientDet
   EfficientDet:
     # pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
