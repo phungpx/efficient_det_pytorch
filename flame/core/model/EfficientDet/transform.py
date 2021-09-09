@@ -7,8 +7,7 @@ __all__ = ['BBoxTransform', 'ClipBoxes']
 
 class BBoxTransform(nn.Module):
     def forward(self, anchors: torch.Tensor, regression: torch.Tensor) -> torch.Tensor:
-        """
-        decode_box_outputs adapted from https://github.com/google/automl/blob/master/efficientdet/anchors.py
+        """decode_box_outputs adapted from https://github.com/google/automl/blob/master/efficientdet/anchors.py
         * (x, y): center of ground truth box
         * (xa, ya): center of anchor box
         - dx = (x - xa) / wa --> x = dx * wa + xa --> x1 = x - w / 2

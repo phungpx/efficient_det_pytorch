@@ -14,14 +14,14 @@ class RegionPredictor(Module):
                  evaluator_name: str = None,
                  compound_coef: int = None,
                  classes: Dict[str, List] = None,
-                 thresh_score: Optional[float] = None,
-                 thresh_iou_nms: Optional[float] = None,
+                 score_threshold: Optional[float] = None,
+                 iou_threshold: Optional[float] = None,
                  output_dir: str = None,
                  output_transform=lambda x: x):
         super(RegionPredictor, self).__init__()
         self.classes = classes
-        self.thresh_score = thresh_score
-        self.thresh_iou_nms = thresh_iou_nms
+        self.score_threshold = score_threshold
+        self.iou_threshold = iou_threshold
         self.evaluator_name = evaluator_name
         self.imsize = 512 + compound_coef * 128
         self.output_transform = output_transform
@@ -51,12 +51,12 @@ class RegionPredictor(Module):
 
             labels, boxes, scores = pred['labels'], pred['boxes'], pred['scores']
 
-            if self.thresh_iou_nms:
-                indices = torchvision.ops.nms(boxes, scores, self.thresh_iou_nms)
+            if self.score_threshold:
+                indices = scores > self.score_threshold
                 labels, boxes, scores = labels[indices], boxes[indices], scores[indices]
 
-            if self.thresh_score:
-                indices = scores > self.thresh_score
+            if self.iou_threshold:
+                indices = torchvision.ops.nms(boxes, scores, self.iou_threshold)
                 labels, boxes, scores = labels[indices], boxes[indices], scores[indices]
 
             boxes = boxes.data.cpu().numpy().tolist()
@@ -65,9 +65,9 @@ class RegionPredictor(Module):
 
             classes = {label: [cls_name, color] for cls_name, (color, label) in self.classes.items()}
 
-            font_scale = max(image_size) / 900
-            box_thickness = max(image_size) // 200
-            text_thickness = max(image_size) // 400
+            font_scale = max(image_size) / 1200
+            box_thickness = max(image_size) // 400
+            text_thickness = max(image_size) // 600
             image_scale = max(image_size) / self.imsize  # in this case of preprocessing data using padding to square.
 
             for (label, box, score) in zip(labels, boxes, scores):
@@ -82,13 +82,13 @@ class RegionPredictor(Module):
                     )
 
                     title = f"{classes[label][0]}: {score:.4f}"
-                    w_text, h_text = cv2.getTextSize(title, cv2.FONT_HERSHEY_SIMPLEX, font_scale, text_thickness)[0]
+                    w_text, h_text = cv2.getTextSize(title, cv2.FONT_HERSHEY_PLAIN, font_scale, text_thickness)[0]
 
                     cv2.rectangle(
                         img=image,
                         pt1=(x1, y1 - int(1.3 * h_text)),
                         pt2=(x1 + w_text, y1),
-                        color=(0, 0, 255),
+                        color=classes[label][1],
                         thickness=-1
                     )
 
@@ -96,7 +96,7 @@ class RegionPredictor(Module):
                         img=image,
                         text=title,
                         org=(x1, y1 - int(0.3 * h_text)),
-                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                        fontFace=cv2.FONT_HERSHEY_PLAIN,
                         fontScale=font_scale,
                         color=(255, 255, 255),
                         thickness=text_thickness,

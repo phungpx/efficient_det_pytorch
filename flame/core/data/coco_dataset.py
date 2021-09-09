@@ -47,6 +47,7 @@ class CoCoDataset(Dataset):
         self.pad_to_square = iaa.PadToSquare(position='right-bottom')
 
         print(f'{self.image_dir.stem}: {len(self.image_indices)}')
+        print(f'All Classes: {self.idx2class}')
 
     def __len__(self):
         return len(self.image_indices)
