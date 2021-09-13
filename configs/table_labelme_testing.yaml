@@ -7,7 +7,7 @@ data:
         module: flame.core.data.labelme_dataset
         class: LabelmeDataset
         LabelmeDataset:
-          compound_coef: 0
+          compound_coef: 1
           dirnames:
             - '''dataset/TABLE/test/ICDAR2013'''
             - '''dataset/TABLE/test/PubLayNet'''
@@ -32,12 +32,12 @@ model:
   EfficientDet:
     head_only: False
     num_classes: 1
-    compound_coef: 0
+    compound_coef: 1
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)', '(1.8, 0.3)']
-    iou_threshold: 0.2
-    score_threshold: 0.2
+    iou_threshold: 0.5
+    score_threshold: 0.05
 
 metrics:
   module: flame.handlers.metrics.metrics
@@ -71,7 +71,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2109051108/best_model_122_focal_loss=-0.2265.pt'''
+    checkpoint_path: '''checkpoint/TABLE/efficientdet-d1/2109101515/best_model_151_focal_loss=-0.1469.pt'''
     mode: '''test'''
 
 predictor:
@@ -79,10 +79,11 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/TABLE/efficientdet-d0/2109051108/best_model_122_focal_loss=-0.2265/test/'''
-    compound_coef: 0
+    output_dir: '''checkpoint/TABLE/efficientdet-d1/2109101515/best_model_151_focal_loss=-0.1469/'''
+    compound_coef: 1
     classes:
       TABLE: [[0, 0, 255], 0]
+    score_threshold: 0.3
     output_transform: 'lambda x: (x[0], x[-1])'
 
 engine:

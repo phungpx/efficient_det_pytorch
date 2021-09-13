@@ -7,7 +7,7 @@ data:
         module: flame.core.data.coco_dataset
         class: CoCoDataset
         CoCoDataset:
-          compound_coef: 0
+          compound_coef: 1
           image_dir: '''dataset/publaynet/train'''
           label_path: '''dataset/publaynet/train.json'''
           mean: [0.485, 0.456, 0.406]
@@ -40,7 +40,7 @@ data:
         module: flame.core.data.coco_dataset
         class: CoCoDataset
         CoCoDataset:
-          compound_coef: 0
+          compound_coef: 1
           image_dir: '''dataset/publaynet/train'''
           label_path: '''dataset/publaynet/train.json'''
           mean: [0.485, 0.456, 0.406]
@@ -60,7 +60,7 @@ data:
         module: flame.core.data.coco_dataset
         class: CoCoDataset
         CoCoDataset:
-          compound_coef: 0
+          compound_coef: 1
           image_dir: '''dataset/publaynet/val'''
           label_path: '''dataset/publaynet/val.json'''
           mean: [0.485, 0.456, 0.406]
@@ -88,12 +88,12 @@ model:
     # pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
     head_only: False
     num_classes: 5
-    compound_coef: 0
+    compound_coef: 1
     backbone_pretrained: True
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)', '(1.8, 0.3)']
-    iou_threshold: 0.2
-    score_threshold: 0.2
+    # iou_threshold: 0.2
+    # score_threshold: 0.2
 
 optim:
   module: torch.optim

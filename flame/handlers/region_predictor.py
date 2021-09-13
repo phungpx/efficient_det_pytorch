@@ -63,7 +63,10 @@ class RegionPredictor(Module):
             labels = labels.data.cpu().numpy().tolist()
             scores = scores.data.cpu().numpy().tolist()
 
-            classes = {label: [cls_name, color] for cls_name, (color, label) in self.classes.items()}
+            if self.classes:
+                classes = {
+                    label: [cls_name, color] for cls_name, (color, label) in self.classes.items()
+                }
 
             font_scale = max(image_size) / 1200
             box_thickness = max(image_size) // 400
@@ -77,25 +80,30 @@ class RegionPredictor(Module):
                         img=image,
                         pt1=(x1, y1),
                         pt2=(x2, y2),
-                        color=classes[label][1],
+                        color=classes[label][1] if self.classes else [0, 0, 255],
                         thickness=box_thickness
                     )
 
-                    title = f"{classes[label][0]}: {score:.4f}"
-                    w_text, h_text = cv2.getTextSize(title, cv2.FONT_HERSHEY_PLAIN, font_scale, text_thickness)[0]
+                    title = f"{classes[label][0]}: {score:.4f}" if self.classes else f"{label}: {score:.4f}"
+                    w_text, h_text = cv2.getTextSize(
+                        title,
+                        cv2.FONT_HERSHEY_PLAIN,
+                        font_scale,
+                        text_thickness
+                    )[0]
 
                     cv2.rectangle(
                         img=image,
-                        pt1=(x1, y1 - int(1.3 * h_text)),
+                        pt1=(x1, y1 + int(1.6 * h_text)),
                         pt2=(x1 + w_text, y1),
-                        color=classes[label][1],
+                        color=classes[label][1] if self.classes else [0, 0, 255],
                         thickness=-1
                     )
 
                     cv2.putText(
                         img=image,
                         text=title,
-                        org=(x1, y1 - int(0.3 * h_text)),
+                        org=(x1, y1 + int(1.3 * h_text)),
                         fontFace=cv2.FONT_HERSHEY_PLAIN,
                         fontScale=font_scale,
                         color=(255, 255, 255),

@@ -7,7 +7,7 @@ data:
         module: flame.core.data.labelme_dataset
         class: LabelmeDataset
         LabelmeDataset:
-          compound_coef: 0
+          compound_coef: 1
           dirnames:
             - '''dataset/TABLE/train/ICDAR2013'''
             - '''dataset/TABLE/train/PubLayNet'''
@@ -32,7 +32,7 @@ data:
             - iaa.Pad(percent=(0, 0.1), keep_size=False)
             # - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
             # - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
-      batch_size: 32
+      batch_size: 16
       shuffle: True
       num_workers: 12
       pin_memory: True
@@ -47,7 +47,7 @@ data:
         module: flame.core.data.labelme_dataset
         class: LabelmeDataset
         LabelmeDataset:
-          compound_coef: 0
+          compound_coef: 1
           dirnames:
             - '''dataset/TABLE/train/ICDAR2013'''
             - '''dataset/TABLE/train/PubLayNet'''
@@ -60,7 +60,7 @@ data:
             borderless_table: 0
             bordered_table: 0
             color_table: 0
-      batch_size: 32
+      batch_size: 16
       shuffle: False
       num_workers: 12
       pin_memory: True
@@ -75,7 +75,7 @@ data:
         module: flame.core.data.labelme_dataset
         class: LabelmeDataset
         LabelmeDataset:
-          compound_coef: 0
+          compound_coef: 1
           dirnames:
             - '''dataset/TABLE/valid/ICDAR2013'''
             - '''dataset/TABLE/valid/PubLayNet'''
@@ -88,7 +88,7 @@ data:
             borderless_table: 0
             bordered_table: 0
             color_table: 0
-      batch_size: 32
+      batch_size: 16
       shuffle: False
       num_workers: 12
       pin_memory: True
@@ -108,15 +108,13 @@ model:
   module: flame.core.model.EfficientDet.efficientdet
   class: EfficientDet
   EfficientDet:
-    # pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
+    # pretrained_weight: '''checkpoint/TABLE/efficientdet-d0/2109062307/best_model_13_focal_loss=-0.1190.pt'''
     head_only: False
     num_classes: 1
-    compound_coef: 0
+    compound_coef: 1
     backbone_pretrained: True
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)', '(1.8, 0.3)']
-    iou_threshold: 0.2
-    score_threshold: 0.2
 
 optim:
   module: torch.optim
@@ -209,7 +207,7 @@ best_saver:
   module: flame.handlers.checkpoint
   class: BestSaver
   BestSaver:
-    dirname: '''checkpoint/TABLE/efficientdet-d0'''
+    dirname: '''checkpoint/TABLE/efficientdet-d1'''
     score_name: '''focal_loss'''
     mode: '''min'''
     evaluator_name: '''valid_evaluator'''
@@ -227,7 +225,7 @@ backup_saver:
       - '''history'''
       - '''lr_scheduler'''
       - '''early_stopping'''
-    dirname: '''checkpoint/TABLE/efficientdet-d0'''
+    dirname: '''checkpoint/TABLE/efficientdet-d1'''
     save_interval: 1
     n_saved: 1
 
