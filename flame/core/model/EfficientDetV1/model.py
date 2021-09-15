@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from .efficientdet import EfficientDet
 
 
@@ -11,14 +11,16 @@ class Model(nn.Module):
                  head_only: bool = False,
                  model_weight_path: Optional[str] = None,
                  backbone_weight_path: Optional[str] = None,
+                 backbone_pretrained_weight: bool = False,
                  scales: List[float] = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
-                 aspect_ratios: List[float] = [0.5, 1., 2.],
+                 aspect_ratios: List[Tuple[float, float]] = [(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
                  iou_threshold: float = 0.2, score_threshold: float = 0.2) -> None:
         super(Model, self).__init__()
         self.model = EfficientDet(
             num_classes=num_classes,
             compound_coef=compound_coef,
             backbone_weight_path=backbone_weight_path,
+            backbone_pretrained_weight=backbone_pretrained_weight,
             scales=scales,
             aspect_ratios=aspect_ratios,
             score_threshold=score_threshold,
@@ -48,7 +50,7 @@ class Model(nn.Module):
         self.model.load_state_dict(state_dict)
 
     def forward(self, inputs):
-        return self.model(inputs)
+        return self.model._forward(inputs)
 
     def inference(self, inputs):
-        return self.model.inference(inputs)
+        return self.model._detect(inputs)

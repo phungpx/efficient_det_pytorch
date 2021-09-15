@@ -82,16 +82,19 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.EfficientDet.efficientdet
-  class: EfficientDet
-  EfficientDet:
-    pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
-    head_only: False
+  module: flame.core.model.EfficientDetV1.model
+  class: Model
+  Model:
     num_classes: 2
     compound_coef: 0
-    backbone_pretrained: False
+    head_only: False
+    model_weight_path: None
+    backbone_weight_path: None
+    backbone_pretrained_weight: True
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    aspect_ratios: ['(1.0, 1.0)', '(1.5, 0.7)', '(0.7, 1.4)']
+    # iou_threshold: 0.2
+    # score_threshold: 0.2
 
 optim:
   module: torch.optim

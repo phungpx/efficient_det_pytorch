@@ -7,12 +7,17 @@ from .model import EfficientNet
 class EfficientNetBackBone(nn.Module):
     def __init__(self, compound_coef: int = 0,
                  R_input: List[int] = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536],
-                 weight_path: str = None):
+                 weight_path: str = None,
+                 pretrained_weight: bool = False):
         super(EfficientNetBackBone, self).__init__()
         self.input_size = R_input[compound_coef]
 
-        efficient_net = EfficientNet.from_pretrained(model_name=f'efficientnet-b{compound_coef}',
-                                                     weights_path=weight_path)
+        efficient_net = EfficientNet.from_pretrained(
+            model_name=f'efficientnet-b{compound_coef}',
+            pretrained_weight=pretrained_weight,
+            weights_path=weight_path
+        )
+
         del efficient_net._conv_head
         del efficient_net._bn1
         del efficient_net._avg_pooling

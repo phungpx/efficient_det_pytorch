@@ -1,7 +1,8 @@
 from .BiFPN.bifpn import BiFPN
 from .Head.regressor import Regressor
 from .Head.classifier import Classifier
-from .Anchor.anchor import AnchorGeneration
+# from .Anchor.anchor import AnchorGeneration
+from .Anchor.generate_anchors import Anchors
 from .Anchor.transform import ClipBoxes, BBoxTransform
 from .EfficientNet.back_bone import EfficientNetBackBone
 
@@ -16,6 +17,7 @@ class EfficientDet(nn.Module):
                  num_classes: int = 80,
                  compound_coef: int = 0,
                  backbone_weight_path: Optional[str] = None,
+                 backbone_pretrained_weight: bool = False,
                  scales: List[float] = None,
                  aspect_ratios: List[float] = None,
                  score_threshold: float = 0.2,
@@ -49,37 +51,56 @@ class EfficientDet(nn.Module):
         self.aspect_ratios = aspect_ratios
         self.scales = scales
 
-        self.feature_extractor = EfficientNetBackBone(R_input=self.R_input,
-                                                      compound_coef=compound_coef,
-                                                      weight_path=backbone_weight_path)
+        self.feature_extractor = EfficientNetBackBone(
+            R_input=self.R_input,
+            compound_coef=compound_coef,
+            pretrained_weight=backbone_pretrained_weight,
+            weight_path=backbone_weight_path
+        )
 
-        self.bifpn = BiFPN(compound_coef=compound_coef,
-                           backbone_out_channels=self.backbone_out_channels,
-                           W_bifpn=self.W_bifpn,
-                           D_bifpn=self.D_bifpn,
-                           onnx_export=False)
+        self.bifpn = BiFPN(
+            compound_coef=compound_coef,
+            backbone_out_channels=self.backbone_out_channels,
+            W_bifpn=self.W_bifpn,
+            D_bifpn=self.D_bifpn,
+            onnx_export=False
+        )
 
         num_anchors = len(scales) * len(aspect_ratios)
 
-        self.classifier = Classifier(n_classes=num_classes,
-                                     n_anchors=num_anchors,
-                                     compound_coef=compound_coef,
-                                     D_class=self.D_class,
-                                     W_pred=self.W_pred,
-                                     onnx_export=False)
+        self.classifier = Classifier(
+            n_classes=num_classes,
+            n_anchors=num_anchors,
+            compound_coef=compound_coef,
+            D_class=self.D_class,
+            W_pred=self.W_pred,
+            onnx_export=False
+        )
 
-        self.regressor = Regressor(n_anchors=num_anchors,
-                                   compound_coef=compound_coef,
-                                   D_box=self.D_box,
-                                   W_pred=self.W_pred,
-                                   onnx_export=False)
+        self.regressor = Regressor(
+            n_anchors=num_anchors,
+            compound_coef=compound_coef,
+            D_box=self.D_box,
+            W_pred=self.W_pred,
+            onnx_export=False
+        )
 
-        self.anchor_generator = AnchorGeneration(compound_coef=compound_coef,
-                                                 scales=scales, aspect_ratios=aspect_ratios)
+        self.pyramid_levels = [5, 5, 5, 5, 5, 5, 5, 5, 6]
+        self.anchor_scale = [4., 4., 4., 4., 4., 4., 4., 5., 4.]
+        self.anchor_generator = Anchors(
+            anchor_scale=self.anchor_scale[compound_coef],
+            pyramid_levels=(torch.arange(self.pyramid_levels[compound_coef]) + 3).tolist(),
+            ratios=aspect_ratios,
+            scales=scales
+        )
+
+        # self.anchor_generator = AnchorGeneration(compound_coef=compound_coef,
+        #                                          scales=scales, aspect_ratios=aspect_ratios)
+
         self.bbox_regressor = BBoxTransform()
         self.bbox_clipper = ClipBoxes(compound_coef=compound_coef)
 
-    def _inference(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
+    def _detect(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
         predictions = []
 
         cls_preds, loc_preds, anchor_boxes = self._forward(inputs=inputs)
@@ -135,7 +156,8 @@ class EfficientDet(nn.Module):
         P3, P4, P5 = feature_maps[-3:]
         pyramid_features = self.bifpn(feature_maps=(P3, P4, P5))
 
-        anchors = self.anchor_generator(inputs=inputs, pyramid_features=pyramid_features)
+        # anchors = self.anchor_generator(inputs=inputs, pyramid_features=pyramid_features)
+        anchors = self.anchor_generator(inputs, inputs.dtype)
 
         cls_preds = self.classifier(pyramid_features=pyramid_features)
         loc_preds = self.regressor(pyramid_features=pyramid_features)

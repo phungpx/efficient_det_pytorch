@@ -329,14 +329,17 @@ class EfficientNet(nn.Module):
         return model
 
     @classmethod
-    def from_pretrained(cls, model_name, weights_path=None, advprop=False,
+    def from_pretrained(cls, model_name, pretrained_weight=False, weights_path=None, advprop=False,
                         in_channels=3, num_classes=1000, **override_params):
         """Create an efficientnet model according to name.
         Args:
             model_name (str): Name for efficientnet.
             weights_path (None or str):
                 str: path to pretrained weights file on the local disk.
-                None: use pretrained weights downloaded from the Internet.
+                None: do not load pretrained weights file on the local disk.
+            pretrained_weight (bool):
+                True: use pretrained weights downloaded from the Internet.
+                False: do not use pretrained weights downloaded from the Internet.
             advprop (bool):
                 Whether to load pretrained weights
                 trained with advprop (valid when weights_path is None).
@@ -356,8 +359,12 @@ class EfficientNet(nn.Module):
             A pretrained efficientnet model.
         """
         model = cls.from_name(model_name, num_classes=num_classes, **override_params)
-        load_pretrained_weights(model, model_name, weights_path=weights_path,
-                                load_fc=(num_classes == 1000), advprop=advprop)
+        if weights_path:
+            load_pretrained_weights(model, model_name, weights_path=weights_path,
+                                    load_fc=(num_classes == 1000), advprop=advprop)
+        if pretrained_weight:
+            load_pretrained_weights(model, model_name, weights_path=None,
+                                    load_fc=(num_classes == 1000), advprop=advprop)
         model._change_in_channels(in_channels)
         return model
 
