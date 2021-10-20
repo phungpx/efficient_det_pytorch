@@ -33,7 +33,7 @@ class EfficientNetBackBone(nn.Module):
         '''
         args:
             x: Tensor B x C x H x W
-        outpus:
+        outputs:
             feature_maps: List[Tensor]
             . P1: B, C1, H / 2 ^ 1, W / 2 ^ 1
             . P2: B, C2, H / 2 ^ 2, W / 2 ^ 2
