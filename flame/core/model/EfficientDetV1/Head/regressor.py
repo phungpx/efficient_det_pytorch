@@ -23,24 +23,39 @@ class Regressor(nn.Module):
         n_pyramid_levels = 5 if compound_coef <= 7 else 6  # D0 - D7: 5 pyramid levels, D7x: 6 pyramid levels
 
         self.separable_convs = nn.ModuleList(
-            [SeparableConvBlock(in_channels=n_channels, out_channels=n_channels,
-                                use_batchnorm=False, use_activation=False,
-                                onnx_export=onnx_export) for _ in range(n_layers)]
+            [
+                SeparableConvBlock(
+                    in_channels=n_channels,
+                    out_channels=n_channels,
+                    use_batchnorm=False,
+                    use_activation=False,
+                    onnx_export=onnx_export
+                )
+                for _ in range(n_layers)
+            ]
         )
 
         self.batch_norms_levels = nn.ModuleList(
-            [nn.ModuleList([nn.BatchNorm2d(num_features=n_channels, momentum=0.01, eps=1e-3)
-                            for _ in range(n_layers)])
-             for _ in range(n_pyramid_levels)]
+            [
+                nn.ModuleList(
+                    [
+                        nn.BatchNorm2d(num_features=n_channels, momentum=0.01, eps=1e-3)
+                        for _ in range(n_layers)
+                    ]
+                )
+                for _ in range(n_pyramid_levels)
+            ]
         )
 
         self.swish = MemoryEfficientSwish() if not onnx_export else Swish()
 
-        self.head_conv = SeparableConvBlock(in_channels=n_channels,
-                                            out_channels=n_anchors * 4,
-                                            use_batchnorm=False,
-                                            use_activation=False,
-                                            onnx_export=onnx_export)
+        self.head_conv = SeparableConvBlock(
+            in_channels=n_channels,
+            out_channels=n_anchors * 4,
+            use_batchnorm=False,
+            use_activation=False,
+            onnx_export=onnx_export
+        )
 
     def forward(self, pyramid_features: Tuple[torch.Tensor]) -> torch.Tensor:
         '''

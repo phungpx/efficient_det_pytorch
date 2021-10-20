@@ -71,8 +71,14 @@ class Anchors(nn.Module):
                 yv = yv.reshape(-1)
 
                 # y1,x1,y2,x2
-                boxes = np.vstack((yv - anchor_size_y_2, xv - anchor_size_x_2,
-                                   yv + anchor_size_y_2, xv + anchor_size_x_2))
+                boxes = np.vstack(
+                    (
+                        yv - anchor_size_y_2,
+                        xv - anchor_size_x_2,
+                        yv + anchor_size_y_2,
+                        xv + anchor_size_x_2,
+                    )
+                )
                 boxes = np.swapaxes(boxes, 0, 1)
                 boxes_level.append(np.expand_dims(boxes, axis=1))
             # concat anchors on the same level to the reshape NxAx4

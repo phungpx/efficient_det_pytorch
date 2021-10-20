@@ -5,10 +5,13 @@ from .model import EfficientNet
 
 
 class EfficientNetBackBone(nn.Module):
-    def __init__(self, compound_coef: int = 0,
-                 R_input: List[int] = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536],
-                 weight_path: str = None,
-                 pretrained_weight: bool = False):
+    def __init__(
+        self,
+        compound_coef: int = 0,
+        R_input: List[int] = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536],
+        weight_path: str = None,
+        pretrained_weight: bool = False
+    ) -> None:
         super(EfficientNetBackBone, self).__init__()
         self.input_size = R_input[compound_coef]
 

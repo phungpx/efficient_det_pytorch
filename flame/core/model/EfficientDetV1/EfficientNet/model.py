@@ -24,10 +24,15 @@ from .utils import (
 
 
 VALID_MODELS = (
-    'efficientnet-b0', 'efficientnet-b1', 'efficientnet-b2', 'efficientnet-b3',
-    'efficientnet-b4', 'efficientnet-b5', 'efficientnet-b6', 'efficientnet-b7',
+    'efficientnet-b0',
+    'efficientnet-b1',
+    'efficientnet-b2',
+    'efficientnet-b3',
+    'efficientnet-b4',
+    'efficientnet-b5',
+    'efficientnet-b6',
+    'efficientnet-b7',
     'efficientnet-b8',
-
     # Support the construction of 'efficientnet-l2' without pretrained weights
     'efficientnet-l2'
 )
@@ -329,8 +334,16 @@ class EfficientNet(nn.Module):
         return model
 
     @classmethod
-    def from_pretrained(cls, model_name, pretrained_weight=False, weights_path=None, advprop=False,
-                        in_channels=3, num_classes=1000, **override_params):
+    def from_pretrained(
+        cls,
+        model_name,
+        pretrained_weight=False,
+        weights_path=None,
+        advprop=False,
+        in_channels=3,
+        num_classes=1000,
+        **override_params
+    ):
         """Create an efficientnet model according to name.
         Args:
             model_name (str): Name for efficientnet.
@@ -359,13 +372,27 @@ class EfficientNet(nn.Module):
             A pretrained efficientnet model.
         """
         model = cls.from_name(model_name, num_classes=num_classes, **override_params)
+
         if weights_path:
-            load_pretrained_weights(model, model_name, weights_path=weights_path,
-                                    load_fc=(num_classes == 1000), advprop=advprop)
+            load_pretrained_weights(
+                model,
+                model_name,
+                weights_path=weights_path,
+                load_fc=(num_classes == 1000),
+                advprop=advprop
+            )
+
         if pretrained_weight:
-            load_pretrained_weights(model, model_name, weights_path=None,
-                                    load_fc=(num_classes == 1000), advprop=advprop)
+            load_pretrained_weights(
+                model,
+                model_name,
+                weights_path=None,
+                load_fc=(num_classes == 1000),
+                advprop=advprop
+            )
+
         model._change_in_channels(in_channels)
+
         return model
 
     @classmethod

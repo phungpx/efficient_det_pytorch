@@ -36,15 +36,37 @@ from torch.utils import model_zoo
 #     but can be used in other model (such as EfficientDet).
 
 # Parameters for the entire model (stem, all blocks, and head)
-GlobalParams = collections.namedtuple('GlobalParams', [
-    'width_coefficient', 'depth_coefficient', 'image_size', 'dropout_rate',
-    'num_classes', 'batch_norm_momentum', 'batch_norm_epsilon',
-    'drop_connect_rate', 'depth_divisor', 'min_depth', 'include_top'])
+GlobalParams = collections.namedtuple(
+    'GlobalParams',
+    [
+        'width_coefficient',
+        'depth_coefficient',
+        'image_size',
+        'dropout_rate',
+        'num_classes',
+        'batch_norm_momentum',
+        'batch_norm_epsilon',
+        'drop_connect_rate',
+        'depth_divisor',
+        'min_depth',
+        'include_top',
+    ]
+)
 
 # Parameters for an individual model block
-BlockArgs = collections.namedtuple('BlockArgs', [
-    'num_repeat', 'kernel_size', 'stride', 'expand_ratio',
-    'input_filters', 'output_filters', 'se_ratio', 'id_skip'])
+BlockArgs = collections.namedtuple(
+    'BlockArgs',
+    [
+        'num_repeat',
+        'kernel_size',
+        'stride',
+        'expand_ratio',
+        'input_filters',
+        'output_filters',
+        'se_ratio',
+        'id_skip',
+    ]
+)
 
 # Set GlobalParams and BlockArgs's defaults
 GlobalParams.__new__.__defaults__ = (None,) * len(GlobalParams._fields)

@@ -5,16 +5,19 @@ from .efficientdet import EfficientDet
 
 
 class Model(nn.Module):
-    def __init__(self,
-                 num_classes: int = 80,
-                 compound_coef: int = 0,
-                 head_only: bool = False,
-                 model_weight_path: Optional[str] = None,
-                 backbone_weight_path: Optional[str] = None,
-                 backbone_pretrained_weight: bool = False,
-                 scales: List[float] = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
-                 aspect_ratios: List[Tuple[float, float]] = [(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
-                 iou_threshold: float = 0.2, score_threshold: float = 0.2) -> None:
+    def __init__(
+        self,
+        num_classes: int = 80,
+        compound_coef: int = 0,
+        head_only: bool = False,
+        model_weight_path: Optional[str] = None,
+        backbone_weight_path: Optional[str] = None,
+        backbone_pretrained_weight: bool = False,
+        scales: List[float] = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
+        aspect_ratios: List[Tuple[float, float]] = [(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
+        iou_threshold: float = 0.2,
+        score_threshold: float = 0.2,
+    ) -> None:
         super(Model, self).__init__()
         self.model = EfficientDet(
             num_classes=num_classes,

@@ -63,16 +63,25 @@ class PascalDataset(Dataset):
 
     def _get_label_info(self, label_path):
         tree = ET.parse(str(label_path))
-        image_info = {'image_name': tree.find('filename').text,
-                      'height': int(tree.find('size').find('height').text),
-                      'width': int(tree.find('size').find('width').text),
-                      'depth': int(tree.find('size').find('depth').text)}
+        image_info = {
+            'image_name': tree.find('filename').text,
+            'height': int(tree.find('size').find('height').text),
+            'width': int(tree.find('size').find('width').text),
+            'depth': int(tree.find('size').find('depth').text)
+        }
+
         label_info = []
         objects = tree.findall('object')
         for obj in objects:
             bndbox = obj.find('bndbox')
-            bbox = np.int32([bndbox.find('xmin').text, bndbox.find('ymin').text,
-                             bndbox.find('xmax').text, bndbox.find('ymax').text])
+            bbox = np.int32(
+                [
+                    bndbox.find('xmin').text,
+                    bndbox.find('ymin').text,
+                    bndbox.find('xmax').text,
+                    bndbox.find('ymax').text,
+                ]
+            )
             label_name = obj.find('name').text
             label_info.append({'label': label_name, 'bbox': bbox})
 
@@ -89,13 +98,18 @@ class PascalDataset(Dataset):
         boxes = [label['bbox'] for label in label_info]
         labels = [self.classes[label['label']] for label in label_info]
 
-        # Pad to square to keep object's ratio
-        bbs = BoundingBoxesOnImage([BoundingBox(x1=box[0], y1=box[1], x2=box[2], y2=box[3], label=label)
-                                    for box, label in zip(boxes, labels)], shape=image.shape)
+        bbs = BoundingBoxesOnImage(
+            [
+                BoundingBox(x1=box[0], y1=box[1], x2=box[2], y2=box[3], label=label)
+                for box, label in zip(boxes, labels)
+            ],
+            shape=image.shape
+        )
+
         for transform in random.sample(self.transforms, k=random.randint(0, len(self.transforms))):
             image, bbs = transform(image=image, bounding_boxes=bbs)
 
-        # Rescale image and bounding boxes
+        # Pad to square to keep object's ratio, then Rescale image and bounding boxes
         image, bbs = self.pad_to_square(image=image, bounding_boxes=bbs)
         sample, bbs = iaa.Resize(size=self.imsize)(image=image, bounding_boxes=bbs)
         bbs = bbs.on(sample)

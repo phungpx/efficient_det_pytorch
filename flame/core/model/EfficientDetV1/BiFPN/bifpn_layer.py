@@ -6,12 +6,16 @@ from .utils import MemoryEfficientSwish, Swish
 
 
 class BiFPNLayer(nn.Module):
-    def __init__(self,
-                 first_time: bool = False,
-                 bifpn_out_channels: int = 64,
-                 backbone_out_channels: List[int] = [40, 112, 320],
-                 use_attention: bool = True, use_P8: bool = False,
-                 onnx_export: bool = False, epsilon: float = 1e-4):
+    def __init__(
+        self,
+        first_time: bool = False,
+        bifpn_out_channels: int = 64,
+        backbone_out_channels: List[int] = [40, 112, 320],
+        use_attention: bool = True,
+        use_P8: bool = False,
+        onnx_export: bool = False,
+        epsilon: float = 1e-4
+    ) -> None:
         super(BiFPNLayer, self).__init__()
 
         self.use_P8 = use_P8

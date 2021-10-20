@@ -13,14 +13,14 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 class CoCoDataset(Dataset):
     def __init__(
-            self,
-            compound_coef: int,
-            image_dir: str,
-            label_path: str,
-            mean: Tuple[float],
-            std: Tuple[float],
-            transforms: list = None
-    ):
+        self,
+        compound_coef: int,
+        image_dir: str,
+        label_path: str,
+        mean: Tuple[float],
+        std: Tuple[float],
+        transforms: list = None
+    ) -> None:
         super(CoCoDataset, self).__init__()
         self.imsize = 512 + compound_coef * 128
         self.transforms = transforms if transforms else []

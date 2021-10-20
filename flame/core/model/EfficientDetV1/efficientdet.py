@@ -1,8 +1,8 @@
 from .BiFPN.bifpn import BiFPN
 from .Head.regressor import Regressor
 from .Head.classifier import Classifier
-# from .Anchor.anchor import AnchorGeneration
-from .Anchor.generate_anchors import Anchors
+from .Anchor.anchor import AnchorGeneration
+# from .Anchor.generate_anchors import Anchors
 from .Anchor.transform import ClipBoxes, BBoxTransform
 from .EfficientNet.back_bone import EfficientNetBackBone
 
@@ -13,15 +13,17 @@ from torchvision.ops.boxes import batched_nms
 
 
 class EfficientDet(nn.Module):
-    def __init__(self,
-                 num_classes: int = 80,
-                 compound_coef: int = 0,
-                 backbone_weight_path: Optional[str] = None,
-                 backbone_pretrained_weight: bool = False,
-                 scales: List[float] = None,
-                 aspect_ratios: List[float] = None,
-                 score_threshold: float = 0.2,
-                 iou_threshold: float = 0.2) -> None:
+    def __init__(
+        self,
+        num_classes: int = 80,
+        compound_coef: int = 0,
+        backbone_weight_path: Optional[str] = None,
+        backbone_pretrained_weight: bool = False,
+        scales: List[float] = None,
+        aspect_ratios: List[float] = None,
+        score_threshold: float = 0.2,
+        iou_threshold: float = 0.2
+    ) -> None:
         super(EfficientDet, self).__init__()
 
         # input image resolution: R_input = 512 + 128 * compound_coef
@@ -40,11 +42,17 @@ class EfficientDet(nn.Module):
         self.D_class = [3, 3, 3, 4, 4, 4, 5, 5, 5]
 
         # out_channels of P3, P4, P5 after feature extractor class
-        self.backbone_out_channels = {0: [40, 112, 320], 1: [40, 112, 320],
-                                      2: [48, 120, 352], 3: [48, 136, 384],
-                                      4: [56, 160, 448], 5: [64, 176, 512],
-                                      6: [72, 200, 576], 7: [72, 200, 576],
-                                      8: [80, 224, 640]}
+        self.backbone_out_channels = {
+            0: [40, 112, 320],
+            1: [40, 112, 320],
+            2: [48, 120, 352],
+            3: [48, 136, 384],
+            4: [56, 160, 448],
+            5: [64, 176, 512],
+            6: [72, 200, 576],
+            7: [72, 200, 576],
+            8: [80, 224, 640]
+        }
 
         self.score_threshold = score_threshold
         self.iou_threshold = iou_threshold
@@ -87,15 +95,18 @@ class EfficientDet(nn.Module):
 
         self.pyramid_levels = [5, 5, 5, 5, 5, 5, 5, 5, 6]
         self.anchor_scale = [4., 4., 4., 4., 4., 4., 4., 5., 4.]
-        self.anchor_generator = Anchors(
-            anchor_scale=self.anchor_scale[compound_coef],
-            pyramid_levels=(torch.arange(self.pyramid_levels[compound_coef]) + 3).tolist(),
-            ratios=aspect_ratios,
-            scales=scales
-        )
+        # self.anchor_generator = Anchors(
+        #     anchor_scale=self.anchor_scale[compound_coef],
+        #     pyramid_levels=(torch.arange(self.pyramid_levels[compound_coef]) + 3).tolist(),
+        #     ratios=aspect_ratios,
+        #     scales=scales
+        # )
 
-        # self.anchor_generator = AnchorGeneration(compound_coef=compound_coef,
-        #                                          scales=scales, aspect_ratios=aspect_ratios)
+        self.anchor_generator = AnchorGeneration(
+            compound_coef=compound_coef,
+            scales=scales,
+            aspect_ratios=aspect_ratios
+        )
 
         self.bbox_regressor = BBoxTransform()
         self.bbox_clipper = ClipBoxes(compound_coef=compound_coef)
@@ -113,9 +124,13 @@ class EfficientDet(nn.Module):
 
         for i in range(inputs.shape[0]):
             if scores_over_thresh[i].sum() == 0:
-                predictions.append({'boxes': torch.FloatTensor([[0, 0, 1, 1]]),
-                                    'labels': torch.FloatTensor([-1]),
-                                    'scores': torch.FloatTensor([0])})
+                predictions.append(
+                    {
+                        'boxes': torch.tensor([[0, 0, 1, 1]], dtype=torch.float32),
+                        'labels': torch.tensor([-1], dtype=torch.int64),
+                        'scores': torch.tensor([0], dtype=torch.float32),
+                    }
+                )
                 continue
 
             classification_per = cls_preds[i, scores_over_thresh[i, :], ...].permute(1, 0)
@@ -131,11 +146,21 @@ class EfficientDet(nn.Module):
                 _scores = _scores[anchors_nms_idx]
                 _boxes = transformed_anchors_per[anchors_nms_idx, :]
 
-                predictions.append({'boxes': _boxes, 'labels': _classes, 'scores': _scores})
+                predictions.append(
+                    {
+                        'boxes': _boxes,
+                        'labels': _classes,
+                        'scores': _scores
+                    }
+                )
             else:
-                predictions.append({'boxes': torch.FloatTensor([[0, 0, 1, 1]]),
-                                    'labels': torch.FloatTensor([-1]),
-                                    'scores': torch.FloatTensor([0])})
+                predictions.append(
+                    {
+                        'boxes': torch.tensor([[0, 0, 1, 1]], dtype=torch.float32),
+                        'labels': torch.tensor([-1], dtype=torch.int64),
+                        'scores': torch.tensor([0], dtype=torch.float32),
+                    }
+                )
 
         return predictions
 
@@ -156,8 +181,8 @@ class EfficientDet(nn.Module):
         P3, P4, P5 = feature_maps[-3:]
         pyramid_features = self.bifpn(feature_maps=(P3, P4, P5))
 
-        # anchors = self.anchor_generator(inputs=inputs, pyramid_features=pyramid_features)
-        anchors = self.anchor_generator(inputs, inputs.dtype)
+        anchors = self.anchor_generator(inputs=inputs, pyramid_features=pyramid_features)
+        # anchors = self.anchor_generator(inputs, inputs.dtype)
 
         cls_preds = self.classifier(pyramid_features=pyramid_features)
         loc_preds = self.regressor(pyramid_features=pyramid_features)

@@ -13,14 +13,17 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
 class AltheiaDataset(Dataset):
-    def __init__(self, dirname: str = None,
-                 image_patterns: List[str] = ['*.jpg'],
-                 label_patterns: List[str] = ['*.xml'],
-                 classes: Dict[str, int] = None,
-                 mean: List[float] = [0.485, 0.456, 0.406],
-                 std: List[float] = [0.229, 0.224, 0.225],
-                 compound_coef: int = 0,
-                 transforms: Optional[List] = None):
+    def __init__(
+        self,
+        dirname: str = None,
+        image_patterns: List[str] = ['*.jpg'],
+        label_patterns: List[str] = ['*.xml'],
+        classes: Dict[str, int] = None,
+        mean: List[float] = [0.485, 0.456, 0.406],
+        std: List[float] = [0.229, 0.224, 0.225],
+        compound_coef: int = 0,
+        transforms: Optional[List] = None
+    ) -> None:
         super(AltheiaDataset, self).__init__()
         self.classes = classes
         self.imsize = 512 + compound_coef * 128
@@ -70,9 +73,13 @@ class AltheiaDataset(Dataset):
                 label_info.append({'mask': mask, 'label': label, 'bbox': bbox})
 
         if not len(label_info):
-            label_info.append({'mask': np.zeros(shape=(height, width), dtype=np.uint8),
-                               'label': -1,
-                               'bbox': (0, 0, 1, 1)})
+            label_info.append(
+                {
+                    'mask': np.zeros(shape=(height, width), dtype=np.uint8),
+                    'label': -1,
+                    'bbox': (0, 0, 1, 1)
+                }
+            )
 
         return label_info
 

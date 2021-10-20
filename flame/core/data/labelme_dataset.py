@@ -13,14 +13,17 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
 class LabelmeDataset(Dataset):
-    def __init__(self, dirnames: List[str] = None,
-                 image_patterns: List[str] = ['*.jpg'],
-                 label_patterns: List[str] = ['*.json'],
-                 classes: Dict[str, int] = None,
-                 mean: List[float] = [0.485, 0.456, 0.406],
-                 std: List[float] = [0.229, 0.224, 0.225],
-                 compound_coef: int = 0,
-                 transforms: Optional[List] = None):
+    def __init__(
+        self,
+        dirnames: List[str] = None,
+        image_patterns: List[str] = ['*.jpg'],
+        label_patterns: List[str] = ['*.json'],
+        classes: Dict[str, int] = None,
+        mean: List[float] = [0.485, 0.456, 0.406],
+        std: List[float] = [0.229, 0.224, 0.225],
+        compound_coef: int = 0,
+        transforms: Optional[List] = None
+    ) -> None:
         super(LabelmeDataset, self).__init__()
         self.classes = classes
         self.imsize = 512 + compound_coef * 128
@@ -80,13 +83,18 @@ class LabelmeDataset(Dataset):
         boxes = [label['bbox'] for label in label_info]
         labels = [label['label'] for label in label_info]
 
-        # Pad to square to keep object's ratio
-        bbs = BoundingBoxesOnImage([BoundingBox(x1=box[0], y1=box[1], x2=box[2], y2=box[3], label=label)
-                                    for box, label in zip(boxes, labels)], shape=image.shape)
+        bbs = BoundingBoxesOnImage(
+            [
+                BoundingBox(x1=box[0], y1=box[1], x2=box[2], y2=box[3], label=label)
+                for box, label in zip(boxes, labels)
+            ],
+            shape=image.shape
+        )
+
         for transform in random.sample(self.transforms, k=random.randint(0, len(self.transforms))):
             image, bbs = transform(image=image, bounding_boxes=bbs)
 
-        # Rescale image and bounding boxes
+        # Pad to square to keep object's ratio, then Rescale image and bounding boxes
         image, bbs = self.pad_to_square(image=image, bounding_boxes=bbs)
         sample, bbs = iaa.Resize(size=self.imsize)(image=image, bounding_boxes=bbs)
         bbs = bbs.on(sample)
