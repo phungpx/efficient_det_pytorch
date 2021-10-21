@@ -8,8 +8,8 @@ data:
         class: CoCoDataset
         CoCoDataset:
           compound_coef: 0
-          image_dir: '''dataset/COCO/val2017'''
-          label_path: '''dataset/COCO/annotations/instances_val2017.json'''
+          image_dir: '''dataset/publaynet/val'''
+          label_path: '''dataset/publaynet/val.json'''
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
       batch_size: 32
@@ -20,29 +20,40 @@ data:
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
-  module: flame.core.model.EfficientDet.efficientdet
+  module: flame.core.model.efficient_det.efficientdet
   class: EfficientDet
   EfficientDet:
-    num_classes: 80
+    head_only: False
+    num_classes: 5
     compound_coef: 0
+    backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.5
-    score_threshold: 0.05
+    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)', '(1.8, 0.3)']
+    iou_threshold: 0.2
+    score_threshold: 0.2
 
 metrics:
   module: flame.handlers.metrics.metrics
   class: Metrics
   Metrics:
     metrics:
-      coco_eval:
-        module: flame.handlers.metrics.coco_evaluator.evaluator
+      mAP:
+        module: flame.handlers.metrics.mean_average_precision.evaluator
         class: Evaluator
         Evaluator:
-          compound_coef: 0
-          annotation_file: '''dataset/COCO/annotations/instances_val2017.json'''
-          save_path: '''checkpoint/COCO/efficientdet-d0/2109052137/coco_val2017.json'''
-          output_transform: 'lambda x: (x[0], x[1], x[2])'
+          eval_fn:
+            module: flame.handlers.metrics.mean_average_precision.mean_average_precision
+            class: MeanAveragePrecision
+            MeanAveragePrecision:
+              classes:
+                Text: 0
+                Title: 1
+                List: 2
+                Table: 3
+                Figure: 4
+              iou_threshold: 0.5
+              method: '''every_point_interpolation'''
+          output_transform: 'lambda x: (x[0], x[1])'
     attach_to:
       engine: '''test'''
 
@@ -57,7 +68,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/COCO/efficientdet-d0/2109052137/best_model_96_focal_loss=-1.6836.pt'''
+    checkpoint_path: '''checkpoint/TABLE/efficientdet-d0/2109062307/best_model_13_focal_loss=-0.1190.pt'''
     mode: '''test'''
 
 predictor:
@@ -65,10 +76,16 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/COCO/efficientdet-d0/2109052137/best_model_96_focal_loss=-1.6836/'''
+    output_dir: '''checkpoint/TABLE/efficientdet-d0/2109062307/best_model_13_focal_loss=-0.1190/'''
     compound_coef: 0
-    score_threshold: 0.3
-    # iou_threshold: 0.0
+    classes:
+      Text: [[0, 255, 0], 0]
+      Title: [[255, 0, 0], 1]
+      List: [[0, 255, 255], 2]
+      Table: [[255, 255, 0], 3]
+      Figure: [[0, 0, 255], 4]
+    # iou_threshold: 0.5
+    # score_threshold: 0.3
     output_transform: 'lambda x: (x[0], x[-1])'
 
 engine:

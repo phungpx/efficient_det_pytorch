@@ -5,11 +5,14 @@ from .utils import SeparableConvBlock, MemoryEfficientSwish, Swish
 
 
 class Regressor(nn.Module):
-    def __init__(self, n_anchors: int = 9,
-                 compound_coef: int = 0,
-                 D_box: List[int] = [3, 3, 3, 4, 4, 4, 5, 5, 5],
-                 W_pred: List[int] = [64, 88, 112, 160, 224, 288, 384, 384, 384],
-                 onnx_export: bool = False) -> None:
+    def __init__(
+        self,
+        n_anchors: int = 9,
+        compound_coef: int = 0,
+        D_box: List[int] = [3, 3, 3, 4, 4, 4, 5, 5, 5],
+        W_pred: List[int] = [64, 88, 112, 160, 224, 288, 384, 384, 384],
+        onnx_export: bool = False
+    ) -> None:
         '''
         Args:
             n_anchors = num_scales * num_aspect_ratios

@@ -4,146 +4,72 @@ data:
     class: DataLoader
     DataLoader:
       dataset:
-        module: flame.core.data.altheia_dataset
-        class: AltheiaDataset
-        AltheiaDataset:
+        module: flame.core.data.coco_dataset
+        class: CoCoDataset
+        CoCoDataset:
           compound_coef: 0
-          dirname: '''dataset/EKYCs/train'''
-          image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
-          label_patterns: ['''*.xml''']
+          image_dir: '''dataset/birdview_vehicles/train'''
+          label_path: '''dataset/birdview_vehicles/annotations/instances_train.json'''
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
-          classes:
-            BLX: 0
-            BLX_BACK: 1
-            BLX_OLD: 2
-            BLX_BACK_OLD: 3
-            CMND: 4
-            CMND_BACK: 5
-            CCCD: 6
-            CCCD_BACK: 7
-            CMCC: 8
-            CCCD_front_chip: 9
-            CCCD_back_chip: 10
-            CMQD_A: 11
-            CMQD_A_BACK: 12
-            CMQD_B: 13
-            CMQD_B_BACK: 14
-            CMQD_C: 15
-            CMQD_C_BACK: 16
-            CMQD_D: 17
-            CMQD_D_BACK: 18
-            CMQD_B_VT: 19
-            CMQD_B_VT_BACK: 20
-            PASSPORT: 21
-            PASSPORT_OTHER: 22
           transforms:
-            - iaa.MotionBlur()
-            - iaa.ChangeColorTemperature()
+            - iaa.Add(value=(-10, 10), per_channel=True)
             - iaa.GaussianBlur(sigma=(0, 1))
-            - iaa.Grayscale(alpha=(0.0, 1.0))
-            - iaa.Add(value=(-50, 50), per_channel=True)
+            - iaa.MotionBlur()
+            - iaa.JpegCompression(compression=(0, 10))
             - iaa.Fliplr(p=0.5)
             - iaa.Flipud(p=0.5)
+            - iaa.Grayscale(alpha=(0.0, 0.1))
+            # - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
+            - iaa.Affine(rotate=(-5, 5), shear=(-5, 5), fit_output=True)
             - iaa.Crop(percent=(0, 0.1))
             - iaa.Pad(percent=(0, 0.1), keep_size=False)
-            - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
-            - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
-      batch_size: 32
+            - iaa.ChangeColorTemperature()
+      batch_size: 16
       shuffle: True
-      num_workers: 12
+      drop_last: True
       pin_memory: True
-      drop_last: False
+      num_workers: 12
       collate_fn: 'lambda batch:tuple(zip(*batch))'
-  
+
   train_eval:
     module: torch.utils.data
     class: DataLoader
     DataLoader:
       dataset:
-        module: flame.core.data.altheia_dataset
-        class: AltheiaDataset
-        AltheiaDataset:
+        module: flame.core.data.coco_dataset
+        class: CoCoDataset
+        CoCoDataset:
           compound_coef: 0
-          dirname: '''dataset/EKYCs/train'''
-          image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
-          label_patterns: ['''*.xml''']
+          image_dir: '''dataset/birdview_vehicles/train'''
+          label_path: '''dataset/birdview_vehicles/annotations/instances_train.json'''
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
-          classes:
-            BLX: 0
-            BLX_BACK: 1
-            BLX_OLD: 2
-            BLX_BACK_OLD: 3
-            CMND: 4
-            CMND_BACK: 5
-            CCCD: 6
-            CCCD_BACK: 7
-            CMCC: 8
-            CCCD_front_chip: 9
-            CCCD_back_chip: 10
-            CMQD_A: 11
-            CMQD_A_BACK: 12
-            CMQD_B: 13
-            CMQD_B_BACK: 14
-            CMQD_C: 15
-            CMQD_C_BACK: 16
-            CMQD_D: 17
-            CMQD_D_BACK: 18
-            CMQD_B_VT: 19
-            CMQD_B_VT_BACK: 20
-            PASSPORT: 21
-            PASSPORT_OTHER: 22
-      batch_size: 32
+      batch_size: 16
       shuffle: False
-      num_workers: 12
+      drop_last: True
       pin_memory: True
-      drop_last: False
+      num_workers: 12
       collate_fn: 'lambda batch:tuple(zip(*batch))'
-  
+
   valid:
     module: torch.utils.data
     class: DataLoader
     DataLoader:
       dataset:
-        module: flame.core.data.altheia_dataset
-        class: AltheiaDataset
-        AltheiaDataset:
+        module: flame.core.data.coco_dataset
+        class: CoCoDataset
+        CoCoDataset:
           compound_coef: 0
-          dirname: '''dataset/EKYCs/valid'''
-          image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
-          label_patterns: ['''*.xml''']
+          image_dir: '''dataset/birdview_vehicles/val'''
+          label_path: '''dataset/birdview_vehicles/annotations/instances_val.json'''
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
-          classes:
-            BLX: 0
-            BLX_BACK: 1
-            BLX_OLD: 2
-            BLX_BACK_OLD: 3
-            CMND: 4
-            CMND_BACK: 5
-            CCCD: 6
-            CCCD_BACK: 7
-            CMCC: 8
-            CCCD_front_chip: 9
-            CCCD_back_chip: 10
-            CMQD_A: 11
-            CMQD_A_BACK: 12
-            CMQD_B: 13
-            CMQD_B_BACK: 14
-            CMQD_C: 15
-            CMQD_C_BACK: 16
-            CMQD_D: 17
-            CMQD_D_BACK: 18
-            CMQD_B_VT: 19
-            CMQD_B_VT_BACK: 20
-            PASSPORT: 21
-            PASSPORT_OTHER: 22
-      batch_size: 32
+      batch_size: 16
       shuffle: False
-      num_workers: 12
+      drop_last: True
       pin_memory: True
-      drop_last: False
+      num_workers: 12
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 loss:
@@ -155,17 +81,19 @@ loss:
     lamda: 50.0
     device: '''cuda'''
 
+
 model:
-  module: flame.core.model.EfficientDet.efficientdet
+  module: flame.core.model.efficient_det.efficientdet
   class: EfficientDet
   EfficientDet:
     pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
     head_only: False
-    num_classes: 23
+    num_classes: 2
     compound_coef: 0
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+
 
 optim:
   module: torch.optim
@@ -252,13 +180,13 @@ early_stopping:
     score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
-    patience: 30
+    patience: 50
 
 best_saver:
   module: flame.handlers.checkpoint
   class: BestSaver
   BestSaver:
-    dirname: '''checkpoint/EKYCS/efficientdet-d0'''
+    dirname: '''checkpoint/birdview_vehicles/efficientdet-d0'''
     score_name: '''focal_loss'''
     mode: '''min'''
     evaluator_name: '''valid_evaluator'''
@@ -276,7 +204,7 @@ backup_saver:
       - '''history'''
       - '''lr_scheduler'''
       - '''early_stopping'''
-    dirname: '''checkpoint/EKYCS/efficientdet-d0'''
+    dirname: '''checkpoint/birdview_vehicles/efficientdet-d0'''
     save_interval: 1
     n_saved: 1
 

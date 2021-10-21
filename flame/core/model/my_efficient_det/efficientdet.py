@@ -1,10 +1,9 @@
-from .BiFPN.bifpn import BiFPN
-from .Head.regressor import Regressor
-from .Head.classifier import Classifier
-from .Anchor.anchor import AnchorGeneration
-# from .Anchor.generate_anchors import Anchors
-from .Anchor.transform import ClipBoxes, BBoxTransform
-from .EfficientNet.back_bone import EfficientNetBackBone
+from .bi_fpn.bifpn import BiFPN
+from .head.regressor import Regressor
+from .head.classifier import Classifier
+from .anchor.anchor import AnchorGeneration
+from .anchor.box_transform import BoxClipper, BoxDecoder
+from .efficient_net.back_bone import EfficientNetBackBone
 
 import torch
 from torch import nn
@@ -93,31 +92,22 @@ class EfficientDet(nn.Module):
             onnx_export=False
         )
 
-        self.pyramid_levels = [5, 5, 5, 5, 5, 5, 5, 5, 6]
-        self.anchor_scale = [4., 4., 4., 4., 4., 4., 4., 5., 4.]
-        # self.anchor_generator = Anchors(
-        #     anchor_scale=self.anchor_scale[compound_coef],
-        #     pyramid_levels=(torch.arange(self.pyramid_levels[compound_coef]) + 3).tolist(),
-        #     ratios=aspect_ratios,
-        #     scales=scales
-        # )
-
         self.anchor_generator = AnchorGeneration(
             compound_coef=compound_coef,
             scales=scales,
             aspect_ratios=aspect_ratios
         )
 
-        self.bbox_regressor = BBoxTransform()
-        self.bbox_clipper = ClipBoxes(compound_coef=compound_coef)
+        self.box_decoder = BoxDecoder()
+        self.box_clipper = BoxClipper(compound_coef=compound_coef)
 
     def _detect(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
         predictions = []
 
         cls_preds, loc_preds, anchor_boxes = self._forward(inputs=inputs)
 
-        transformed_anchors = self.bbox_regressor(anchor_boxes, loc_preds)
-        transformed_anchors = self.bbox_clipper(transformed_anchors, inputs)
+        transformed_anchors = self.box_decoder(anchor_boxes, loc_preds)
+        transformed_anchors = self.box_clipper(transformed_anchors, inputs)
 
         scores = torch.max(cls_preds, dim=2, keepdim=True)[0]
         scores_over_thresh = (scores > self.score_threshold)[:, :, 0]
@@ -138,8 +128,11 @@ class EfficientDet(nn.Module):
             scores_per = scores[i, scores_over_thresh[i, :], ...]
             _scores, _classes = classification_per.max(dim=0)
 
-            anchors_nms_idx = batched_nms(transformed_anchors_per, scores_per[:, 0], _classes,
-                                          iou_threshold=self.iou_threshold)
+            anchors_nms_idx = batched_nms(
+                transformed_anchors_per,
+                scores_per[:, 0],
+                _classes,
+                iou_threshold=self.iou_threshold)
 
             if anchors_nms_idx.shape[0] != 0:
                 _classes = _classes[anchors_nms_idx]
