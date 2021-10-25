@@ -1,25 +1,13 @@
 import cv2
-import yaml
 import argparse
 import numpy as np
 from pathlib import Path
-from importlib import import_module
 
+import utils
 
-def load_yaml(yaml_file):
-    with open(yaml_file, mode='r', encoding='utf-8') as f:
-        configs = yaml.safe_load(f)
-    return configs
-
-
-def create_instance(config, *args, **kwargs):
-    module = config['module']
-    name = config['name']
-    config_kwargs = config.get(name, {})
-    for key, value in config_kwargs.items():
-        if isinstance(value, str):
-            config_kwargs[key] = eval(value)
-    return getattr(import_module(module), name)(*args, **config_kwargs, **kwargs)
+import os
+import sys
+sys.path.append(os.environ['PWD'])
 
 
 if __name__ == '__main__':
@@ -37,8 +25,8 @@ if __name__ == '__main__':
 
     image_paths = list(Path(args.input_dir).glob(args.pattern)) if args.pattern else [Path(args.input_dir)]
 
-    config = load_yaml(args.config)
-    predictor = create_instance(config)
+    config = utils.load_yaml(args.config)
+    predictor = utils.eval_config(config)
 
     for i, image_path in enumerate(image_paths, 1):
         print('**' * 30)
@@ -47,14 +35,17 @@ if __name__ == '__main__':
         image = cv2.imread(str(image_path))
         prediction = predictor([image])[0]
 
-        if prediction['labels'] is not None:
-            thickness = max(image.shape) // 500
-            fontscale = max(image.shape) / 500
-            boxes = prediction['boxes'].cpu().numpy().astype(np.int32)
-            labels = prediction['labels'].cpu().numpy()
-            scores = prediction['scores'].cpu().numpy()
-            class_names = prediction['names']
-            for box, score, class_name in zip(boxes, scores, class_names):
+        boxes = prediction['boxes'].cpu().numpy().astype(np.int32)
+        labels = prediction['labels'].cpu().numpy()
+        scores = prediction['scores'].cpu().numpy()
+        class_names = prediction['names']
+        font_scale = max(image.shape) / 1200
+        box_thickness = max(image.shape) // 400
+        text_thickness = max(image.shape) // 600
+
+        for (label, class_name, box, score) in zip(labels, class_names, boxes, scores):
+            if label != -1:
+                x1, y1, x2, y2 = box
                 color = (
                     np.random.randint(200, 255),
                     np.random.randint(50, 200),
@@ -63,21 +54,38 @@ if __name__ == '__main__':
 
                 cv2.rectangle(
                     img=image,
-                    pt1=tuple(box[:2]),
-                    pt2=tuple(box[2:]),
+                    pt1=(x1, y1),
+                    pt2=(x2, y2),
                     color=color,
-                    thickness=thickness
+                    thickness=box_thickness
+                )
+
+                title = f"{class_name}: {score:.4f}"
+                w_text, h_text = cv2.getTextSize(
+                    title,
+                    cv2.FONT_HERSHEY_PLAIN,
+                    font_scale,
+                    text_thickness
+                )[0]
+
+                cv2.rectangle(
+                    img=image,
+                    pt1=(x1, y1 + int(1.6 * h_text)),
+                    pt2=(x1 + w_text, y1),
+                    color=color,
+                    thickness=-1
                 )
 
                 cv2.putText(
                     img=image,
-                    text=f'{class_name}: {score: .4f}',
-                    org=tuple(box[:2]),
+                    text=title,
+                    org=(x1, y1 + int(1.3 * h_text)),
                     fontFace=cv2.FONT_HERSHEY_PLAIN,
-                    fontScale=fontscale,
-                    color=color,
-                    thickness=thickness,
-                    lineType=cv2.LINE_AA)
+                    fontScale=font_scale,
+                    color=(255, 255, 255),
+                    thickness=text_thickness,
+                    lineType=cv2.LINE_AA
+                )
 
             if args.show:
                 cv2.imshow(image_path.name, image)

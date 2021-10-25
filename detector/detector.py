@@ -4,22 +4,8 @@ import cv2
 import torch
 import numpy as np
 from torch import nn
-from pathlib import Path
-from importlib import import_module
 
-
-def abs_path(path):
-    return str(Path(__file__).parent.joinpath(path))
-
-
-def create_instance(config, *args, **kwargs):
-    module = config['module']
-    name = config['name']
-    config_kwargs = config.get(name, {})
-    for key, value in config_kwargs.items():
-        if isinstance(value, str):
-            config_kwargs[key] = eval(value)
-    return getattr(import_module(module), name)(*args, **config_kwargs, **kwargs)
+import utils
 
 
 def chunks(lst: list, size: Optional[int] = None) -> Union[List, Generator]:
@@ -42,6 +28,7 @@ class Detector:
         device: str = 'cpu'
     ) -> None:
         super(Detector, self).__init__()
+        self.model = model
         self.device = device
         self.classes = classes
         self.batch_size = batch_size
@@ -50,8 +37,7 @@ class Detector:
         self.mean = torch.tensor(mean, dtype=torch.float, device=device).view(1, 3, 1, 1)
         self.std = torch.tensor(std, dtype=torch.float, device=device).view(1, 3, 1, 1)
 
-        self.model = create_instance(model)
-        state_dict = torch.load(f=abs_path(weight_path), map_location='cpu')
+        state_dict = torch.load(f=utils.abs_path(weight_path), map_location='cpu')
         self.model.load_state_dict(state_dict=state_dict)
         self.model.eval().to(device)
 
@@ -94,9 +80,8 @@ class Detector:
     ) -> List[Dict]:
 
         for original_size, pred in zip(original_sizes, preds):
-            if pred['labels'].item() == -1:
-                pred['boxes'] *= max(original_size) / self.imsize
-                pred['names'] = [self.classes[label.item()] for label in pred['labels']]
+            pred['boxes'] *= max(original_size) / self.imsize
+            pred['names'] = [self.classes.get(label.item(), 'background') for label in pred['labels']]
 
         return preds
 

@@ -10,14 +10,16 @@ from .efficientnet.backbone import EfficientNetBackBone
 
 
 class EfficientDetBackBone(nn.Module):
-    def __init__(self,
-                 num_classes=80,
-                 compound_coef=0,
-                 backbone_pretrained=False,
-                 scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
-                 aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
-                 iou_threshold=0.2,
-                 score_threshold=0.2):
+    def __init__(
+        self,
+        num_classes=80,
+        compound_coef=0,
+        backbone_pretrained=False,
+        scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
+        aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
+        iou_threshold=0.2,
+        score_threshold=0.2
+    ) -> None:
         super(EfficientDetBackBone, self).__init__()
         self.compound_coef = compound_coef
         self.iou_threshold = iou_threshold
@@ -58,21 +60,27 @@ class EfficientDetBackBone(nn.Module):
                     attention=True if compound_coef < 6 else False,
                     use_p8=compound_coef > 7) for _ in range(self.fpn_cell_repeats[compound_coef])])
 
-        self.regressor = Regressor(in_channels=self.fpn_num_filters[self.compound_coef],
-                                   num_anchors=num_anchors,
-                                   num_layers=self.box_class_repeats[self.compound_coef],
-                                   pyramid_levels=self.pyramid_levels[self.compound_coef])
+        self.regressor = Regressor(
+            in_channels=self.fpn_num_filters[self.compound_coef],
+            num_anchors=num_anchors,
+            num_layers=self.box_class_repeats[self.compound_coef],
+            pyramid_levels=self.pyramid_levels[self.compound_coef]
+        )
 
-        self.classifier = Classifier(in_channels=self.fpn_num_filters[self.compound_coef],
-                                     num_anchors=num_anchors,
-                                     num_classes=num_classes,
-                                     num_layers=self.box_class_repeats[self.compound_coef],
-                                     pyramid_levels=self.pyramid_levels[self.compound_coef])
+        self.classifier = Classifier(
+            in_channels=self.fpn_num_filters[self.compound_coef],
+            num_anchors=num_anchors,
+            num_classes=num_classes,
+            num_layers=self.box_class_repeats[self.compound_coef],
+            pyramid_levels=self.pyramid_levels[self.compound_coef]
+        )
 
-        self.anchors = Anchors(anchor_scale=self.anchor_scale[compound_coef],
-                               pyramid_levels=(torch.arange(self.pyramid_levels[self.compound_coef]) + 3).tolist(),
-                               ratios=aspect_ratios,
-                               scales=scales)
+        self.anchors = Anchors(
+            anchor_scale=self.anchor_scale[compound_coef],
+            pyramid_levels=(torch.arange(self.pyramid_levels[self.compound_coef]) + 3).tolist(),
+            ratios=aspect_ratios,
+            scales=scales
+        )
 
         self.backbone_net = EfficientNetBackBone(
             compound_coef=self.backbone_compound_coef[compound_coef],
@@ -119,9 +127,13 @@ class EfficientDetBackBone(nn.Module):
 
         for i in range(inputs.shape[0]):
             if scores_over_thresh[i].sum() == 0:
-                predictions.append({'boxes': torch.FloatTensor([[0, 0, 1, 1]]),
-                                    'labels': torch.FloatTensor([-1]),
-                                    'scores': torch.FloatTensor([0])})
+                predictions.append(
+                    {
+                        'boxes': torch.FloatTensor([[0, 0, 1, 1]]),
+                        'labels': torch.FloatTensor([-1]),
+                        'scores': torch.FloatTensor([0])
+                    }
+                )
                 continue
 
             classification_per = classification[i, scores_over_thresh[i, :], ...].permute(1, 0)
@@ -138,9 +150,13 @@ class EfficientDetBackBone(nn.Module):
 
                 predictions.append({'boxes': _boxes, 'labels': _classes, 'scores': _scores})
             else:
-                predictions.append({'boxes': torch.FloatTensor([[0, 0, 1, 1]]),
-                                    'labels': torch.FloatTensor([-1]),
-                                    'scores': torch.FloatTensor([0])})
+                predictions.append(
+                    {
+                        'boxes': torch.FloatTensor([[0, 0, 1, 1]]),
+                        'labels': torch.FloatTensor([-1]),
+                        'scores': torch.FloatTensor([0])
+                    }
+                )
 
         return predictions
 
