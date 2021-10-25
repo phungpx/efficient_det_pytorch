@@ -27,7 +27,7 @@ model:
     compound_coef: 0
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.5, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.4
+    iou_threshold: 0.45
     score_threshold: 0.2
 
 metrics:
@@ -71,7 +71,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2109052311/best_model_42_focal_loss=-1.1555.pt'''
+    checkpoint_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2110211347/best_model_36_focal_loss=-1.2241.pt'''
     mode: '''test'''
 
 predictor:
@@ -79,7 +79,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/birdview_vehicles/efficientdet-d0/2109052311/best_model_42_focal_loss=-1.1555/val'''
+    output_dir: '''checkpoint/birdview_vehicles/efficientdet-d0/2110211347/best_model_36_focal_loss=-1.2241/val'''
     compound_coef: 0
     classes:
       large-vehicle: [[255, 0, 0], 0]  # color, class_idx, area_threshold

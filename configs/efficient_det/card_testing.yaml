@@ -53,8 +53,8 @@ model:
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.5
-    score_threshold: 0.05
+    iou_threshold: 0.2
+    score_threshold: 0.5
 
 metrics:
   module: flame.handlers.metrics.metrics
@@ -110,7 +110,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/EKYCS/efficientdet-d0/2109020802/best_model_19_focal_loss=-0.0796.pt'''
+    checkpoint_path: '''checkpoint/EKYCS/efficientdet-d0/2109041637/best_model_103_focal_loss=-0.0622.pt'''
     mode: '''test'''
 
 predictor:
@@ -118,7 +118,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/EKYCS/efficientdet-d0/2109020802/best_model_19_focal_loss=-0.0796/test/'''
+    output_dir: '''checkpoint/EKYCS/efficientdet-d0/2109041637/best_model_103_focal_loss=-0.0622/test/'''
     compound_coef: 0
     classes:
       BLX: [[128, 0, 0], 0]

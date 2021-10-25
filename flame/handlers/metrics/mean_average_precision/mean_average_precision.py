@@ -133,7 +133,7 @@ class MeanAveragePrecision(nn.Module):
                 "Total FP",
                 "Total GroundTruths",
                 "Total Detections",
-                f"Average Precision (IoU={self.iou_threshold})"
+                f"Average Precision (IoU={self.iou_threshold})",
             ]
         )
 
@@ -146,7 +146,7 @@ class MeanAveragePrecision(nn.Module):
                     result['total_FP'],
                     result['total_groundtruths'],
                     result['total_detections'],
-                    result['average_precision']
+                    round(result['average_precision'], 4),
                 ]
             )
 

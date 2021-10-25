@@ -56,7 +56,7 @@ model:
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
     iou_threshold: 0.2
-    score_threshold: 0.2
+    score_threshold: 0.3
 
 metrics:
   module: flame.handlers.metrics.metrics
@@ -109,7 +109,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/PASCAL/efficientdet-d0/2109050041/best_model_48_focal_loss=-1.2504.pt'''
+    checkpoint_path: '''checkpoint/PASCAL/efficientdet-d0/2110221358/best_model_21_focal_loss=-1.2464.pt'''
     mode: '''test'''
 
 predictor:
@@ -117,7 +117,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/PASCAL/efficientdet-d0/2109050041/best_model_48_focal_loss=-1.2504/valid/'''
+    output_dir: '''checkpoint/PASCAL/efficientdet-d0/2110221358/best_model_21_focal_loss=-1.2464/'''
     compound_coef: 0
     classes:
       aeroplane: [[128, 0, 0], 0]  # color, class_idx, area_threshold

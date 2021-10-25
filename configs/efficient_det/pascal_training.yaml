@@ -41,19 +41,19 @@ data:
             train: 18
             tvmonitor: 19
           transforms:
-            # - iaa.Add(value=(-10, 10), per_channel=True)
-            # - iaa.GaussianBlur(sigma=(0, 1))
-            # - iaa.MotionBlur()
+            - iaa.Add(value=(-10, 10), per_channel=True)
+            - iaa.GaussianBlur(sigma=(0, 1))
+            - iaa.MotionBlur()
             # - iaa.JpegCompression(compression=(0, 10))
             - iaa.Fliplr(p=0.5)
             # - iaa.Flipud(p=0.5)
-            # - iaa.Grayscale(alpha=(0.0, 0.1))
+            - iaa.Grayscale(alpha=(0.0, 0.1))
             # - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
             # - iaa.Affine(rotate=(-5, 5), shear=(-5, 5), fit_output=True)
             # - iaa.Crop(percent=(0, 0.1))
             # - iaa.Pad(percent=(0, 0.1), keep_size=False)
-            # - iaa.ChangeColorTemperature()
-      batch_size: 32
+            - iaa.ChangeColorTemperature()
+      batch_size: 16
       shuffle: True
       pin_memory: True
       num_workers: 12
@@ -101,7 +101,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 32
+      batch_size: 16
       shuffle: False
       pin_memory: True
       num_workers: 12
@@ -149,7 +149,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 32
+      batch_size: 16
       shuffle: False
       pin_memory: True
       num_workers: 12
@@ -185,13 +185,6 @@ optim:
     lr: 0.08
     momentum: 0.9
     nesterov: True
-
-# optim:
-#   module: torch.optim
-#   class: AdamW
-#   AdamW:
-#     params: config['model'].parameters()
-#     lr: 0.001
 
 train_evaluator:
   module: flame.handlers.metric_evaluator
