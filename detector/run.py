@@ -158,7 +158,7 @@ if __name__ == '__main__':
             video_path=args.video_path,
             stride=args.stride,
             frame_size=args.frame_size,
-            FPS=args.FPS,
+            FPS=args.fps,
             output_dir=args.output_dir,
         )
 
