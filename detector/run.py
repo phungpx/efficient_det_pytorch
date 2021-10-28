@@ -1,10 +1,10 @@
 import cv2
 import argparse
 import numpy as np
-from tqdm import tqdm
+# from tqdm import tqdm
 from pathlib import Path
-from natsort import natsorted
-from typing import Callable, Tuple
+# from natsort import natsorted
+from typing import Callable, Tuple, Optional
 
 import utils
 
@@ -13,42 +13,11 @@ import sys
 sys.path.append(os.environ['PWD'])
 
 
-def make_video(
-    image_dir: str = None,
-    image_extent: str = '.*',
-    frame_size: Tuple[int, int] = (960, 540),
-    FPS: int = 32,  # fps mong muốn khi ghi
-    output_dir: str = None,
-):
-    '''write a video from all frame images in folder
-    '''
-    video_writer = cv2.VideoWriter(
-        filename=output_dir, fourcc=cv2.VideoWriter_fourcc(*'DIVX'),
-        fps=FPS, frameSize=frame_size
-    )
-
-    image_paths = list(Path(image_dir).glob(f'**/*{image_extent}'))
-    image_paths = natsorted(image_paths, key=lambda x: x.stem)
-
-    for image_path in tqdm(image_paths):
-        image = cv2.imread(str(image_path))
-
-        image_path.unlink(missing_ok=False)
-
-        if image is None:
-            continue
-
-        video_writer.write(image)
-
-    video_writer.release()
-
-
 def process_video(
     predictor: Callable,
     video_path: str = None,
-    stride: int = 1,  # stride để đọc các frame
-    image_extent: str = '.jpg',
-    frame_size: Tuple[int, int] = (960, 540),
+    # stride: int = 1,  # stride để đọc các frame
+    frame_size: Optional[Tuple[int, int]] = None,
     FPS: int = 32,  # fps mong muốn khi ghi
     output_dir: str = None  # where save processed frames
 ):
@@ -56,35 +25,44 @@ def process_video(
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
-    count = 0
-    video_capture = cv2.VideoCapture(video_path)
+    video_reader = cv2.VideoCapture(video_path)
+    sucess, frame = video_reader.read()
+    if frame_size is None:
+        frame_size = frame.shape[:2]
 
-    while (video_capture.isOpened()):  # lặp đến hết video
-        ret, frame = video_capture.read()  # lấy ra từng frame
+    video_reader.set(3, frame_size[1])  # width
+    video_reader.set(4, frame_size[0])  # height
 
-        if count % stride != 0:
-            continue
-
-        count += 1
-
-        # ret: a boolean indicating if the frame was successfully read or not.
-        if ret:
-            frame = predict_image(frame, predictor)
-            frame_path = output_dir.joinpath(f'{Path(video_path).stem}_{count}{image_extent}')
-            cv2.imwrite(str(frame_path), frame)
-
-        # tắt chương trình bằng nút 'q'
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            cv2.destroyAllWindows()
-            break
-
-    make_video(
-        image_dir=output_dir, image_extent=image_extent,
-        frame_size=frame_size, FPS=FPS, output_dir=output_dir,
+    video_writer = cv2.VideoWriter(
+        filename=str(output_dir.joinpath(Path(video_path).name)),
+        fourcc=cv2.VideoWriter_fourcc(*'DIVX'),
+        fps=FPS, frameSize=frame_size
     )
 
+    while (video_reader.isOpened()):  # lặp đến hết video
+        success, frame = video_reader.read()  # lấy ra từng frame
 
-def predict_image(image, predictor):
+        # ret: a boolean indicating if the frame was successfully read or not.
+        if success:
+            frame = process_image(frame, predictor)
+            video_writer.write(frame)
+
+            cv2.imshow("FRAME", frame)
+
+            # tắt chương trình bằng nút 'q'
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
+                break
+
+        else:
+            break
+
+    video_reader.release()
+    video_writer.release()
+    cv2.destroyAllWindows()
+
+
+def process_image(image, predictor):
     prediction = predictor([image])[0]
 
     boxes = prediction['boxes'].cpu().numpy().astype(np.int32)
@@ -156,7 +134,7 @@ if __name__ == '__main__':
         process_video(
             predictor=predictor,
             video_path=args.video_path,
-            stride=args.stride,
+            # stride=args.stride,
             frame_size=args.frame_size,
             FPS=args.fps,
             output_dir=args.output_dir,
@@ -170,7 +148,7 @@ if __name__ == '__main__':
             print(f'{i} / {len(image_paths)} - {image_path.name}')
 
             image = cv2.imread(str(image_path))
-            image = predict_image(image, predictor)
+            image = process_image(image, predictor)
 
             if args.show:
                 cv2.imshow(image_path.name, image)
