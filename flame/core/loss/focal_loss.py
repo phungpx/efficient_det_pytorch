@@ -96,11 +96,13 @@ class FocalLoss(loss.LossBase):
 
         return reg_target
 
-    def _smooth_l1_loss(self,
-                        input: torch.Tensor = None,
-                        target: torch.Tensor = None,
-                        reduction: str = 'none',
-                        beta: float = 1.):
+    def _smooth_l1_loss(
+        self,
+        input: torch.Tensor = None,
+        target: torch.Tensor = None,
+        reduction: str = 'none',
+        beta: float = 1.
+    ):
         '''smooth l1 for calculating regression loss,
             reference: https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html
         '''

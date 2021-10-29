@@ -81,7 +81,7 @@ class Detector:
 
         for original_size, pred in zip(original_sizes, preds):
             pred['boxes'] *= max(original_size) / self.imsize
-            pred['names'] = [self.classes.get(label.item(), 'background') for label in pred['labels']]
+            pred['names'] = [self.classes.get(label.item() + 1, 'background') for label in pred['labels']]
 
         return preds
 
