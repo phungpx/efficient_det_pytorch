@@ -16,9 +16,9 @@ sys.path.append(os.environ['PWD'])
 def process_video(
     predictor: Callable,
     video_path: str = None,
-    # stride: int = 1,  # stride để đọc các frame
+    # stride: int = 1,  # stride to skip duplicated frames
     frame_size: Optional[Tuple[int, int]] = None,
-    FPS: int = 32,  # fps mong muốn khi ghi
+    FPS: int = 32,  # frame per second
     output_dir: str = None  # where save processed frames
 ):
     output_dir = Path(output_dir)
@@ -39,8 +39,8 @@ def process_video(
         fps=FPS, frameSize=frame_size
     )
 
-    while (video_reader.isOpened()):  # lặp đến hết video
-        success, frame = video_reader.read()  # lấy ra từng frame
+    while (video_reader.isOpened()):  # loop video to the end of video
+        success, frame = video_reader.read()  # get frame by frame with status
 
         # ret: a boolean indicating if the frame was successfully read or not.
         if success:
@@ -49,7 +49,7 @@ def process_video(
 
             cv2.imshow("FRAME", frame)
 
-            # tắt chương trình bằng nút 'q'
+            # close stream video by pressing 'q' button on keyboard
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
                 break
