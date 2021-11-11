@@ -18,25 +18,34 @@ def process_video(
     video_path: str = None,
     # stride: int = 1,  # stride to skip duplicated frames
     frame_size: Optional[Tuple[int, int]] = None,
-    FPS: int = 32,  # frame per second
-    output_dir: str = None  # where save processed frames
+    FPS: int = 20,  # frame rate of the created video stream
+    output_dir: str = None,  # where save processed frames
+    show: bool = False,
 ):
+    video_path = Path(video_path)
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
-    video_reader = cv2.VideoCapture(video_path)
-    sucess, frame = video_reader.read()
+    video_reader = cv2.VideoCapture(str(video_path))
+    # sucess, frame = video_reader.read()
     if frame_size is None:
-        frame_size = frame.shape[:2]
+        frame_width = int(video_reader.get(3))
+        frame_height = int(video_reader.get(4))
+        frame_size = (frame_width, frame_height)
 
-    video_reader.set(3, frame_size[1])  # width
-    video_reader.set(4, frame_size[0])  # height
+    if video_path.suffix == '.mp4':
+        # fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+        # fourcc = cv2.VideoWriter_fourcc(*'MPEG')
+        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+    elif video_path.suffix == '.avi':
+        fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+    else:
+        raise ValueError(f'Can not read video with suffix {video_path.suffix}')
 
     video_writer = cv2.VideoWriter(
-        filename=str(output_dir.joinpath(Path(video_path).name)),
-        fourcc=cv2.VideoWriter_fourcc(*'DIVX'),
-        fps=FPS, frameSize=frame_size
+        filename=str(output_dir.joinpath(f'{video_path.stem}_output{video_path.suffix}')),
+        fourcc=fourcc, fps=FPS, frameSize=frame_size
     )
 
     while (video_reader.isOpened()):  # loop video to the end of video
@@ -47,19 +56,19 @@ def process_video(
             frame = process_image(frame, predictor)
             video_writer.write(frame)
 
-            cv2.imshow("FRAME", frame)
-
-            # close stream video by pressing 'q' button on keyboard
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-                break
+            if show:
+                cv2.imshow("FRAME", frame)
+                if cv2.waitKey(25) & 0xFF == ord('q'):  # close stream video by pressing 'q' button on keyboard
+                    cv2.destroyAllWindows()
+                    break
 
         else:
+            print('Stream is disconnected.')
             break
 
     video_reader.release()
     video_writer.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
 
 
 def process_image(image, predictor):
@@ -117,7 +126,7 @@ if __name__ == '__main__':
     # for visualizing video
     parser.add_argument('--video-path', type=str)
     parser.add_argument('--fps', type=int, default=32)
-    parser.add_argument('--frame-size', type=tuple, default=(960, 540))
+    parser.add_argument('--frame-size')
     parser.add_argument('--stride', type=int, default=1)
     # save video / image
     parser.add_argument('--output-dir', default='detector/output/')
