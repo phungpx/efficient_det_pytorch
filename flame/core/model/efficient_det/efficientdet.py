@@ -162,24 +162,28 @@ class EfficientDetBackBone(nn.Module):
 
 
 class EfficientDet(nn.Module):
-    def __init__(self,
-                 pretrained_weight=None,
-                 head_only=False,
-                 num_classes=80,
-                 compound_coef=0,
-                 backbone_pretrained=False,
-                 scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
-                 aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
-                 iou_threshold=0.2,
-                 score_threshold=0.2):
+    def __init__(
+        self,
+        pretrained_weight=None,
+        head_only=False,
+        num_classes=80,
+        compound_coef=0,
+        backbone_pretrained=False,
+        scales=[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
+        aspect_ratios=[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)],
+        iou_threshold=0.2,
+        score_threshold=0.2
+    ) -> None:
         super(EfficientDet, self).__init__()
-        self.model = EfficientDetBackBone(num_classes=num_classes,
-                                          compound_coef=compound_coef,
-                                          backbone_pretrained=backbone_pretrained,
-                                          scales=scales,
-                                          aspect_ratios=aspect_ratios,
-                                          iou_threshold=iou_threshold,
-                                          score_threshold=score_threshold)
+        self.model = EfficientDetBackBone(
+            num_classes=num_classes,
+            compound_coef=compound_coef,
+            backbone_pretrained=backbone_pretrained,
+            scales=scales,
+            aspect_ratios=aspect_ratios,
+            iou_threshold=iou_threshold,
+            score_threshold=score_threshold
+        )
 
         if pretrained_weight is not None:
             state_dict = torch.load(pretrained_weight, map_location='cpu')

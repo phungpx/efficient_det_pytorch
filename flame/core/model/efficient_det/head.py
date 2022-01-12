@@ -25,11 +25,24 @@ class SeparableConvBlock(nn.Module):
         #  or just pointwise_conv apply bias.
         # A: Confirmed, just pointwise_conv applies bias, depthwise_conv has no bias.
 
-        self.depthwise_conv = Conv2dStaticSamePadding(in_channels, in_channels,
-                                                      kernel_size=3, stride=1, groups=in_channels, bias=False)
-        self.pointwise_conv = Conv2dStaticSamePadding(in_channels, out_channels, kernel_size=1, stride=1)
+        self.depthwise_conv = Conv2dStaticSamePadding(
+            in_channels,
+            in_channels,
+            kernel_size=3,
+            stride=1,
+            groups=in_channels,
+            bias=False
+        )
+
+        self.pointwise_conv = Conv2dStaticSamePadding(
+            in_channels,
+            out_channels,
+            kernel_size=1,
+            stride=1
+        )
 
         self.norm = norm
+
         if self.norm:
             # Warning: pytorch momentum is different from tensorflow's, momentum_pytorch = 1 - momentum_tensorflow
             self.bn = nn.BatchNorm2d(num_features=out_channels, momentum=0.01, eps=1e-3)
@@ -61,10 +74,21 @@ class Regressor(nn.Module):
         self.num_layers = num_layers
 
         self.conv_list = nn.ModuleList(
-            [SeparableConvBlock(in_channels, in_channels, norm=False, activation=False) for i in range(num_layers)])
+            [
+                SeparableConvBlock(in_channels, in_channels, norm=False, activation=False)
+                for i in range(num_layers)
+            ]
+        )
+
         self.bn_list = nn.ModuleList(
-            [nn.ModuleList([nn.BatchNorm2d(in_channels, momentum=0.01, eps=1e-3) for i in range(num_layers)]) for j in
-             range(pyramid_levels)])
+            [
+                nn.ModuleList(
+                    [nn.BatchNorm2d(in_channels, momentum=0.01, eps=1e-3) for i in range(num_layers)]
+                )
+                for j in range(pyramid_levels)
+            ]
+        )
+
         self.header = SeparableConvBlock(in_channels, num_anchors * 4, norm=False, activation=False)
         self.swish = MemoryEfficientSwish() if not onnx_export else Swish()
 
@@ -98,10 +122,19 @@ class Classifier(nn.Module):
         self.num_classes = num_classes
         self.num_layers = num_layers
         self.conv_list = nn.ModuleList(
-            [SeparableConvBlock(in_channels, in_channels, norm=False, activation=False) for i in range(num_layers)])
+            [
+                SeparableConvBlock(in_channels, in_channels, norm=False, activation=False)
+                for i in range(num_layers)
+            ]
+        )
+
         self.bn_list = nn.ModuleList(
-            [nn.ModuleList([nn.BatchNorm2d(in_channels, momentum=0.01, eps=1e-3) for i in range(num_layers)]) for j in
-             range(pyramid_levels)])
+            [
+                nn.ModuleList([nn.BatchNorm2d(in_channels, momentum=0.01, eps=1e-3) for i in range(num_layers)])
+                for j in range(pyramid_levels)
+            ]
+        )
+
         self.header = SeparableConvBlock(in_channels, num_anchors * num_classes, norm=False, activation=False)
         self.swish = MemoryEfficientSwish() if not onnx_export else Swish()
 
@@ -112,11 +145,12 @@ class Classifier(nn.Module):
                 feat = conv(feat)
                 feat = bn(feat)
                 feat = self.swish(feat)
-            feat = self.header(feat)
 
+            feat = self.header(feat)
             feat = feat.permute(0, 2, 3, 1)
-            feat = feat.contiguous().view(feat.shape[0], feat.shape[1], feat.shape[2], self.num_anchors,
-                                          self.num_classes)
+            feat = feat.contiguous().view(
+                feat.shape[0], feat.shape[1], feat.shape[2], self.num_anchors, self.num_classes
+            )
             feat = feat.contiguous().view(feat.shape[0], -1, self.num_classes)
 
             feats.append(feat)
