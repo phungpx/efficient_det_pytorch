@@ -36,9 +36,9 @@ class LabelmeDataset(Dataset):
         image_paths, label_paths = [], []
         for dirname in dirnames:
             for image_pattern in image_patterns:
-                image_paths.extend(Path(dirname).glob('**/{}'.format(image_pattern)))
+                image_paths.extend(Path(dirname).glob(f'**/{image_pattern}'))
             for label_pattern in label_patterns:
-                label_paths.extend(Path(dirname).glob('**/{}'.format(label_pattern)))
+                label_paths.extend(Path(dirname).glob(f'**/{label_pattern}'))
 
         image_paths = natsorted(image_paths, key=lambda x: str(x.stem))
         label_paths = natsorted(label_paths, key=lambda x: str(x.stem))

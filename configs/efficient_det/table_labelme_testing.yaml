@@ -9,17 +9,19 @@ data:
         LabelmeDataset:
           compound_coef: 1
           dirnames:
-            - '''dataset/TABLE/test/ICDAR2013'''
-            - '''dataset/TABLE/test/PubLayNet'''
-          image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
+            # - '''dataset/TABLE/test/ICDAR2013'''
+            # - '''dataset/TABLE/test/PubLayNet'''
+            - '''dataset/TableBank/train'''
+          image_patterns: ['''*.*g''', '''*.*G''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
           classes:
             # TABLE: 0
-            borderless_table: 0
-            bordered_table: 0
-            color_table: 0
+            # borderless_table: 0
+            # bordered_table: 0
+            # color_table: 0
+            table: 0
       batch_size: 8
       shuffle: False
       num_workers: 12
