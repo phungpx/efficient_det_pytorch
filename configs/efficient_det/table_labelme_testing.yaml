@@ -11,7 +11,7 @@ data:
           dirnames:
             # - '''dataset/TABLE/test/ICDAR2013'''
             # - '''dataset/TABLE/test/PubLayNet'''
-            - '''dataset/TableBank/train'''
+            - '''dataset/TableBank/test'''
           image_patterns: ['''*.*g''', '''*.*G''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
@@ -73,7 +73,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/TABLE/efficientdet-d1/2109101515/best_model_151_focal_loss=-0.1469.pt'''
+    checkpoint_path: '''checkpoint/TableBank/efficientdet-d1/2201121623/best_model_72_focal_loss=-0.2119.pt'''
     mode: '''test'''
 
 predictor:
@@ -81,7 +81,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/TABLE/efficientdet-d1/2109101515/best_model_151_focal_loss=-0.1469/'''
+    output_dir: '''checkpoint/TableBank/efficientdet-d1/2201121623/best_model_72_focal_loss=-0.2119'''
     compound_coef: 1
     classes:
       TABLE: [[0, 0, 255], 0]
