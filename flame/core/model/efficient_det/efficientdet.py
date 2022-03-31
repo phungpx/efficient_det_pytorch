@@ -189,6 +189,8 @@ class EfficientDet(nn.Module):
             state_dict = torch.load(pretrained_weight, map_location='cpu')
             state_dict.pop('classifier.header.pointwise_conv.conv.weight')
             state_dict.pop('classifier.header.pointwise_conv.conv.bias')
+            state_dict.pop('regressor.header.pointwise_conv.conv.weight')
+            state_dict.pop('regressor.header.pointwise_conv.conv.bias')
             self.model.load_state_dict(state_dict, strict=False)
 
         if head_only:

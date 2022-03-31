@@ -1,0 +1,104 @@
+data:
+  test:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.labelme_dataset
+        class: LabelmeDataset
+        LabelmeDataset:
+          compound_coef: 0
+          dirnames:
+            - '''dataset/EPASS/test'''
+          image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
+          label_patterns: ['''*.json''']
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          classes:
+            EPASS_TYPE_1: 0
+            EPASS_TYPE_2: 1
+            EPASS_TYPE_3: 2
+            EPASS_TYPE_4: 3
+            EPASS_TYPE_5: 4
+      batch_size: 16
+      shuffle: False
+      num_workers: 8
+      pin_memory: True
+      drop_last: True
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+
+model:
+  module: flame.core.model.efficient_det.efficientdet
+  class: EfficientDet
+  EfficientDet:
+    num_classes: 5
+    compound_coef: 0
+    backbone_pretrained: False
+    scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
+    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    iou_threshold: 0.2
+    score_threshold: 0.2
+
+metrics:
+  module: flame.handlers.metrics.metrics
+  class: Metrics
+  Metrics:
+    metrics:
+      mAP:
+        module: flame.handlers.metrics.mean_average_precision.evaluator
+        class: Evaluator
+        Evaluator:
+          eval_fn:
+            module: flame.handlers.metrics.mean_average_precision.mean_average_precision
+            class: MeanAveragePrecision
+            MeanAveragePrecision:
+              classes:
+                EPASS_TYPE_1: 0
+                EPASS_TYPE_2: 1
+                EPASS_TYPE_3: 2
+                EPASS_TYPE_4: 3
+                EPASS_TYPE_5: 4
+              iou_threshold: 0.5
+              method: '''every_point_interpolation'''
+          output_transform: 'lambda x: (x[0], x[1])'
+    attach_to:
+      engine: '''test'''
+
+screenlogger:
+  module: flame.handlers.screenlogger
+  class: ScreenLogger
+  ScreenLogger:
+    eval_names:
+      - '''test'''
+
+checkpoint_loader:
+  module: flame.handlers.checkpoint
+  class: CheckpointLoader
+  CheckpointLoader:
+    checkpoint_path: '''checkpoint/EPASS/efficientdet-d0/2203301642/best_model_68_focal_loss=-0.2670.pt'''
+    mode: '''test'''
+
+predictor:
+  module: flame.handlers.region_predictor
+  class: RegionPredictor
+  RegionPredictor:
+    evaluator_name: '''engine'''
+    output_dir: '''checkpoint/EPASS/efficientdet-d0/2203301642/best_model_68_focal_loss=-0.2670/test/'''
+    compound_coef: 0
+    classes:
+      EPASS_TYPE_1: [[128, 0, 0], 0]
+      EPASS_TYPE_2: [[0, 128, 0], 1]
+      EPASS_TYPE_3: [[128, 128, 0], 2]
+      EPASS_TYPE_4: [[0, 0, 128], 3]
+      EPASS_TYPE_5: [[128, 0, 128], 4]
+    output_transform: 'lambda x: (x[0], x[-1])'
+
+engine:
+  module: flame.core.engine.tester
+  class: Evaluator
+  Evaluator:
+    dataset: config['data']['test']
+    device: '''cuda'''
+
+extralibs:
+  torch: torch

@@ -11,10 +11,6 @@ __all__ = ['SeparableConvBlock', 'Regressor', 'Classifier']
 
 
 class SeparableConvBlock(nn.Module):
-    """
-    created by Zylo117
-    """
-
     def __init__(self, in_channels, out_channels=None, norm=True, activation=False, onnx_export=False):
         super(SeparableConvBlock, self).__init__()
         if out_channels is None:
@@ -65,10 +61,6 @@ class SeparableConvBlock(nn.Module):
 
 
 class Regressor(nn.Module):
-    """
-    modified by Zylo117
-    """
-
     def __init__(self, in_channels, num_anchors, num_layers, pyramid_levels=5, onnx_export=False):
         super(Regressor, self).__init__()
         self.num_layers = num_layers
@@ -112,10 +104,6 @@ class Regressor(nn.Module):
 
 
 class Classifier(nn.Module):
-    """
-    modified by Zylo117
-    """
-
     def __init__(self, in_channels, num_anchors, num_classes, num_layers, pyramid_levels=5, onnx_export=False):
         super(Classifier, self).__init__()
         self.num_anchors = num_anchors
