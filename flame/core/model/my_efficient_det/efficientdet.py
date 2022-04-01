@@ -1,7 +1,7 @@
 from .bi_fpn.bifpn import BiFPN
+from .anchor.anchor import Anchors
 from .head.regressor import Regressor
 from .head.classifier import Classifier
-from .anchor.anchor import AnchorGeneration
 from .anchor.box_transform import BoxClipper, BoxDecoder
 from .efficient_net.back_bone import EfficientNetBackBone
 
@@ -92,8 +92,8 @@ class EfficientDet(nn.Module):
             onnx_export=False
         )
 
-        self.anchor_generator = AnchorGeneration(
-            compound_coef=compound_coef,
+        self.anchor_generator = Anchors(
+            anchor_scale=4 if compound_coef != 7 else 5.,
             scales=scales,
             aspect_ratios=aspect_ratios
         )
@@ -174,8 +174,7 @@ class EfficientDet(nn.Module):
         P3, P4, P5 = feature_maps[-3:]
         pyramid_features = self.bifpn(feature_maps=(P3, P4, P5))
 
-        anchors = self.anchor_generator(inputs=inputs, pyramid_features=pyramid_features)
-        # anchors = self.anchor_generator(inputs, inputs.dtype)
+        anchors = self.anchor_generator(inputs=inputs, features=pyramid_features)
 
         cls_preds = self.classifier(pyramid_features=pyramid_features)
         loc_preds = self.regressor(pyramid_features=pyramid_features)

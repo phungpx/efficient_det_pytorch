@@ -34,6 +34,8 @@ class Model(nn.Module):
             state_dict = torch.load(model_weight_path, map_location='cpu')
             state_dict.pop('classifier.header.pointwise_conv.conv.weight')
             state_dict.pop('classifier.header.pointwise_conv.conv.bias')
+            state_dict.pop('regressor.header.pointwise_conv.conv.weight')
+            state_dict.pop('regressor.header.pointwise_conv.conv.bias')
             self.model.load_state_dict(state_dict, strict=False)
 
         if head_only:
