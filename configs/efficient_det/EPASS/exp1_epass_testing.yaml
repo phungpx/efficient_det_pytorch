@@ -20,7 +20,7 @@ data:
             EPASS_TYPE_3: 2
             EPASS_TYPE_4: 3
             EPASS_TYPE_5: 4
-      batch_size: 16
+      batch_size: 4
       shuffle: False
       num_workers: 8
       pin_memory: True
@@ -35,7 +35,7 @@ model:
     compound_coef: 0
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)', '(0.5, 2.)', '(2., 0.5)']  # 1:1, 2:1, 1:2, 1:4, 4:1
     iou_threshold: 0.2
     score_threshold: 0.2
 
@@ -75,7 +75,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/EPASS/efficientdet-d0/2203310848/best_model_109_focal_loss=-0.5503.pt'''
+    checkpoint_path: '''checkpoint/EPASS/efficientdet-d0/EXP1/2203310848/best_model_109_focal_loss=-0.5503.pt'''
     mode: '''test'''
 
 predictor:
@@ -83,7 +83,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/EPASS/efficientdet-d0/2203310848/best_model_109_focal_loss=-0.5503/test/'''
+    output_dir: '''checkpoint/EPASS/efficientdet-d0/EXP1/2203310848/best_model_109_focal_loss=-0.5503/test/'''
     compound_coef: 0
     classes:
       EPASS_TYPE_1: [[128, 0, 0], 0]

@@ -77,8 +77,7 @@ class EfficientDetBackBone(nn.Module):
 
         self.anchors = Anchors(
             anchor_scale=self.anchor_scale[compound_coef],
-            pyramid_levels=(torch.arange(self.pyramid_levels[self.compound_coef]) + 3).tolist(),
-            ratios=aspect_ratios,
+            aspect_ratios=aspect_ratios,
             scales=scales
         )
 
@@ -102,7 +101,7 @@ class EfficientDetBackBone(nn.Module):
         features = (p3, p4, p5)
         features = self.bifpn(features)
 
-        anchors = self.anchors(inputs, inputs.dtype)
+        anchors = self.anchors(inputs, features)
         regression = self.regressor(features)
         classification = self.classifier(features)
 
@@ -116,7 +115,7 @@ class EfficientDetBackBone(nn.Module):
         features = (p3, p4, p5)
         features = self.bifpn(features)
 
-        anchors = self.anchors(inputs, inputs.dtype)
+        anchors = self.anchors(inputs, features)
         regression = self.regressor(features)
         classification = self.classifier(features)
 

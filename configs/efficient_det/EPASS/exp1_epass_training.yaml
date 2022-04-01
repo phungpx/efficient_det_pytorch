@@ -108,7 +108,7 @@ model:
   module: flame.core.model.efficient_det.efficientdet
   class: EfficientDet
   EfficientDet:
-    pretrained_weight: '''checkpoint/PASCAL/efficientdet-d0/2110221358/best_model_21_focal_loss=-1.2464.pt'''
+    pretrained_weight: '''checkpoint/PASCAL/efficientdet-d0/EXP0/2110221358/best_model_21_focal_loss=-1.2464.pt'''
     head_only: False
     num_classes: 5
     compound_coef: 0
@@ -207,7 +207,7 @@ best_saver:
   module: flame.handlers.checkpoint
   class: BestSaver
   BestSaver:
-    dirname: '''checkpoint/EPASS/efficientdet-d0'''
+    dirname: '''checkpoint/EPASS/efficientdet-d0/EXP1/'''
     score_name: '''focal_loss'''
     mode: '''min'''
     evaluator_name: '''valid_evaluator'''
@@ -225,7 +225,7 @@ backup_saver:
       - '''history'''
       - '''lr_scheduler'''
       - '''early_stopping'''
-    dirname: '''checkpoint/EPASS/efficientdet-d0'''
+    dirname: '''checkpoint/EPASS/efficientdet-d0/EXP1/'''
     save_interval: 1
     n_saved: 1
 
