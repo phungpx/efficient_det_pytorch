@@ -118,7 +118,7 @@ def process_image(image, predictor):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default='detector/config.yaml')
+    parser.add_argument('--config', default='detector/configs/coco.yaml')
     # for visualizing image
     parser.add_argument('--image-dir', type=str)
     parser.add_argument('--pattern', type=str)

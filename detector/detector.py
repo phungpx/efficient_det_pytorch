@@ -20,10 +20,11 @@ class Detector:
     def __init__(
         self,
         model: nn.Module,
-        compound_coef: int,
         weight_path: str,
+        compound_coef: int,
         classes: Dict[int, str],
-        mean: List[float], std: List[float],
+        mean: List[float],
+        std: List[float],
         batch_size: Optional[int] = 1,
         device: str = 'cpu'
     ) -> None:
@@ -81,7 +82,7 @@ class Detector:
 
         for original_size, pred in zip(original_sizes, preds):
             pred['boxes'] *= max(original_size) / self.imsize
-            pred['names'] = [self.classes.get(label.item() + 1, 'background') for label in pred['labels']]
+            pred['names'] = [self.classes.get(label.item(), 'None-Definition') for label in pred['labels']]
 
         return preds
 

@@ -24,7 +24,7 @@ data:
       shuffle: False
       num_workers: 12
       pin_memory: True
-      drop_last: True
+      drop_last: False
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
@@ -37,7 +37,7 @@ model:
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: [0.25, 0.5, 1., 2., 4.]  # anchor_width / anchor_height
     iou_threshold: 0.2
-    score_threshold: 0.5
+    score_threshold: 0.2
 
 metrics:
   module: flame.handlers.metrics.metrics
@@ -56,7 +56,8 @@ metrics:
                 EPASS: 0
               iou_threshold: 0.5
               method: '''every_point_interpolation'''
-          output_transform: 'lambda x: (x[0], x[1])'
+              print_FP_files: True
+          output_transform: 'lambda x: (x[0], x[1], x[2])'
     attach_to:
       engine: '''test'''
 

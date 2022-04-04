@@ -8,19 +8,27 @@ from shapely import geometry
 
 
 class MeanAveragePrecision(nn.Module):
-    def __init__(self, classes: Dict[str, int], iou_threshold: float = 0.5,
-                 method: str = 'every_point_interpolation', full: bool = False):  # or '11_point_interpolation'
+    def __init__(
+        self,
+        classes: Dict[str, int],
+        iou_threshold: float = 0.5,
+        method: str = 'every_point_interpolation',  # or '11_point_interpolation'
+        print_detail_mAP: bool = False,
+        print_FP_files: bool = False,
+    ) -> None:
         super(MeanAveragePrecision, self).__init__()
         self.classes = {class_id: class_name for class_name, class_id in classes.items()}
         self.iou_threshold = iou_threshold
         self.method = method
-        self.full = full
+        # verbose
+        self.print_detail_mAP = print_detail_mAP
+        self.print_FP_files = print_FP_files
 
     def forward(self, detections: list, ground_truths: list) -> dict:
         r'''
         Args
-            detections: list with all detections ([image_id, class_id, confidence, [x1, y1, x2, y2]])
-            ground_truths: list with all ground_truths ([image_id, class_id, 1., [x1, y1, x2, y2]])
+            detections: list with all detections ([image_id, class_id, confidence, [x1, y1, x2, y2], image_path])
+            ground_truths: list with all ground_truths ([image_id, class_id, 1., [x1, y1, x2, y2], image_path])
         Outputs:
             A list of dictionaries. Each dictionary contains information and metrics of each class.
             The keys of each dictionary are:
@@ -47,9 +55,10 @@ class MeanAveragePrecision(nn.Module):
             class_groundtruths = [groundtruth for groundtruth in ground_truths if groundtruth[1] == class_id]
             num_groundtruths = len(class_groundtruths)
 
-            # initialize TP, FP with all 0 values
+            # initialize TP, FP with all 0 values and FP_image_paths is empty list.
             TP = [0] * num_detections
             FP = [0] * num_detections
+            FP_image_paths = []
 
             # create dictionary with amount of ground truths for each image (same image id)
             # Ex: amount_class_groundtruths = {0: [0,0,0], 1: [0,0,0,0,0]}
@@ -59,7 +68,7 @@ class MeanAveragePrecision(nn.Module):
                 for image_id, num_groundtruths in amount_class_groundtruths.items()
             }
 
-            # sort class_detections by decreasing confidence
+            # sort class_detections by decreasing confidence.
             class_detections = sorted(class_detections, key=lambda detection: detection[2], reverse=True)
 
             for id_detection, detection in enumerate(class_detections):
@@ -80,8 +89,14 @@ class MeanAveragePrecision(nn.Module):
                         amount_class_groundtruths[detection[0]][id_groundtruth_max] == 1  # flag as already 'seen'
                     else:
                         FP[id_detection] = 1  # count as false positive
+                        # add FP_image_path
+                        if detection[4] not in FP_image_paths:
+                            FP_image_paths.append(detection[4])
                 else:
                     FP[id_detection] = 1  # count as false positive
+                    # add FP_image_path
+                    if detection[4] not in FP_image_paths:
+                        FP_image_paths.append(detection[4])
 
             # compute precision, recall and average precision
             cumulative_TP = np.cumsum(TP)
@@ -107,7 +122,7 @@ class MeanAveragePrecision(nn.Module):
                 raise RuntimeError('Interpolation Method is Wrong.')
 
             # if predictions have no bounding boxes of label and detection, ap will be 1.
-            if num_groundtruths == 0 and num_detections == 0:
+            if (num_groundtruths == 0) and (num_detections == 0):
                 average_precision = 1.
 
             result = {
@@ -120,7 +135,8 @@ class MeanAveragePrecision(nn.Module):
                 'total_detections': num_detections,
                 'total_groundtruths': num_groundtruths,
                 'total_TP': sum(TP),
-                'total_FP': sum(FP)
+                'total_FP': sum(FP),
+                'FP_image_paths': FP_image_paths, 
             }
 
             results.append(result)
@@ -154,13 +170,24 @@ class MeanAveragePrecision(nn.Module):
 
         mAP = sum(average_precisions) / len(average_precisions) if len(average_precisions) else 0.
 
-        if self.full:
+        if self.print_FP_files:
+            FP_file_stats = PrettyTable(["Class Name", "FP File Path"])
+            for result in results:
+                class_name = result['class_name']
+                for file_path in result['FP_image_paths']:
+                    FP_file_stats.add_row([class_name, file_path])
+            print(FP_file_stats) 
+
+        if self.print_detail_mAP:
             return mAP, results
 
         return mAP
 
-    def every_points_interpolated_AP(self, recalls: List[float],
-                                     precisions: List[float]) -> Tuple[float, List[float], List[float]]:
+    def every_points_interpolated_AP(
+        self,
+        recalls: List[float],
+        precisions: List[float]
+    ) -> Tuple[float, List[float], List[float]]:
         r'''every-point interpolated average precision
         '''
 
@@ -177,8 +204,11 @@ class MeanAveragePrecision(nn.Module):
 
         return average_precision, mrecalls[0:-1], mprecisions[0:-1]
 
-    def eleven_points_interpolated_AP(self, recalls: List[float],
-                                      precisions: List[float]) -> Tuple[float, List[float], List[float]]:
+    def eleven_points_interpolated_AP(
+        self,
+        recalls: List[float],
+        precisions: List[float]
+    ) -> Tuple[float, List[float], List[float]]:
         r'''11-point interpolated average precision
         '''
 
