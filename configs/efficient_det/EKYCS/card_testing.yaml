@@ -52,7 +52,7 @@ model:
     compound_coef: 0
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    aspect_ratios: [1., 2., 0.5]
     iou_threshold: 0.2
     score_threshold: 0.5
 

@@ -10,6 +10,7 @@ data:
           compound_coef: 0
           dirnames:
             - '''dataset/EPASS/train/'''
+            - '''dataset/EPASS/test/'''
           image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
@@ -32,7 +33,7 @@ data:
             - iaa.Pad(percent=(0, 0.1), keep_size=False)
             - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
             - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
-      batch_size: 32
+      batch_size: 8
       shuffle: True
       num_workers: 12
       pin_memory: True
@@ -50,6 +51,7 @@ data:
           compound_coef: 0
           dirnames:
             - '''dataset/EPASS/train/'''
+            - '''dataset/EPASS/test/'''
           image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
@@ -60,7 +62,7 @@ data:
             EPASS_TYPE_3: 0
             EPASS_TYPE_4: 0
             EPASS_TYPE_5: 0
-      batch_size: 32
+      batch_size: 8
       shuffle: False
       num_workers: 12
       pin_memory: True
@@ -88,7 +90,7 @@ data:
             EPASS_TYPE_3: 0
             EPASS_TYPE_4: 0
             EPASS_TYPE_5: 0
-      batch_size: 32
+      batch_size: 8
       shuffle: False
       num_workers: 12
       pin_memory: True
@@ -105,17 +107,16 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.my_efficient_det.model
-  class: Model
-  Model:
+  module: flame.core.model.efficient_det.efficientdet
+  class: EfficientDet
+  EfficientDet:
+    pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
+    head_only: False
     num_classes: 1
     compound_coef: 0
-    head_only: False
-    model_weight_path: Null
-    backbone_weight_path: Null
-    backbone_pretrained_weight: True
-    scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: [0.25, 0.5, 1., 2., 4.]
+    backbone_pretrained: False
+    scales: ['2 ** (-1 / 3)', 1., '2 ** (1 / 3)', '2 ** (2 / 3)']
+    aspect_ratios: [0.25, 0.5, 1., 2., 4.]  # anchor_width / anchor_height
 
 optim:
   module: torch.optim
