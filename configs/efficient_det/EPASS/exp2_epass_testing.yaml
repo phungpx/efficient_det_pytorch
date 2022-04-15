@@ -9,7 +9,7 @@ data:
         LabelmeDataset:
           compound_coef: 0
           dirnames:
-            - '''dataset/EPASS/test'''
+            - '''dataset/EPASS/train'''
           image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
@@ -72,7 +72,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/EPASS/efficientdet-d0/EXP2/2204011232/best_model_166_focal_loss=-0.4426.pt'''
+    checkpoint_path: '''checkpoint/EPASS/efficientdet-d0/EXP2/2204061354/best_model_107_focal_loss=-0.3236.pt'''
     mode: '''test'''
 
 predictor:
@@ -80,7 +80,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/EPASS/efficientdet-d0/EXP2/2204011232/best_model_166_focal_loss=-0.4426/test/'''
+    output_dir: '''checkpoint/EPASS/efficientdet-d0/EXP2/2204061354/best_model_107_focal_loss=-0.3236/train/'''
     compound_coef: 0
     classes:
       EPASS: [[0, 0, 255], 0]

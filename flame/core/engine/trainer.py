@@ -43,6 +43,7 @@ class Trainer(Engine):
         self.model = self.frame['model'].to(self.device)
         self.optimizer = self.frame['optim']
         self.loss = self.frame['loss']
+        print(f'[Info] parameters of model: {sum(param.numel() for param in self.model.parameters() if param.requires_grad)} params.')
 
     def _update(self, engine, batch):
         self.model.train()
