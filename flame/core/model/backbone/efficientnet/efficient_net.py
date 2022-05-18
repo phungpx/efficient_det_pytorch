@@ -7,12 +7,12 @@ from .model import EfficientNet
 class _EfficientNet(nn.Module):
     def __init__(
         self,
-        compound_coef: int = 0,
-        load_weights: bool = False
+        backbone_name: str = 'efficientnet-b0',
+        pretrained: bool = False
     ) -> None:
         super(_EfficientNet, self).__init__()
 
-        model = EfficientNet.from_pretrained(f'efficientnet-b{compound_coef}', load_weights)
+        model = EfficientNet.from_pretrained(backbone_name, pretrained)
         del model._conv_head
         del model._bn1
         del model._avg_pooling

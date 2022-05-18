@@ -42,6 +42,6 @@ class Evaluator(Module):
             targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in batch[1]]
             image_infos = [image_info for image_info in params[2]]
 
-            predictions = self.model.inference(samples)
+            predictions = self.model.predict(samples)
 
             return predictions, targets, image_infos

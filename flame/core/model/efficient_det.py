@@ -47,7 +47,7 @@ class EfficientDet(nn.Module):
         # self.input_sizes = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536]
 
         # backbone
-        self.backbone, backbone_out_channels = load_backbone(
+        self.backbone_net, backbone_out_channels = load_backbone(
             backbone_name=BACKBONE_NAME[compound_coef],
             pretrained=backbone_pretrained
         )
@@ -99,7 +99,7 @@ class EfficientDet(nn.Module):
                 module.eval()
 
     def forward(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
-        _, _, P3, P4, P5 = self.backbone(inputs)
+        _, _, P3, P4, P5 = self.backbone_net(inputs)
         pyramid_features = self.bifpn((P3, P4, P5))
         reg_preds = self.regressor(pyramid_features)  # B x all_anchors x 4
         cls_preds = self.classifier(pyramid_features)  # B x all_anchors x num_classes
@@ -109,7 +109,7 @@ class EfficientDet(nn.Module):
         return cls_preds, reg_preds, anchors
 
     def predict(self, inputs: torch.Tensor) -> List[Dict[str, torch.Tensor]]:
-        _, _, P3, P4, P5 = self.backbone(inputs)
+        _, _, P3, P4, P5 = self.backbone_net(inputs)
         pyramid_features = self.bifpn((P3, P4, P5))
         reg_preds = self.regressor(pyramid_features)  # B x all_anchors x 4
         cls_preds = self.classifier(pyramid_features)  # B x all_anchors x num_classes

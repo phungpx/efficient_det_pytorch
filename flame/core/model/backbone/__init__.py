@@ -1,6 +1,7 @@
 # from .resnet import ResNet
 # from .densenet import DenseNet
-from .efficientnet_pytorch.efficient_net import _EfficientNet
+from .efficientnet.efficient_net import _EfficientNet
+# from .efficientnet_pytorch.efficient_net import _EfficientNet
 from typing import Optional
 
 
