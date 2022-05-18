@@ -1,0 +1,83 @@
+data:
+  test:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.coco_dataset
+        class: CoCoDataset
+        CoCoDataset:
+          compound_coef: 0
+          image_dir: '''dataset/COCO/val2017'''
+          label_path: '''dataset/COCO/annotations/instances_val2017.json'''
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+      batch_size: 32
+      shuffle: False
+      drop_last: False
+      pin_memory: True
+      num_workers: 12
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+
+model:
+  module: flame.core.model.efficient_det.efficientdet
+  class: EfficientDet
+  EfficientDet:
+    num_classes: 80
+    compound_coef: 0
+    backbone_pretrained: False
+    scales: ['2 ** 0', '2 ** (1 / 3)', '2 ** (2 / 3)']
+    aspect_ratios: [1., 2., 0.5]
+    iou_threshold: 0.5
+    score_threshold: 0.05
+
+metrics:
+  module: flame.handlers.metrics.metrics
+  class: Metrics
+  Metrics:
+    metrics:
+      coco_eval:
+        module: flame.core.metric.COCO_eval
+        class: COCOEvaluator
+        COCOEvaluator:
+          compound_coef: 0
+          detection_path: '''checkpoint/COCO/efficientdet-d0/2109052137/COCO_det_val.json'''
+          ground_truth_path: '''checkpoint/COCO/efficientdet-d0/2109052137/COCO_gt_val.json'''
+          classes: 80
+          output_transform: 'lambda x: (x[0], x[1], x[2])'
+    attach_to:
+      engine: '''test'''
+
+screenlogger:
+  module: flame.handlers.screenlogger
+  class: ScreenLogger
+  ScreenLogger:
+    eval_names:
+      - '''test'''
+
+checkpoint_loader:
+  module: flame.handlers.checkpoint
+  class: CheckpointLoader
+  CheckpointLoader:
+    checkpoint_path: '''checkpoint/COCO/efficientdet-d0/2109052137/best_model_96_focal_loss=-1.6836.pt'''
+    mode: '''test'''
+
+predictor:
+  module: flame.handlers.region_predictor
+  class: RegionPredictor
+  RegionPredictor:
+    evaluator_name: '''engine'''
+    output_dir: '''checkpoint/COCO/efficientdet-d0/2109052137/best_model_96_focal_loss=-1.6836/'''
+    compound_coef: 0
+    score_threshold: 0.3
+    output_transform: 'lambda x: (x[0], x[-1])'
+
+engine:
+  module: flame.core.engine.tester
+  class: Evaluator
+  Evaluator:
+    dataset: config['data']['test']
+    device: '''cuda'''
+
+extralibs:
+  torch: torch

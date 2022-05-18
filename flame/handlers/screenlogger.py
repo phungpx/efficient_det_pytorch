@@ -19,7 +19,8 @@ class ScreenLogger(Module):
         msg = f'Epoch #{engine.state.epoch} - {time.asctime()} - '
         for eval_name in self.eval_names:
             for metric_name, metric_value in self.frame['metrics'].metric_values[eval_name].items():
-                msg += f'{eval_name}_{metric_name}: {metric_value:.5f} - '
+                if metric_value is not None:
+                    msg += f'{eval_name}_{metric_name}: {metric_value:.5f} - '
         print(msg[:-2])
 
     def init(self):

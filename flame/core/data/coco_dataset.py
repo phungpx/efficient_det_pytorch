@@ -43,7 +43,6 @@ class CoCoDataset(Dataset):
             self.class2idx[category['name']] = len(self.class2idx)
 
         self.idx2class = {class_idx: class_name for class_name, class_idx in self.class2idx.items()}
-        print(self.idx2class)
 
         self.pad_to_square = iaa.PadToSquare(position='right-bottom')
 

@@ -1,0 +1,238 @@
+data:
+  train:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.labelme_dataset
+        class: LabelmeDataset
+        LabelmeDataset:
+          compound_coef: 0
+          dirnames:
+            - '''dataset/EPASS/train/'''
+            - '''dataset/EPASS/test/'''
+          image_patterns: ['''*.*g''', '''*.*G''']
+          label_patterns: ['''*.json''']
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          classes:
+            EPASS_TYPE_1: 0
+            EPASS_TYPE_2: 0
+            EPASS_TYPE_3: 0
+            EPASS_TYPE_4: 0
+            EPASS_TYPE_5: 0
+          transforms:
+            - iaa.MotionBlur()
+            - iaa.ChangeColorTemperature()
+            - iaa.GaussianBlur(sigma=(0, 1))
+            - iaa.Grayscale(alpha=(0.0, 1.0))
+            - iaa.Add(value=(-50, 50), per_channel=True)
+            - iaa.Fliplr(p=0.5)
+            - iaa.Flipud(p=0.5)
+            - iaa.Crop(percent=(0, 0.1))
+            - iaa.Pad(percent=(0, 0.1), keep_size=False)
+            - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
+            - iaa.Affine(rotate=(0, 360), shear=(-2, 2), fit_output=True)
+      batch_size: 8
+      shuffle: True
+      num_workers: 12
+      pin_memory: True
+      drop_last: False
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+  
+  train_eval:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.labelme_dataset
+        class: LabelmeDataset
+        LabelmeDataset:
+          compound_coef: 0
+          dirnames:
+            - '''dataset/EPASS/train/'''
+            - '''dataset/EPASS/test/'''
+          image_patterns: ['''*.*g''', '''*.*G''']
+          label_patterns: ['''*.json''']
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          classes:
+            EPASS_TYPE_1: 0
+            EPASS_TYPE_2: 0
+            EPASS_TYPE_3: 0
+            EPASS_TYPE_4: 0
+            EPASS_TYPE_5: 0
+      batch_size: 8
+      shuffle: False
+      num_workers: 12
+      pin_memory: True
+      drop_last: False
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+
+  valid:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.labelme_dataset
+        class: LabelmeDataset
+        LabelmeDataset:
+          compound_coef: 0
+          dirnames:
+            - '''dataset/EPASS/valid/'''
+          image_patterns: ['''*.*g''', '''*.*G''']
+          label_patterns: ['''*.json''']
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          classes:
+            EPASS_TYPE_1: 0
+            EPASS_TYPE_2: 0
+            EPASS_TYPE_3: 0
+            EPASS_TYPE_4: 0
+            EPASS_TYPE_5: 0
+      batch_size: 8
+      shuffle: False
+      num_workers: 12
+      pin_memory: True
+      drop_last: False
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+
+loss:
+  module: flame.core.loss.focal_loss
+  class: FocalLoss
+  FocalLoss:
+    alpha: 0.25
+    gamma: 2.0
+    lamda: 50.0
+    device: '''cuda'''
+
+model:
+  module: flame.core.model.efficient_det
+  class: Model
+  Model:
+    pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
+    num_classes: 1
+    compound_coef: 0
+    backbone_pretrained: False
+    scales: ['2 ** 0', '2 ** (1 / 3)', '2 ** (2 / 3)']
+    aspect_ratios: [0.25, 0.5, 1., 2., 4.]  # anchor_width / anchor_height
+
+optim:
+  module: torch.optim
+  class: SGD
+  SGD:
+    params: config['model'].parameters()
+    lr: 0.08
+    momentum: 0.9
+    nesterov: True
+
+train_evaluator:
+  module: flame.handlers.metric_evaluator
+  class: MetricEvaluator
+  MetricEvaluator:
+    dataset: config['data']['train_eval']
+    device: '''cuda'''
+
+valid_evaluator:
+  module: flame.handlers.metric_evaluator
+  class: MetricEvaluator
+  MetricEvaluator:
+    dataset: config['data']['valid']
+    device: '''cuda'''
+
+metrics:
+  module: flame.handlers.metrics.metrics
+  class: Metrics
+  Metrics:
+    metrics:
+      focal_loss:
+        module: flame.handlers.metrics.loss
+        class: Loss
+        Loss:
+          loss_fn: config['loss']
+          output_transform: 'lambda x: (x[0], x[1], x[2], x[3])'
+    attach_to:
+      train_evaluator: '''train'''
+      valid_evaluator: '''valid'''
+
+screenlogger:
+  module: flame.handlers.screenlogger
+  class: ScreenLogger
+  ScreenLogger:
+    eval_names:
+      - '''train''' 
+      - '''valid'''
+
+history:
+  module: flame.handlers.checkpoint
+  class: History
+
+checkpoint_loader:
+  module: flame.handlers.checkpoint
+  class: CheckpointLoader
+  CheckpointLoader:
+    checkpoint_path: ''''''
+    mode: '''train'''
+
+terminate_on_nan:
+  module: flame.handlers.terminate_on_nan
+  class: TerminateOnNan
+
+lr_scheduler:
+  module: flame.handlers.lr_scheduler
+  class: ReduceLROnPlateau
+  ReduceLROnPlateau:
+    score_name: '''focal_loss'''
+    evaluator_name: '''valid_evaluator'''
+    mode: '''min'''
+    patience: 5
+    verbose: True
+
+early_stopping:
+  module: flame.handlers.early_stopping
+  class: EarlyStopping
+  EarlyStopping:
+    score_name: '''focal_loss'''
+    evaluator_name: '''valid_evaluator'''
+    mode: '''min'''
+    patience: 50
+
+best_saver:
+  module: flame.handlers.checkpoint
+  class: BestSaver
+  BestSaver:
+    dirname: '''checkpoint/EPASS/efficientdet-d0/EXP2/'''
+    score_name: '''focal_loss'''
+    mode: '''min'''
+    evaluator_name: '''valid_evaluator'''
+    n_saved: 1
+
+backup_saver:
+  module: flame.handlers.checkpoint
+  class: BackupSaver
+  BackupSaver:
+    modules:
+      - '''model'''
+      - '''optim'''
+      - '''backup_saver'''
+      - '''best_saver'''
+      - '''history'''
+      - '''lr_scheduler'''
+      - '''early_stopping'''
+    dirname: '''checkpoint/EPASS/efficientdet-d0/EXP2/'''
+    save_interval: 1
+    n_saved: 1
+
+engine:
+  module: flame.core.engine.trainer
+  class: Trainer
+  Trainer:
+    dataset: config['data']['train']
+    device: '''cuda'''
+    max_epochs: 10000
+    max_norm: 0.1
+    norm_type: 2
+
+extralibs:
+  torch: torch
+  iaa: imgaug.augmenters

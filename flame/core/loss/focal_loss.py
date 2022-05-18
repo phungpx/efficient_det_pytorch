@@ -1,8 +1,8 @@
 import torch
-from . import loss
+from torch import nn
 
 
-class FocalLoss(loss.LossBase):
+class FocalLoss(nn.Module):
     def __init__(self, alpha, gamma, lamda, device):
         super(FocalLoss, self).__init__()
         self.alpha = alpha  # this paper set 0.25

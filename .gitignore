@@ -134,3 +134,5 @@ dataset/
 checkpoint/
 output/
 models/
+
+flame/core/model/efficient_det_ver1
