@@ -90,6 +90,8 @@ class COCOEvaluator(Metric):
 
                 # create ground truth in COCO format if has no COCO ground truth file.
                 for box, label, area in zip(true_boxes, true_labels, true_areas):
+                    if label == -1:
+                        continue
                     annotation = {
                         'image_id': image_id,
                         'category_id': label,
