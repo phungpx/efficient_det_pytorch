@@ -11,10 +11,15 @@ from torch.utils.data import Dataset
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
+input_size = {
+    'D0': 512, 'D1': 640, 'D2': 768, 'D3': 896, 'D4': 1024, 'D5': 1280, 'D6': 1280, 'D7': 1536, 'D7x': 1536,
+}
+
+
 class CoCoDataset(Dataset):
     def __init__(
         self,
-        compound_coef: int,
+        model_name: str,
         image_dir: str,
         label_path: str,
         mean: Tuple[float],
@@ -22,7 +27,7 @@ class CoCoDataset(Dataset):
         transforms: list = None
     ) -> None:
         super(CoCoDataset, self).__init__()
-        self.imsize = 512 + compound_coef * 128
+        self.imsize = input_size[model_name]
         self.transforms = transforms if transforms else []
         self.std = torch.tensor(std, dtype=torch.float).view(3, 1, 1)
         self.mean = torch.tensor(mean, dtype=torch.float).view(3, 1, 1)

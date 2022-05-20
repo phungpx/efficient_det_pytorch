@@ -7,7 +7,7 @@ data:
         module: flame.core.data.coco_dataset
         class: CoCoDataset
         CoCoDataset:
-          compound_coef: 0
+          model_name: '''D0'''
           image_dir: '''dataset/COCO/val2017'''
           label_path: '''dataset/COCO/annotations/instances_val2017.json'''
           mean: [0.485, 0.456, 0.406]
@@ -24,7 +24,7 @@ model:
   class: Model
   Model:
     num_classes: 80
-    compound_coef: 0
+    model_name: '''D0'''
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1 / 3)', '2 ** (2 / 3)']
     aspect_ratios: [0.5, 1., 2.]
@@ -40,7 +40,7 @@ metrics:
         module: flame.core.metric.COCO_eval
         class: COCOEvaluator
         COCOEvaluator:
-          compound_coef: 0
+          model_name: '''D0'''
           detection_path: '''checkpoint/COCO/efficientdet-d0/2109052137/COCO_det_val.json'''
           ground_truth_path: '''checkpoint/COCO/efficientdet-d0/2109052137/COCO_gt_val.json'''
           classes: 80
@@ -68,7 +68,7 @@ predictor:
   RegionPredictor:
     evaluator_name: '''engine'''
     output_dir: '''checkpoint/COCO/efficientdet-d0/2109052137/best_model_96_focal_loss=-1.6836/'''
-    compound_coef: 0
+    model_name: '''D0'''
     score_threshold: 0.3
     output_transform: 'lambda x: (x[0], x[-1])'
 

@@ -12,6 +12,11 @@ from typing import Dict, Tuple, List, Optional
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 
+input_size = {
+    'D0': 512, 'D1': 640, 'D2': 768, 'D3': 896, 'D4': 1024, 'D5': 1280, 'D6': 1280, 'D7': 1536, 'D7x': 1536,
+}
+
+
 class AltheiaDataset(Dataset):
     def __init__(
         self,
@@ -21,12 +26,12 @@ class AltheiaDataset(Dataset):
         classes: Dict[str, int] = None,
         mean: List[float] = [0.485, 0.456, 0.406],
         std: List[float] = [0.229, 0.224, 0.225],
-        compound_coef: int = 0,
+        model_name: str = 'D0',
         transforms: Optional[List] = None
     ) -> None:
         super(AltheiaDataset, self).__init__()
         self.classes = classes
-        self.imsize = 512 + compound_coef * 128
+        self.imsize = input_size[model_name]
         self.std = torch.tensor(std, dtype=torch.float).view(3, 1, 1)
         self.mean = torch.tensor(mean, dtype=torch.float).view(3, 1, 1)
 

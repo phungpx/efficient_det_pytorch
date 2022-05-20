@@ -8,10 +8,15 @@ from pycocotools.cocoeval import COCOeval
 from typing import List, Dict, Optional, Callable, Union
 
 
+input_size = {
+    'D0': 512, 'D1': 640, 'D2': 768, 'D3': 896, 'D4': 1024, 'D5': 1280, 'D6': 1280, 'D7': 1536, 'D7x': 1536,
+}
+
+
 class COCOEvaluator(Metric):
     def __init__(
         self,
-        compound_coef: Optional[int] = None,
+        model_name: Optional[str] = None,
         classes: Optional[Union[Dict[str, int], int]] = None,
         annotation_file: Optional[str] = None,
         label_to_coco_label: Optional[Dict[int, int]] = {None: 0},
@@ -24,7 +29,7 @@ class COCOEvaluator(Metric):
         self.detection_path = detection_path
         self.ground_truth_path = ground_truth_path
 
-        self.imsize = 512 + compound_coef * 128 if compound_coef is not None else None
+        self.imsize = input_size.get(model_name, None)
 
         if isinstance(classes, int):
             classes = {i: i for i in range(classes)}

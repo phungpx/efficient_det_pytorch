@@ -12,16 +12,80 @@ from .utils.box_clipper import BoxClipper
 from .utils.box_decoder import BoxDecoder
 
 
-BACKBONE_NAME = {
-    0: 'efficientnet-b0',
-    1: 'efficientnet-b1',
-    2: 'efficientnet-b2',
-    3: 'efficientnet-b3',
-    4: 'efficientnet-b4',
-    5: 'efficientnet-b5',
-    6: 'efficientnet-b6',
-    7: 'efficientnet-b6',
-    8: 'efficientnet-b7'
+# setting in Table 1. Efficient Det paper: https://arxiv.org/pdf/1911.09070.pdf
+setting = {
+    'D0': {
+        'input_size': 512,  # input_size (R_input)
+        'backbone_network': 'B0',  # backbone_network, efficient_net
+        'BiFPN_channels': 64,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 3,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 3,  #  Box/class_layers (D_class)
+    },
+    'D1': {
+        'input_size': 640,  # input_size (R_input)
+        'backbone_network': 'B1',  # backbone_network, efficient_net
+        'BiFPN_channels': 88,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 4,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 3,  #  Box/class_layers (D_class)
+    },
+    'D2': {
+        'input_size': 768,  # input_size (R_input)
+        'backbone_network': 'B2',  # backbone_network, efficient_net
+        'BiFPN_channels': 112,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 5,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 3  #  Box/class_layers (D_class)
+    },
+    'D3': {
+        'input_size': 896,  # input_size (R_input)
+        'backbone_network': 'B3',  # backbone_network, efficient_net
+        'BiFPN_channels': 160,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 6,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 4  #  Box/class_layers (D_class)
+    },
+    'D4': {
+        'input_size': 1024,  # input_size (R_input)
+        'backbone_network': 'B4',  # backbone_network, efficient_net
+        'BiFPN_channels': 224,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 7,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 4  #  Box/class_layers (D_class)
+    },
+    'D5': {
+        'input_size': 1280,  # input_size (R_input)
+        'backbone_network': 'B5',  # backbone_network, efficient_net
+        'BiFPN_channels': 288,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 7,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 4  #  Box/class_layers (D_class)
+    },
+    'D6': {
+        'input_size': 1280,  # input_size (R_input)
+        'backbone_network': 'B6',  # backbone_network, efficient_net
+        'BiFPN_channels': 384,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 8,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 5  #  Box/class_layers (D_class)
+    },
+    'D7': {
+        'input_size': 1536,  # input_size (R_input)
+        'backbone_network': 'B6',  # backbone_network, efficient_net
+        'BiFPN_channels': 384,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 8,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 5,  # P3 -> P7
+        'num_conv_layers': 5  #  Box/class_layers (D_class)
+    },
+    'D7x': {
+        'input_size': 1536,  # input_size (R_input)
+        'backbone_network': 'B7',  # backbone_network, efficient_net
+        'BiFPN_channels': 384,  # BiFPN_channels (W_biFPN)
+        'BiFPN_layers': 8,  # BiFPN_layers (D_biFPN)
+        'num_pyramid_levels': 6,  # P3 -> P8
+        'num_conv_layers': 5  #  Box/class_layers (D_class)
+    },
 }
 
 
@@ -29,7 +93,7 @@ class EfficientDet(nn.Module):
     def __init__(
         self,
         num_classes: int = 80,
-        compound_coef: int = 0,
+        model_name: str = 'D0',  # D0, D1, D2, D3, D4, D5, D6, D7, D7x
         backbone_pretrained: bool = False,
         scales: List[float] = [2 ** 0, 2 ** (1 / 3), 2 ** (2 / 3)],
         aspect_ratios: List[float] = [0.5, 1., 2.],
@@ -38,53 +102,57 @@ class EfficientDet(nn.Module):
         onnx_export: bool = False,
     ) -> None:
         super(EfficientDet, self).__init__()
+        # setting for model
+        backbone_name = setting[model_name]['backbone_network']
+        bifpn_out_channels = setting[model_name]['BiFPN_channels']
+        bifpn_num_layers = setting[model_name]['BiFPN_layers']
+        num_pyramid_levels = setting[model_name]['num_pyramid_levels']
+        box_class_num_layers = setting[model_name]['num_conv_layers']
+
+        # setting for post processing
         self.iou_threshold = iou_threshold
         self.score_threshold = score_threshold
 
-        NUMBER_PYRAMID_LEVELS = [5, 5, 5, 5, 5, 5, 5, 5, 6]
-        NUMBER_BiFPN_BLOCKS = [3, 4, 5, 6, 7, 7, 8, 8, 8]
-        NUMBER_CONV_HEAD_BLOCKS = [3, 3, 3, 4, 4, 4, 5, 5, 5]
-        BiFPN_CHANNELS = [64, 88, 112, 160, 224, 288, 384, 384, 384]
-        # self.input_sizes = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536]
-
         # backbone
         self.backbone_net, backbone_out_channels = load_backbone(
-            backbone_name=BACKBONE_NAME[compound_coef],
+            backbone_name=f'efficientnet-{backbone_name.lower()}',
             pretrained=backbone_pretrained
         )
 
         # neck
-        BiFPN_attention = True if compound_coef < 6 else False
-        use_P8 = True if compound_coef > 7 else False
+        BiFPN_attention = True if model_name in ['D0', 'D1', 'D2', 'D3', 'D4', 'D5'] else False
+        use_P8 = True if model_name == 'D7x' else False
         self.bifpn = nn.Sequential(
             *[
                 BiFPN(
                     first_time=True if i == 0 else False,
-                    BiFPN_out_channels=BiFPN_CHANNELS[compound_coef],
+                    BiFPN_out_channels=bifpn_out_channels,
                     P3_out_channels=backbone_out_channels['C3'],
                     P4_out_channels=backbone_out_channels['C4'],
                     P5_out_channels=backbone_out_channels['C5'],
-                    onnx_export=onnx_export, attention=BiFPN_attention, use_p8=use_P8,
+                    onnx_export=onnx_export,
+                    attention=BiFPN_attention,
+                    use_p8=use_P8,
                 )
-                for i in range(NUMBER_BiFPN_BLOCKS[compound_coef])
+                for i in range(bifpn_num_layers)
             ]
         )
 
         # head
         self.regressor = Regressor(
-            BiFPN_out_channels=BiFPN_CHANNELS[compound_coef],
+            BiFPN_out_channels=bifpn_out_channels,
             num_anchors=len(scales) * len(aspect_ratios),
-            num_layers=NUMBER_CONV_HEAD_BLOCKS[compound_coef],
-            num_pyramid_levels=NUMBER_PYRAMID_LEVELS[compound_coef],
+            num_layers=box_class_num_layers,
+            num_pyramid_levels=num_pyramid_levels,
             onnx_export=onnx_export,
         )
 
         self.classifier = Classifier(
             num_classes=num_classes,
-            BiFPN_out_channels=BiFPN_CHANNELS[compound_coef],
+            BiFPN_out_channels=bifpn_out_channels,
             num_anchors=len(scales) * len(aspect_ratios),
-            num_layers=NUMBER_CONV_HEAD_BLOCKS[compound_coef],
-            num_pyramid_levels=NUMBER_PYRAMID_LEVELS[compound_coef],
+            num_layers=box_class_num_layers,
+            num_pyramid_levels=num_pyramid_levels,
             onnx_export=onnx_export,
         )
 
@@ -180,7 +248,7 @@ class Model(nn.Module):
         pretrained_weight: str = None,
         # head_only: bool = False,
         num_classes: int = 80,
-        compound_coef: int = 0,
+        model_name: str = 'D0',
         backbone_pretrained: bool = False,
         scales: List[float] = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
         aspect_ratios: List[float] = [0.5, 1.0, 2.0],
@@ -191,7 +259,7 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.model = EfficientDet(
             num_classes=num_classes,
-            compound_coef=compound_coef,
+            model_name=model_name,
             backbone_pretrained=backbone_pretrained,
             scales=scales,
             aspect_ratios=aspect_ratios,

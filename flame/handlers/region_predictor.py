@@ -9,21 +9,28 @@ from ignite.engine import Events
 from typing import Dict, List, Optional
 
 
+input_size = {
+    'D0': 512, 'D1': 640, 'D2': 768, 'D3': 896, 'D4': 1024, 'D5': 1280, 'D6': 1280, 'D7': 1536, 'D7x': 1536,
+}
+
+
 class RegionPredictor(Module):
-    def __init__(self,
-                 evaluator_name: str = None,
-                 compound_coef: int = None,
-                 classes: Dict[str, List] = None,
-                 score_threshold: Optional[float] = None,
-                 iou_threshold: Optional[float] = None,
-                 output_dir: str = None,
-                 output_transform=lambda x: x):
+    def __init__(
+        self,
+        evaluator_name: str = None,
+        model_name: str = 'D0',
+        classes: Dict[str, List] = None,
+        score_threshold: Optional[float] = None,
+        iou_threshold: Optional[float] = None,
+        output_dir: str = None,
+        output_transform=lambda x: x
+    ):
         super(RegionPredictor, self).__init__()
         self.classes = classes
         self.score_threshold = score_threshold
         self.iou_threshold = iou_threshold
         self.evaluator_name = evaluator_name
-        self.imsize = 512 + compound_coef * 128
+        self.imsize = input_size[model_name]
         self.output_transform = output_transform
         self.output_dir = Path(output_dir)
 

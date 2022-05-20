@@ -7,7 +7,7 @@ data:
         module: flame.core.data.pascal_dataset
         class: PascalDataset
         PascalDataset:
-          compound_coef: 0
+          model_name: '''D0'''
           VOC2012:
             image_dir: '''dataset/PASCALVOC2012/JPEGImages/'''
             label_dir: '''dataset/PASCALVOC2012/Annotations/'''
@@ -52,7 +52,7 @@ model:
   class: Model
   Model:
     num_classes: 20
-    compound_coef: 0
+    model_name: '''D0'''
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: [0.5, 1., 2.]
     iou_threshold: 0.5
@@ -67,7 +67,7 @@ metrics:
         module: flame.core.metric.COCO_eval
         class: COCOEvaluator
         COCOEvaluator:
-          compound_coef: 0
+          model_name: '''D0'''
           detection_path: '''checkpoint/PASCAL/efficientdet-d0/2205190641/pascal_det_val.json'''
           ground_truth_path: '''checkpoint/PASCAL/efficientdet-d0/2205190641/pascal_gt_val.json'''
           classes:
@@ -115,7 +115,7 @@ predictor:
   RegionPredictor:
     evaluator_name: '''engine'''
     output_dir: '''checkpoint/PASCAL/efficientdet-d0/2205190641/best_model_143_focal_loss=-1.3508/'''
-    compound_coef: 0
+    model_name: '''D0'''
     classes:
       aeroplane: [[128, 0, 0], 0]  # color, class_idx, area_threshold
       bicycle: [[0, 128, 0], 1]
