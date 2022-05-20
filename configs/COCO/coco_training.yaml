@@ -66,7 +66,7 @@ data:
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
       batch_size: 32
-      shuffle: False
+      shuffle: True
       drop_last: False
       num_workers: 12
       pin_memory: True
@@ -160,7 +160,7 @@ lr_scheduler:
     score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
-    patience: 3
+    patience: 10
     verbose: True
 
 early_stopping:

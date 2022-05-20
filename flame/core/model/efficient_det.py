@@ -34,7 +34,8 @@ class EfficientDet(nn.Module):
         scales: List[float] = [2 ** 0, 2 ** (1 / 3), 2 ** (2 / 3)],
         aspect_ratios: List[float] = [0.5, 1., 2.],
         iou_threshold: float = 0.2,
-        score_threshold: float = 0.2
+        score_threshold: float = 0.2,
+        onnx_export: bool = False,
     ) -> None:
         super(EfficientDet, self).__init__()
         self.iou_threshold = iou_threshold
@@ -53,17 +54,17 @@ class EfficientDet(nn.Module):
         )
 
         # neck
+        BiFPN_attention = True if compound_coef < 6 else False
+        use_P8 = True if compound_coef > 7 else False
         self.bifpn = nn.Sequential(
             *[
                 BiFPN(
+                    first_time=True if i == 0 else False,
                     BiFPN_out_channels=BiFPN_CHANNELS[compound_coef],
                     P3_out_channels=backbone_out_channels['C3'],
                     P4_out_channels=backbone_out_channels['C4'],
                     P5_out_channels=backbone_out_channels['C5'],
-                    first_time=True if i == 0 else False,
-                    epsilon=1e-4, onnx_export=False,
-                    attention=True if compound_coef < 6 else False,
-                    use_p8=compound_coef > 7
+                    onnx_export=onnx_export, attention=BiFPN_attention, use_p8=use_P8,
                 )
                 for i in range(NUMBER_BiFPN_BLOCKS[compound_coef])
             ]
@@ -74,7 +75,8 @@ class EfficientDet(nn.Module):
             BiFPN_out_channels=BiFPN_CHANNELS[compound_coef],
             num_anchors=len(scales) * len(aspect_ratios),
             num_layers=NUMBER_CONV_HEAD_BLOCKS[compound_coef],
-            num_pyramid_levels=NUMBER_PYRAMID_LEVELS[compound_coef]
+            num_pyramid_levels=NUMBER_PYRAMID_LEVELS[compound_coef],
+            onnx_export=onnx_export,
         )
 
         self.classifier = Classifier(
@@ -82,7 +84,8 @@ class EfficientDet(nn.Module):
             BiFPN_out_channels=BiFPN_CHANNELS[compound_coef],
             num_anchors=len(scales) * len(aspect_ratios),
             num_layers=NUMBER_CONV_HEAD_BLOCKS[compound_coef],
-            num_pyramid_levels=NUMBER_PYRAMID_LEVELS[compound_coef]
+            num_pyramid_levels=NUMBER_PYRAMID_LEVELS[compound_coef],
+            onnx_export=onnx_export,
         )
 
         # anchor
@@ -182,7 +185,8 @@ class Model(nn.Module):
         scales: List[float] = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)],
         aspect_ratios: List[float] = [0.5, 1.0, 2.0],
         iou_threshold: float = 0.2,
-        score_threshold: float = 0.2
+        score_threshold: float = 0.2,
+        onnx_export: bool = False,
     ) -> None:
         super(Model, self).__init__()
         self.model = EfficientDet(
@@ -192,7 +196,8 @@ class Model(nn.Module):
             scales=scales,
             aspect_ratios=aspect_ratios,
             iou_threshold=iou_threshold,
-            score_threshold=score_threshold
+            score_threshold=score_threshold,
+            onnx_export=onnx_export
         )
 
         if pretrained_weight is not None:

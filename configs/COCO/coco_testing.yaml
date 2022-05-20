@@ -20,9 +20,9 @@ data:
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
-  module: flame.core.model.efficient_det.efficientdet
-  class: EfficientDet
-  EfficientDet:
+  module: flame.core.model.efficient_det
+  class: Model
+  Model:
     num_classes: 80
     compound_coef: 0
     backbone_pretrained: False

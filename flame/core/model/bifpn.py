@@ -1,6 +1,6 @@
 import torch
-
 from torch import nn
+from typing import Tuple
 from .utils.basic_blocks import Swish, MemoryEfficientSwish, SeparableConvBlock, Conv2dStaticSamePadding, MaxPool2dStaticSamePadding
 
 
@@ -19,10 +19,10 @@ class BiFPN(nn.Module):
     ):
         """
         Args:
-            BiFPN_out_channels: int,
-            P3_out_channels: int,
-            P4_out_channels: int,
-            P5_out_channels: int,
+            BiFPN_out_channels: int, out_channels in final tensor after BiFPN Blocks,
+            P3_out_channels: int, out_channels of backbone (efficient net),
+            P4_out_channels: int, out_channels of backbone (efficient net),
+            P5_out_channels: int, out_channels of backbone (efficient net),
             first_time: whether the input comes directly from the efficientnet,
                         if True, downchannel it first, and downsample P5 to generate P6 then P7
             epsilon: epsilon of fast weighted attention sum of BiFPN, not the BN's epsilon
@@ -91,13 +91,13 @@ class BiFPN(nn.Module):
         self.p4_upsample = nn.Upsample(scale_factor=2, mode='nearest')
         self.p3_upsample = nn.Upsample(scale_factor=2, mode='nearest')
 
-        self.p4_downsample = MaxPool2dStaticSamePadding(3, 2)
-        self.p5_downsample = MaxPool2dStaticSamePadding(3, 2)
-        self.p6_downsample = MaxPool2dStaticSamePadding(3, 2)
-        self.p7_downsample = MaxPool2dStaticSamePadding(3, 2)
+        self.p4_downsample = MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
+        self.p5_downsample = MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
+        self.p6_downsample = MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
+        self.p7_downsample = MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
         if use_p8:
             self.p7_upsample = nn.Upsample(scale_factor=2, mode='nearest')
-            self.p8_downsample = MaxPool2dStaticSamePadding(3, 2)
+            self.p8_downsample = MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
 
         self.swish = MemoryEfficientSwish() if not onnx_export else Swish()
 
@@ -109,7 +109,7 @@ class BiFPN(nn.Module):
                     out_channels=BiFPN_out_channels,
                     kernel_size=1
                 ),
-                nn.BatchNorm2d(BiFPN_out_channels, momentum=0.01, eps=1e-3),
+                nn.BatchNorm2d(num_features=BiFPN_out_channels, momentum=0.01, eps=1e-3),
             )
             self.p4_down_channel = nn.Sequential(
                 Conv2dStaticSamePadding(
@@ -117,7 +117,7 @@ class BiFPN(nn.Module):
                     out_channels=BiFPN_out_channels,
                     kernel_size=1
                 ),
-                nn.BatchNorm2d(BiFPN_out_channels, momentum=0.01, eps=1e-3),
+                nn.BatchNorm2d(num_features=BiFPN_out_channels, momentum=0.01, eps=1e-3),
             )
             self.p3_down_channel = nn.Sequential(
                 Conv2dStaticSamePadding(
@@ -125,7 +125,7 @@ class BiFPN(nn.Module):
                     out_channels=BiFPN_out_channels,
                     kernel_size=1
                 ),
-                nn.BatchNorm2d(BiFPN_out_channels, momentum=0.01, eps=1e-3),
+                nn.BatchNorm2d(num_features=BiFPN_out_channels, momentum=0.01, eps=1e-3),
             )
 
             self.p5_to_p6 = nn.Sequential(
@@ -134,15 +134,15 @@ class BiFPN(nn.Module):
                     out_channels=BiFPN_out_channels,
                     kernel_size=1
                 ),
-                nn.BatchNorm2d(BiFPN_out_channels, momentum=0.01, eps=1e-3),
-                MaxPool2dStaticSamePadding(3, 2)
+                nn.BatchNorm2d(num_features=BiFPN_out_channels, momentum=0.01, eps=1e-3),
+                MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
             )
             self.p6_to_p7 = nn.Sequential(
-                MaxPool2dStaticSamePadding(3, 2)
+                MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
             )
             if use_p8:
                 self.p7_to_p8 = nn.Sequential(
-                    MaxPool2dStaticSamePadding(3, 2)
+                    MaxPool2dStaticSamePadding(kernel_size=3, stride=2)
                 )
 
             self.p4_down_channel_2 = nn.Sequential(
@@ -151,7 +151,7 @@ class BiFPN(nn.Module):
                     out_channels=BiFPN_out_channels,
                     kernel_size=1
                 ),
-                nn.BatchNorm2d(BiFPN_out_channels, momentum=0.01, eps=1e-3),
+                nn.BatchNorm2d(num_features=BiFPN_out_channels, momentum=0.01, eps=1e-3),
             )
             self.p5_down_channel_2 = nn.Sequential(
                 Conv2dStaticSamePadding(
@@ -159,7 +159,7 @@ class BiFPN(nn.Module):
                     out_channels=BiFPN_out_channels,
                     kernel_size=1
                 ),
-                nn.BatchNorm2d(BiFPN_out_channels, momentum=0.01, eps=1e-3),
+                nn.BatchNorm2d(num_features=BiFPN_out_channels, momentum=0.01, eps=1e-3),
             )
 
         # Weight
@@ -214,7 +214,7 @@ class BiFPN(nn.Module):
 
         return outs
 
-    def _forward_fast_attention(self, inputs):
+    def _forward_fast_attention(self, inputs: Tuple[torch.Tensor]) -> Tuple[torch.Tensor]:
         if self.first_time:
             p3, p4, p5 = inputs
 
@@ -288,7 +288,7 @@ class BiFPN(nn.Module):
 
         return p3_out, p4_out, p5_out, p6_out, p7_out
 
-    def _forward(self, inputs):
+    def _forward(self, inputs: Tuple[torch.Tensor]) -> Tuple[torch.Tensor]:
         if self.first_time:
             p3, p4, p5 = inputs
 
