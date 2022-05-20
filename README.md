@@ -59,16 +59,17 @@ https://developer.ibm.com/exchanges/data/all/publaynet/
 
 # USAGE
 ## VOC 2007, 2012
-### Config: https://github.com/phungpx/efficient_det_pytorch/tree/master/configs/PASCAL
-### Training
+* Config: https://github.com/phungpx/efficient_det_pytorch/tree/master/configs/PASCAL
+* Training
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_training.yaml
 ```
-### Testing
+* Testing
 ```python
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_testing.yaml
 ```
-### Result
+* Result
+
 |Model|Parameters|Result|
 |:---:|:--------:|:----:|
 |EffiDet - D0|3,839,117|<img src="https://user-images.githubusercontent.com/61035926/169470818-7968f3bf-c12c-4503-b45e-0f62071c5622.png" width="600"> |
@@ -82,5 +83,27 @@ CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_testing
 |EffiDet - D7x|-|-|
 
 ## COCO
+* Config: https://github.com/phungpx/efficient_det_pytorch/tree/master/configs/PASCAL
+* Training
+```python
+CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_training.yaml
+```
+* Testing
+```python
+CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_testing.yaml
+```
+* Result
+
+|Model|Parameters|Result|
+|:---:|:--------:|:----:|
+|EffiDet - D0|3,874,217|<img src="https://user-images.githubusercontent.com/61035926/169502260-a933b1e0-0eda-4535-a793-662ac7c576fc.png" width="600"> |
+|EffiDet - D1|-|-|
+|EffiDet - D2|-|-|
+|EffiDet - D3|-|-|
+|EffiDet - D4|-|-|
+|EffiDet - D5|-|-|
+|EffiDet - D6|-|-|
+|EffiDet - D7|-|-|
+|EffiDet - D7x|-|-|
 
 ## Birdviews
