@@ -9,7 +9,9 @@
 - [x] Efficient Det training, inference flow.
 - [ ] Augmentations: Mosaic, Mixup, CutMix,...
 - [ ] BBox IOU Loss (GIoU, DIoU, CIoU, ...)
-- [ ] Using soft-nms instead of normal NMS.
+* [Distance-IoU Loss](https://arxiv.org/pdf/1911.08287.pdf)
+* [Complete-IoU Loss](https://arxiv.org/pdf/2005.03572.pdf)
+- [ ] [Using soft-nms instead of normal NMS.](https://arxiv.org/pdf/1704.04503.pdf)
 - [ ] FP16 (automatic mixed precision), DDP (DistributedDataParallel) for faster training on GPUs.
 - [ ] Tensorboard, Profiler.
 
