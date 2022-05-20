@@ -46,14 +46,14 @@ data:
             - iaa.MotionBlur()
             # - iaa.JpegCompression(compression=(0, 10))
             - iaa.Fliplr(p=0.5)
-            # - iaa.Flipud(p=0.5)
+            - iaa.Flipud(p=0.5)
             - iaa.Grayscale(alpha=(0.0, 0.1))
             # - iaa.Rot90(k=[0, 1, 2, 3], keep_size=False)
             # - iaa.Affine(rotate=(-5, 5), shear=(-5, 5), fit_output=True)
             # - iaa.Crop(percent=(0, 0.1))
             # - iaa.Pad(percent=(0, 0.1), keep_size=False)
             - iaa.ChangeColorTemperature()
-      batch_size: 16
+      batch_size: 8
       shuffle: True
       pin_memory: True
       num_workers: 12
@@ -101,7 +101,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 16
+      batch_size: 8
       shuffle: False
       pin_memory: True
       num_workers: 12
@@ -149,7 +149,7 @@ data:
             sofa: 17
             train: 18
             tvmonitor: 19
-      batch_size: 16
+      batch_size: 8
       shuffle: False
       pin_memory: True
       num_workers: 12
@@ -166,16 +166,15 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.efficient_det.efficientdet
-  class: EfficientDet
-  EfficientDet:
+  module: flame.core.model.efficient_det
+  class: Model
+  Model:
     pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
-    head_only: False
     num_classes: 20
     compound_coef: 0
     backbone_pretrained: False
-    scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    scales: ['2 ** 0', '2 ** (1 / 3)', '2 ** (2 / 3)']
+    aspect_ratios: [0.5, 1., 2.]
 
 optim:
   module: torch.optim
@@ -206,17 +205,10 @@ metrics:
   Metrics:
     metrics:
       focal_loss:
-        module: flame.handlers.metrics.focal_loss.loss
+        module: flame.handlers.metrics.loss
         class: Loss
         Loss:
-          loss_fn:
-            module: flame.handlers.metrics.focal_loss.focal_loss
-            class: FocalLoss
-            FocalLoss:
-              alpha: 0.25
-              gamma: 2.0
-              lamda: 50.0
-              device: '''cuda'''
+          loss_fn: config['loss']
           output_transform: 'lambda x: (x[0], x[1], x[2], x[3])'
     attach_to:
       train_evaluator: '''train'''
@@ -252,7 +244,7 @@ lr_scheduler:
     score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
-    patience: 3
+    patience: 10
     verbose: True
 
 early_stopping:
@@ -262,7 +254,7 @@ early_stopping:
     score_name: '''focal_loss'''
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
-    patience: 30
+    patience: 50
 
 best_saver:
   module: flame.handlers.checkpoint

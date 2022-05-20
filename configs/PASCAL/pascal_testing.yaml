@@ -48,53 +48,50 @@ data:
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
-  module: flame.core.model.efficient_det.efficientdet
-  class: EfficientDet
-  EfficientDet:
+  module: flame.core.model.efficient_det
+  class: Model
+  Model:
     num_classes: 20
     compound_coef: 0
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
-    iou_threshold: 0.2
-    score_threshold: 0.3
+    aspect_ratios: [1., 2., 0.5]
+    iou_threshold: 0.5
+    score_threshold: 0.02
 
 metrics:
   module: flame.handlers.metrics.metrics
   class: Metrics
   Metrics:
     metrics:
-      mAP:
-        module: flame.handlers.metrics.mean_average_precision.evaluator
-        class: Evaluator
-        Evaluator:
-          eval_fn:
-            module: flame.handlers.metrics.mean_average_precision.mean_average_precision
-            class: MeanAveragePrecision
-            MeanAveragePrecision:
-              classes:
-                aeroplane: 0
-                bicycle: 1
-                bird: 2
-                boat: 3
-                bottle: 4
-                bus: 5
-                car: 6
-                cat: 7
-                chair: 8
-                cow: 9
-                diningtable: 10
-                dog: 11
-                horse: 12
-                motorbike: 13
-                person: 14
-                pottedplant: 15
-                sheep: 16
-                sofa: 17
-                train: 18
-                tvmonitor: 19
-              iou_threshold: 0.5
-              method: '''every_point_interpolation'''
-          output_transform: 'lambda x: (x[0], x[1])'
+      coco_eval:
+        module: flame.core.metric.COCO_eval
+        class: COCOEvaluator
+        COCOEvaluator:
+          compound_coef: 0
+          detection_path: '''checkpoint/PASCAL/efficientdet-d0/2110221358/pascal_det_val.json'''
+          ground_truth_path: '''checkpoint/PASCAL/efficientdet-d0/2110221358/pascal_gt_val.json'''
+          classes:
+            aeroplane: 0
+            bicycle: 1
+            bird: 2
+            boat: 3
+            bottle: 4
+            bus: 5
+            car: 6
+            cat: 7
+            chair: 8
+            cow: 9
+            diningtable: 10
+            dog: 11
+            horse: 12
+            motorbike: 13
+            person: 14
+            pottedplant: 15
+            sheep: 16
+            sofa: 17
+            train: 18
+            tvmonitor: 19
+          output_transform: 'lambda x: (x[0], x[1], x[2])'
     attach_to:
       engine: '''test'''
 
@@ -143,7 +140,7 @@ predictor:
     output_transform: 'lambda x: (x[0], x[-1])'
 
 engine:
-  module: flame.core.engine.tester
+  module: flame.core.engine.evaluator
   class: Evaluator
   Evaluator:
     dataset: config['data']['test']

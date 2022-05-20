@@ -27,7 +27,7 @@ model:
     compound_coef: 0
     backbone_pretrained: False
     scales: ['2 ** 0', '2 ** (1 / 3)', '2 ** (2 / 3)']
-    aspect_ratios: [1., 2., 0.5]
+    aspect_ratios: [0.5, 1., 2.]
     iou_threshold: 0.5
     score_threshold: 0.05
 
@@ -73,7 +73,7 @@ predictor:
     output_transform: 'lambda x: (x[0], x[-1])'
 
 engine:
-  module: flame.core.engine.tester
+  module: flame.core.engine.evaluator
   class: Evaluator
   Evaluator:
     dataset: config['data']['test']

@@ -28,9 +28,9 @@ data:
       collate_fn: 'lambda batch:tuple(zip(*batch))'
 
 model:
-  module: flame.core.model.efficientdet
-  class: EfficientDet
-  EfficientDet:
+  module: flame.core.model.efficient_det
+  class: Model
+  Model:
     num_classes: 1
     compound_coef: 0
     backbone_pretrained: False
@@ -97,7 +97,7 @@ predictor:
     output_transform: 'lambda x: (x[0], x[-1])'
 
 engine:
-  module: flame.core.engine.tester
+  module: flame.core.engine.evaluator
   class: Evaluator
   Evaluator:
     dataset: config['data']['test']

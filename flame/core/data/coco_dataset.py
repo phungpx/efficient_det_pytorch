@@ -114,7 +114,7 @@ class CoCoDataset(Dataset):
         boxes, labels = [], []
         annot_indices = self.coco.getAnnIds(imgIds=self.image_indices[image_idx], iscrowd=False)
         if not len(annot_indices):
-            labels, boxes = [[-1]], [[0, 0, 1, 1]]
+            labels, boxes = [-1], [[0, 0, 1, 1]]
             return boxes, labels
 
         annot_infos = self.coco.loadAnns(ids=annot_indices)

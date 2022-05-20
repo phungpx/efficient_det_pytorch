@@ -156,16 +156,16 @@ loss:
     device: '''cuda'''
 
 model:
-  module: flame.core.model.efficient_det.efficientdet
-  class: EfficientDet
-  EfficientDet:
+  module: flame.core.model.efficient_det
+  class: Model
+  Model:
     pretrained_weight: '''checkpoint/efficientdet_pretrained_weight/efficientdet-d0.pth'''
     head_only: False
     num_classes: 23
     compound_coef: 0
     backbone_pretrained: False
-    scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
-    aspect_ratios: ['(1.0, 1.0)', '(1.4, 0.7)', '(0.7, 1.4)']
+    scales: ['2 ** 0', '2 ** (1 / 3)', '2 ** (2 / 3)']
+    aspect_ratios: [0.5, 1., 2.]
 
 optim:
   module: torch.optim
@@ -199,14 +199,7 @@ metrics:
         module: flame.handlers.metrics.focal_loss.loss
         class: Loss
         Loss:
-          loss_fn:
-            module: flame.handlers.metrics.focal_loss.focal_loss
-            class: FocalLoss
-            FocalLoss:
-              alpha: 0.25
-              gamma: 2.0
-              lamda: 50.0
-              device: '''cuda'''
+          loss_fn: config['loss']
           output_transform: 'lambda x: (x[0], x[1], x[2], x[3])'
     attach_to:
       train_evaluator: '''train'''
