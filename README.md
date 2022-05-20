@@ -69,24 +69,17 @@ CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_trainin
 CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_testing.yaml
 ```
 ### Result
-* EfficientDet - D0
-<div align="center">
-	<img src="https://user-images.githubusercontent.com/61035926/169444903-890a341f-2909-40d2-9b7c-3d1c8f36e7c7.png", width="1200">
-</div>
-
-* EfficientDet - D1
-
-* EfficientDet - D2
-
-* EfficientDet - D3
-
-* EfficientDet - D4
-
-* EfficientDet - D5
-
-* EfficientDet - D6
-
-* EfficientDet - D7
+|Model|Parameters|Result|
+|:---:|:--------:|:----:|
+|EffiDet - D0|3,839,117|<img src="https://user-images.githubusercontent.com/61035926/169470818-7968f3bf-c12c-4503-b45e-0f62071c5622.png" width="600"> |
+|EffiDet - D1|-|-|
+|EffiDet - D2|-|-|
+|EffiDet - D3|-|-|
+|EffiDet - D4|-|-|
+|EffiDet - D5|-|-|
+|EffiDet - D6|-|-|
+|EffiDet - D7|-|-|
+|EffiDet - D7x|-|-|
 
 ## COCO
 
