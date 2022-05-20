@@ -7,6 +7,7 @@
 # TODO
 - [x] Dataset format including coco, pascal, labelme and altheia.
 - [x] Efficient Det training, inference flow.
+- [ ] Add mask head, based on the idea of [RetinaMask](https://arxiv.org/pdf/1901.03353.pdf)
 - [ ] Augmentations: Mosaic, Mixup, CutMix,...
 - [ ] BBox IOU Loss (GIoU, DIoU, CIoU, ...)
 * [Distance-IoU Loss](https://arxiv.org/pdf/1911.08287.pdf)
