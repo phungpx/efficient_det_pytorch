@@ -83,14 +83,14 @@ CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_testing
 |EffiDet - D7x|-|-|
 
 ## COCO
-* Config: https://github.com/phungpx/efficient_det_pytorch/tree/master/configs/PASCAL
+* Config: https://github.com/phungpx/efficient_det_pytorch/tree/master/configs/COCO/
 * Training
 ```python
-CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_training.yaml
+CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/COCO/coco_training.yaml
 ```
 * Testing
 ```python
-CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/PASCAL/pascal_testing.yaml
+CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/COCO/coco_testing.yaml
 ```
 * Result
 
