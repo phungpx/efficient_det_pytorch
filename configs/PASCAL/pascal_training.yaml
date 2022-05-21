@@ -7,7 +7,7 @@ data:
         module: flame.core.data.pascal_dataset
         class: PascalDataset
         PascalDataset:
-          compound_coef: 0
+          model_name: '''D0'''
           VOC2012:
             image_dir: '''dataset/PASCALVOC2012/JPEGImages/'''
             label_dir: '''dataset/PASCALVOC2012/Annotations/'''
@@ -68,7 +68,7 @@ data:
         module: flame.core.data.pascal_dataset
         class: PascalDataset
         PascalDataset:
-          compound_coef: 0
+          model_name: '''D0'''
           VOC2012:
             image_dir: '''dataset/PASCALVOC2012/JPEGImages/'''
             label_dir: '''dataset/PASCALVOC2012/Annotations/'''
@@ -116,7 +116,7 @@ data:
         module: flame.core.data.pascal_dataset
         class: PascalDataset
         PascalDataset:
-          compound_coef: 0
+          model_name: '''D0'''
           VOC2012:
             image_dir: '''dataset/PASCALVOC2012/JPEGImages/'''
             label_dir: '''dataset/PASCALVOC2012/Annotations/'''

@@ -7,7 +7,7 @@ data:
         module: flame.core.data.labelme_dataset
         class: LabelmeDataset
         LabelmeDataset:
-          compound_coef: 1
+          model_name: '''D0'''
           dirnames:
             - '''dataset/EPASS/train'''
             - '''dataset/EPASS/test'''
@@ -34,7 +34,7 @@ model:
   class: EfficientDet
   EfficientDet:
     num_classes: 1
-    compound_coef: 1
+    model_name: '''D0'''
     backbone_pretrained: False
     scales: ['2 ** (-1 / 3)', 1., '2 ** (1 / 3)', '2 ** (2 / 3)', '2 ** 1']
     aspect_ratios: [0.25, 0.5, 1., 2., 4.]  # anchor_width / anchor_height
@@ -47,18 +47,18 @@ metrics:
   Metrics:
     metrics:
       mAP:
-        module: flame.handlers.metrics.mean_average_precision.evaluator
+        module: flame.core.metrics.evaluator
         class: Evaluator
         Evaluator:
           eval_fn:
-            module: flame.handlers.metrics.mean_average_precision.mean_average_precision
+            module: flame.core.metric.mAP
             class: MeanAveragePrecision
             MeanAveragePrecision:
               classes:
                 EPASS: 0
               iou_threshold: 0.5
               method: '''every_point_interpolation'''
-              print_FP_files: True
+              print_FP_files: False
           output_transform: 'lambda x: (x[0], x[1], x[2])'
     attach_to:
       engine: '''test'''
@@ -83,7 +83,7 @@ predictor:
   RegionPredictor:
     evaluator_name: '''engine'''
     output_dir: '''checkpoint/EPASS/efficientdet-d1/EXP3/'''
-    compound_coef: 1
+    model_name: '''D0'''
     classes:
       EPASS: [[0, 0, 255], 0]
     output_transform: 'lambda x: (x[0], x[-1])'
