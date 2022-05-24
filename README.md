@@ -97,7 +97,7 @@ CUDA_VISIBLE_DEVICES=<cuda_indice> python -m flame configs/COCO/coco_testing.yam
 
 |Model|Parameters|Result|
 |:---:|:--------:|:----:|
-|EffiDet - D0|3,874,217|<img src="https://user-images.githubusercontent.com/61035926/169502260-a933b1e0-0eda-4535-a793-662ac7c576fc.png" width="600"> |
+|EffiDet - D0|3,874,217|<img src="https://user-images.githubusercontent.com/61035926/170002262-de272239-b631-4ae1-b2ba-20123e0690bb.png" width="600"> |
 |EffiDet - D1|-|-|
 |EffiDet - D2|-|-|
 |EffiDet - D3|-|-|
