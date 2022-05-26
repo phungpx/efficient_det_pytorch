@@ -10,7 +10,7 @@ data:
           model_name: '''D0'''
           dirnames:
             - '''dataset/EPASS/test/'''
-          image_patterns: ['''*.jpg''', '''*.png''', '''*.jpeg''', '''*.JPG''', '''*.PNG''', '''*.JPEG''']
+          image_patterns: ['''*.*g''', '''*.*G''']
           label_patterns: ['''*.json''']
           mean: [0.485, 0.456, 0.406]
           std: [0.229, 0.224, 0.225]
@@ -44,20 +44,6 @@ metrics:
   class: Metrics
   Metrics:
     metrics:
-      mAP:
-        module: flame.handlers.metrics.evaluator
-        class: Evaluator
-        Evaluator:
-          eval_fn:
-            module: flame.core.metric.mAP
-            class: MeanAveragePrecision
-            MeanAveragePrecision:
-              classes:
-                EPASS: 0
-              iou_threshold: 0.5
-              method: '''every_point_interpolation'''
-              print_FP_files: False
-          output_transform: 'lambda x: (x[0], x[1], x[2])'
       coco_eval:
         module: flame.core.metric.COCO_eval
         class: COCOEvaluator

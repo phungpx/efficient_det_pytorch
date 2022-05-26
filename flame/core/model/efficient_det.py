@@ -257,6 +257,7 @@ class Model(nn.Module):
         onnx_export: bool = False,
     ) -> None:
         super(Model, self).__init__()
+        self.imsize: int = setting[model_name]['input_size']
         self.model = EfficientDet(
             num_classes=num_classes,
             model_name=model_name,

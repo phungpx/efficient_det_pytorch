@@ -59,7 +59,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/COCO/efficientdet-d0/2205200917/best_model_20_focal_loss=-1.7065.pt'''
+    checkpoint_path: '''checkpoint/COCO/efficientdet-d0/2205200917/best_model_42_focal_loss=-1.6850.pt'''
     mode: '''test'''
 
 predictor:
@@ -67,7 +67,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/COCO/efficientdet-d0/2205200917/best_model_20_focal_loss=-1.7065/'''
+    output_dir: '''checkpoint/COCO/efficientdet-d0/2205200917/best_model_42_focal_loss=-1.6850/'''
     model_name: '''D0'''
     score_threshold: 0.3
     output_transform: 'lambda x: (x[0], x[-1])'
