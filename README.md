@@ -60,6 +60,21 @@ http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
 https://developer.ibm.com/exchanges/data/all/publaynet/
 ```
 
+# Note. Run TensorBoard on Server
+You have to create a ssh connection using port forwarding:
+```bash
+ssh -L 16006:127.0.0.1:6006 user@host
+```
+Then you run the tensorboard command:
+
+```bash
+tensorboard --logdir=/path/to/logs
+```
+Then you can easily access the tensorboard in your browser under:
+```bash
+localhost:16006/
+```
+
 # USAGE
 ## VOC 2007, 2012
 * Config: https://github.com/phungpx/efficient_det_pytorch/tree/master/configs/PASCAL
