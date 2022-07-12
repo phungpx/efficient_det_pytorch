@@ -13,8 +13,10 @@
 * [Distance-IoU Loss](https://arxiv.org/pdf/1911.08287.pdf)
 * [Complete-IoU Loss](https://arxiv.org/pdf/2005.03572.pdf)
 - [ ] [Using soft-nms instead of normal NMS.](https://arxiv.org/pdf/1704.04503.pdf)
-- [ ] FP16 (automatic mixed precision), DDP (DistributedDataParallel) for faster training on GPUs.
-- [ ] Tensorboard, Profiler.
+- [ ] FP16 (automatic mixed precision)
+- [ ] DDP (DistributedDataParallel) for faster training on GPUs.
+- [x] Tensorboard, Logger.
+- [ ] Profiler.
 
 # MAIN FUNCTIONS
 * [Backbone using all variants of Efficient NetV1](https://github.com/phungpx/efficient_det_pytorch/blob/master/flame/core/model/backbone/__init__.py)
@@ -56,6 +58,21 @@ http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
 * Publaynet
 ```bash
 https://developer.ibm.com/exchanges/data/all/publaynet/
+```
+
+# Note. Run TensorBoard on Server
+You have to create a ssh connection using port forwarding:
+```bash
+ssh -L 16006:127.0.0.1:6006 user@host
+```
+Then you run the tensorboard command:
+
+```bash
+tensorboard --logdir=/path/to/logs
+```
+Then you can easily access the tensorboard in your browser under:
+```bash
+localhost:16006/
 ```
 
 # USAGE
