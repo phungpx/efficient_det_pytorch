@@ -13,8 +13,10 @@
 * [Distance-IoU Loss](https://arxiv.org/pdf/1911.08287.pdf)
 * [Complete-IoU Loss](https://arxiv.org/pdf/2005.03572.pdf)
 - [ ] [Using soft-nms instead of normal NMS.](https://arxiv.org/pdf/1704.04503.pdf)
-- [ ] FP16 (automatic mixed precision), DDP (DistributedDataParallel) for faster training on GPUs.
-- [ ] Tensorboard, Profiler.
+- [ ] FP16 (automatic mixed precision)
+- [ ] DDP (DistributedDataParallel) for faster training on GPUs.
+- [x] Tensorboard, Logger.
+- [ ] Profiler.
 
 # MAIN FUNCTIONS
 * [Backbone using all variants of Efficient NetV1](https://github.com/phungpx/efficient_det_pytorch/blob/master/flame/core/model/backbone/__init__.py)
