@@ -75,9 +75,9 @@ class Trainer(Engine):
             # log learning_rate
             current_lr = self.optimizer.param_groups[0]['lr']
             self.writer.add_scalar(tag='learning_rate', scalar_value=current_lr, global_step=step)
-            self.writer.add_scalars(main_tag='Loss', tag_scalar_dict={'train': loss.item()}, global_step=step)
-            self.writer.add_scalars(main_tag='Regression_loss', tag_scalar_dict={'train': reg_loss.mean().item()}, global_step=step)
-            self.writer.add_scalars(main_tag='Classfication_loss', tag_scalar_dict={'train': cls_loss.mean().item()}, global_step=step)
+            self.writer.add_scalar(tag='FocalLoss', scalar_value=loss.item(), global_step=step)
+            self.writer.add_scalar(tag='Regression', scalar_value=reg_loss.mean().item(), global_step=step)
+            self.writer.add_scalar(tag='Classfication', scalar_value=cls_loss.mean().item(), global_step=step)
 
         return loss.item()
 
