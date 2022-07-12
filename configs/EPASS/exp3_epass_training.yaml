@@ -141,12 +141,12 @@ valid_evaluator:
     device: '''cuda'''
 
 metrics:
-  module: flame.handlers.metrics.metrics
+  module: flame.handlers.metrics
   class: Metrics
   Metrics:
     metrics:
       focal_loss:
-        module: flame.handlers.metrics.loss
+        module: flame.core.metric.loss
         class: Loss
         Loss:
           loss_fn: config['loss']

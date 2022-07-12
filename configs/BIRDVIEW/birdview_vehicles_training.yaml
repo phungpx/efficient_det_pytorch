@@ -116,12 +116,12 @@ valid_evaluator:
     device: '''cuda'''
 
 metrics:
-  module: flame.handlers.metrics.metrics
+  module: flame.handlers.metrics
   class: Metrics
   Metrics:
     metrics:
       focal_loss:
-        module: flame.handlers.metrics.loss
+        module: flame.core.metric.loss
         class: Loss
         Loss:
           loss_fn: config['loss']
@@ -130,13 +130,26 @@ metrics:
       train_evaluator: '''train'''
       valid_evaluator: '''valid'''
 
+writer:
+  module: flame.handlers.tensorboard
+  class: TensorBoard
+  TensorBoard:
+    logdir: '''checkpoint/birdview_vehicles/efficientdet-d0/'''
+
+logger:
+  module: flame.handlers.logger
+  class: Logger
+  Logger:
+    logdir: '''checkpoint/birdview_vehicles/efficientdet-d0/'''
+    logname: '''BIRDVIEW'''
+
 screenlogger:
   module: flame.handlers.screenlogger
   class: ScreenLogger
   ScreenLogger:
-    eval_names:
-      - '''train''' 
-      - '''valid'''
+    writer: config['writer']
+    logger: config['logger']
+    eval_names: ['''train''', '''valid''']
 
 history:
   module: flame.handlers.checkpoint
@@ -207,6 +220,7 @@ engine:
     max_epochs: 10000
     max_norm: 0.1
     norm_type: 2
+    writer: config['writer']
 
 extralibs:
   torch: torch

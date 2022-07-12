@@ -139,12 +139,12 @@ valid_evaluator:
     device: '''cuda'''
 
 metrics:
-  module: flame.handlers.metrics.metrics
+  module: flame.handlers.metrics
   class: Metrics
   Metrics:
     metrics:
       focal_loss:
-        module: flame.handlers.metrics.loss
+        module: flame.core.metric.loss
         class: Loss
         Loss:
           loss_fn: config['loss']
@@ -153,13 +153,26 @@ metrics:
       train_evaluator: '''train'''
       valid_evaluator: '''valid'''
 
+writer:
+  module: flame.handlers.tensorboard
+  class: TensorBoard
+  TensorBoard:
+    logdir: '''checkpoint/EPASS/efficientdet-d0/EXP2/'''
+
+logger:
+  module: flame.handlers.logger
+  class: Logger
+  Logger:
+    logdir: '''checkpoint/EPASS/efficientdet-d0/EXP2/'''
+    logname: '''EPASS'''
+
 screenlogger:
   module: flame.handlers.screenlogger
   class: ScreenLogger
   ScreenLogger:
-    eval_names:
-      - '''train''' 
-      - '''valid'''
+    writer: config['writer']
+    logger: config['logger']
+    eval_names: ['''train''', '''valid''']
 
 history:
   module: flame.handlers.checkpoint
@@ -181,6 +194,7 @@ lr_scheduler:
   class: ReduceLROnPlateau
   ReduceLROnPlateau:
     score_name: '''focal_loss'''
+    sub_score_name: '''loss'''  # because focal_loss is dict of {'loss': ..., 'reg_loss': ..., 'cls_loss': ...}
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
     patience: 5
@@ -191,6 +205,7 @@ early_stopping:
   class: EarlyStopping
   EarlyStopping:
     score_name: '''focal_loss'''
+    sub_score_name: '''loss'''  # because focal_loss is dict of {'loss': ..., 'reg_loss': ..., 'cls_loss': ...}
     evaluator_name: '''valid_evaluator'''
     mode: '''min'''
     patience: 50
@@ -201,6 +216,7 @@ best_saver:
   BestSaver:
     dirname: '''checkpoint/EPASS/efficientdet-d0/EXP2/'''
     score_name: '''focal_loss'''
+    sub_score_name: '''loss'''  # because focal_loss is dict of {'loss': ..., 'reg_loss': ..., 'cls_loss': ...}
     mode: '''min'''
     evaluator_name: '''valid_evaluator'''
     n_saved: 1
@@ -227,6 +243,7 @@ engine:
   Trainer:
     dataset: config['data']['train']
     device: '''cuda'''
+    writer: config['writer']
     max_epochs: 10000
     max_norm: 0.1
     norm_type: 2

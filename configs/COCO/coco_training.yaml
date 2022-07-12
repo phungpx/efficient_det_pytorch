@@ -121,7 +121,7 @@ metrics:
   Metrics:
     metrics:
       focal_loss:
-        module: flame.handlers.metrics.loss
+        module: flame.core.metric.loss
         class: Loss
         Loss:
           loss_fn: config['loss']

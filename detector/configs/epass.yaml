@@ -6,14 +6,14 @@ Detector:
     class: EfficientDet
     EfficientDet:
       num_classes: 1
-      compound_coef: 0
+      model_name: '''D0'''
       scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
       aspect_ratios: [0.25, 0.5, 1., 2., 4.]  # anchor_width / anchor_height
       iou_threshold: 0.2
       score_threshold: 0.5
   classes:
     0: '''EPASS'''
-  compound_coef: 0
+  model_name: '''D0'''
   weight_path: '''models/EPASS/2204011232/best_model_166_focal_loss=-0.4426.pt'''
   batch_size: 1
   mean: '(0.485, 0.456, 0.406)'

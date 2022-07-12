@@ -16,12 +16,17 @@ def chunks(lst: list, size: Optional[int] = None) -> Union[List, Generator]:
             yield lst[i:i + size]
 
 
+input_size = {
+    'D0': 512, 'D1': 640, 'D2': 768, 'D3': 896, 'D4': 1024, 'D5': 1280, 'D6': 1280, 'D7': 1536, 'D7x': 1536,
+}
+
+
 class Detector:
     def __init__(
         self,
         model: nn.Module,
         weight_path: str,
-        compound_coef: int,
+        model_name: str,
         classes: Dict[int, str],
         mean: List[float],
         std: List[float],
@@ -33,7 +38,7 @@ class Detector:
         self.device = device
         self.classes = classes
         self.batch_size = batch_size
-        self.imsize = 512 + 128 * compound_coef
+        self.imsize = input_size[model_name]
 
         self.mean = torch.tensor(mean, dtype=torch.float, device=device).view(1, 3, 1, 1)
         self.std = torch.tensor(std, dtype=torch.float, device=device).view(1, 3, 1, 1)
@@ -72,7 +77,7 @@ class Detector:
             batch = (batch.float().div(255.) - self.mean) / self.std
 
             with torch.no_grad():
-                preds += self.model.inference(batch)
+                preds += self.model.predict(batch)
 
         return original_sizes, preds
 

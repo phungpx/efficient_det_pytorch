@@ -32,10 +32,19 @@ class Engine(Module):
 
 
 class Trainer(Engine):
-    def __init__(self, dataset, device, max_norm=None, norm_type=2, max_epochs=1):
+    def __init__(
+        self,
+        dataset,
+        device,
+        max_norm=None,
+        norm_type=2,
+        max_epochs=1,
+        writer=None,
+    ):
         super(Trainer, self).__init__(dataset, device, max_epochs)
         self.max_norm = max_norm
         self.norm_type = norm_type
+        self.writer = writer
 
     def init(self):
         assert 'model' in self.frame, 'The frame does not have model.'
@@ -43,7 +52,6 @@ class Trainer(Engine):
         self.model = self.frame['model'].to(self.device)
         self.optimizer = self.frame['optim']
         self.loss = self.frame['loss']
-        print(f'[Info] parameters of model: {sum(param.numel() for param in self.model.parameters() if param.requires_grad)} params.')
 
     def _update(self, engine, batch):
         self.model.train()
@@ -55,13 +63,21 @@ class Trainer(Engine):
         cls_preds, reg_preds, anchors = self.model(samples)
         cls_loss, reg_loss = self.loss(cls_preds, reg_preds, anchors, targets)
         loss = cls_loss.mean() + reg_loss.mean()
-
         loss.backward()
 
         if self.max_norm is not None:
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
 
         self.optimizer.step()
+
+        if self.writer is not None:
+            step = engine.state.iteration
+            # log learning_rate
+            current_lr = self.optimizer.param_groups[0]['lr']
+            self.writer.add_scalar(tag='learning_rate', scalar_value=current_lr, global_step=step)
+            self.writer.add_scalars(main_tag='Loss', tag_scalar_dict={'train': loss.item()}, global_step=step)
+            self.writer.add_scalars(main_tag='Regression_loss', tag_scalar_dict={'train': reg_loss.mean().item()}, global_step=step)
+            self.writer.add_scalars(main_tag='Classfication_loss', tag_scalar_dict={'train': cls_loss.mean().item()}, global_step=step)
 
         return loss.item()
 
