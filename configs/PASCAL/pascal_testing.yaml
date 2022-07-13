@@ -59,7 +59,7 @@ model:
     score_threshold: 0.05
 
 metrics:
-  module: flame.handlers.metrics.metrics
+  module: flame.handlers.metrics
   class: Metrics
   Metrics:
     metrics:
@@ -95,10 +95,19 @@ metrics:
     attach_to:
       engine: '''test'''
 
+logger:
+  module: flame.handlers.logger
+  class: Logger
+  Logger:
+    logdir: '''checkpoint/PASCAL/efficientdet-d0/2205190641/'''
+    logname: '''PASCAL'''
+    run_mode: '''testing'''
+
 screenlogger:
   module: flame.handlers.screenlogger
   class: ScreenLogger
   ScreenLogger:
+    logger: config['logger']
     eval_names:
       - '''test'''
 

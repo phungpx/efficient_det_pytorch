@@ -7,11 +7,19 @@ class Logger:
     def __init__(
         self,
         logdir=None,
+        run_mode='training',  # training or testing
         logname=None,
         mode=logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     ):
-        logdir = Path(logdir) / datetime.now().strftime('%y%m%d%H%M') / 'log'
+        if run_mode == 'training':
+            logdir = Path(logdir) / datetime.now().strftime('%y%m%d%H%M')
+        elif run_mode == 'testing':
+            logdir = Path(logdir)
+        else:
+            print(f'run mode {run_mode} is invalid.')
+
+        logdir = logdir / 'log'
         if not logdir.exists():
             logdir.mkdir(parents=True)
 

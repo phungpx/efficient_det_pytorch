@@ -27,11 +27,11 @@ model:
     model_name: '''D0'''
     scales: ['2 ** 0', '2 ** (1.0 / 3.0)', '2 ** (2.0 / 3.0)']
     aspect_ratios: [0.5, 1., 2.]
-    iou_threshold: 0.45
-    score_threshold: 0.2
+    iou_threshold: 0.5
+    score_threshold: 0.1
 
 metrics:
-  module: flame.handlers.metrics.metrics
+  module: flame.handlers.metrics
   class: Metrics
   Metrics:
     metrics:
@@ -40,8 +40,8 @@ metrics:
         class: COCOEvaluator
         COCOEvaluator:
           model_name: '''D0'''
-          detection_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2205191442/birdview_det_val.json'''
-          ground_truth_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2205191442/birdview_gt_val.json'''
+          detection_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2207121727/birdview_det_val.json'''
+          ground_truth_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2207121727/birdview_gt_val.json'''
           classes:
             large-vehicle: 0
             small-vehicle: 1
@@ -49,10 +49,19 @@ metrics:
     attach_to:
       engine: '''test'''
 
+logger:
+  module: flame.handlers.logger
+  class: Logger
+  Logger:
+    logdir: '''checkpoint/birdview_vehicles/efficientdet-d0/2207121727/'''
+    logname: '''BIRDVIEW'''
+    run_mode: '''testing'''
+
 screenlogger:
   module: flame.handlers.screenlogger
   class: ScreenLogger
   ScreenLogger:
+    logger: config['logger']
     eval_names:
       - '''test'''
 
@@ -60,7 +69,7 @@ checkpoint_loader:
   module: flame.handlers.checkpoint
   class: CheckpointLoader
   CheckpointLoader:
-    checkpoint_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2205191442/best_model_42_focal_loss=-1.3001.pt'''
+    checkpoint_path: '''checkpoint/birdview_vehicles/efficientdet-d0/2207121727/best_model_36_focal_loss=-1.2553.pt'''
     mode: '''test'''
 
 predictor:
@@ -68,7 +77,7 @@ predictor:
   class: RegionPredictor
   RegionPredictor:
     evaluator_name: '''engine'''
-    output_dir: '''checkpoint/birdview_vehicles/efficientdet-d0/2205191442/best_model_42_focal_loss=-1.3001/val'''
+    output_dir: '''checkpoint/birdview_vehicles/efficientdet-d0/2207121727/best_model_36_focal_loss=-1.2553/val'''
     model_name: '''D0'''
     classes:
       large-vehicle: [[255, 0, 0], 0]  # color, class_idx, area_threshold

@@ -32,7 +32,7 @@ model:
     score_threshold: 0.01
 
 metrics:
-  module: flame.handlers.metrics.metrics
+  module: flame.handlers.metrics
   class: Metrics
   Metrics:
     metrics:
@@ -48,10 +48,19 @@ metrics:
     attach_to:
       engine: '''test'''
 
+logger:
+  module: flame.handlers.logger
+  class: Logger
+  Logger:
+    logdir: '''checkpoint/birdview_vehicles/efficientdet-d0/2207121727/'''
+    logname: '''BIRDVIEW'''
+    run_mode: '''testing'''
+
 screenlogger:
   module: flame.handlers.screenlogger
   class: ScreenLogger
   ScreenLogger:
+    logger: config['logger']
     eval_names:
       - '''test'''
 

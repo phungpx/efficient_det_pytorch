@@ -218,14 +218,14 @@ writer:
   module: flame.handlers.tensorboard
   class: TensorBoard
   TensorBoard:
-    logdir: '''checkpoint/birdview_vehicles/efficientdet-d0/'''
+    logdir: '''checkpoint/PASCAL/efficientdet-d0/'''
 
 logger:
   module: flame.handlers.logger
   class: Logger
   Logger:
-    logdir: '''checkpoint/birdview_vehicles/efficientdet-d0/'''
-    logname: '''BIRDVIEW'''
+    logdir: '''checkpoint/PASCAL/efficientdet-d0/'''
+    logname: '''PASCAL'''
 
 screenlogger:
   module: flame.handlers.screenlogger
