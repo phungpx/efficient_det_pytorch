@@ -101,6 +101,10 @@ optim:
     momentum: 0.9
     nesterov: True
 
+# scaler:
+#   module: torch.cuda.amp
+#   class: GradScaler
+
 train_evaluator:
   module: flame.handlers.metric_evaluator
   class: MetricEvaluator
@@ -116,7 +120,7 @@ valid_evaluator:
     device: '''cuda'''
 
 metrics:
-  module: flame.handlers.metrics
+  module: flame.handlers.metric_evaluator
   class: Metrics
   Metrics:
     metrics:

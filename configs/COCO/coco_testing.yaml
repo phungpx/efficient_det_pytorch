@@ -32,7 +32,7 @@ model:
     score_threshold: 0.01
 
 metrics:
-  module: flame.handlers.metrics
+  module: flame.handlers.metric_evaluator
   class: Metrics
   Metrics:
     metrics:

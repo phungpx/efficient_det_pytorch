@@ -47,10 +47,16 @@ class Trainer(Engine):
     def init(self):
         assert 'model' in self.frame, 'The frame does not have model.'
         assert 'optim' in self.frame, 'The frame does not have optim.'
+        assert 'loss' in self.frame, 'The frame does not have loss.'
+        assert 'logger' in self.frame, 'The frame does not have logger.'
         self.model = self.frame['model'].to(self.device)
         self.optimizer = self.frame['optim']
         self.loss = self.frame['loss']
+        self.logger = self.frame['logger']
         self.writer = self.frame.get('writer', None)
+        self.scaler = self.frame.get('scaler', None)  # FP16: https://pytorch.org/docs/stable/amp.html
+        if self.scaler is not None:
+            self.logger.info('Applied FP16 mode.')
 
     def _update(self, engine, batch):
         self.model.train()
@@ -59,26 +65,87 @@ class Trainer(Engine):
         samples = torch.stack([image.to(self.device) for image in params[0]], dim=0)
         targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in params[1]]
 
-        cls_preds, reg_preds, anchors = self.model(samples)
-        cls_loss, reg_loss = self.loss(cls_preds, reg_preds, anchors, targets)
-        loss = cls_loss.mean() + reg_loss.mean()
-        loss.backward()
+        # casts operations to mixed precision
+        with torch.cuda.amp.autocast(enabled=self.scaler is not None):
+            cls_preds, reg_preds, anchors = self.model(samples)
+            cls_loss, reg_loss = self.loss(cls_preds, reg_preds, anchors, targets)
+            loss = cls_loss.mean() + reg_loss.mean()
 
-        if self.max_norm is not None:
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
-
-        self.optimizer.step()
+        if self.scaler is not None:
+            # scales the loss, and calls backward() to create scaled gradients
+            self.scaler.scale(loss).backward()
+            # unscale_() is optional, serving cases where you need to modify or inspect gradients between the backward pass(es) and step()
+            self.scaler.unscale_(self.optimizer)
+            if self.max_norm is not None:
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
+            self.scaler.step(self.optimizer)
+            # update the scale for next iteration
+            self.scaler.update()
+        else:
+            loss.backward()
+            if self.max_norm is not None:
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
+            self.optimizer.step()
 
         if self.writer is not None:
             step = engine.state.iteration
-            # log learning_rate
-            current_lr = self.optimizer.param_groups[0]['lr']
-            self.writer.add_scalar(tag='learning_rate', scalar_value=current_lr, global_step=step)
+            lr = self.optimizer.param_groups[0]['lr']
+            self.writer.add_scalar(tag='LearningRate', scalar_value=lr, global_step=step)
             self.writer.add_scalar(tag='FocalLoss', scalar_value=loss.item(), global_step=step)
             self.writer.add_scalar(tag='Regression', scalar_value=reg_loss.mean().item(), global_step=step)
             self.writer.add_scalar(tag='Classfication', scalar_value=cls_loss.mean().item(), global_step=step)
 
         return loss.item()
+
+
+# class Trainer(Engine):
+#     def __init__(
+#         self,
+#         dataset,
+#         device,
+#         max_norm=None,
+#         norm_type=2,
+#         max_epochs=1,
+#     ):
+#         super(Trainer, self).__init__(dataset, device, max_epochs)
+#         self.max_norm = max_norm
+#         self.norm_type = norm_type
+
+#     def init(self):
+#         assert 'model' in self.frame, 'The frame does not have model.'
+#         assert 'optim' in self.frame, 'The frame does not have optim.'
+#         self.model = self.frame['model'].to(self.device)
+#         self.optimizer = self.frame['optim']
+#         self.loss = self.frame['loss']
+#         self.writer = self.frame.get('writer', None)
+
+#     def _update(self, engine, batch):
+#         self.model.train()
+#         self.optimizer.zero_grad()
+#         params = [param.to(self.device) if torch.is_tensor(param) else param for param in batch]
+#         samples = torch.stack([image.to(self.device) for image in params[0]], dim=0)
+#         targets = [{k: v.to(self.device) for k, v in target.items() if not isinstance(v, list)} for target in params[1]]
+
+#         cls_preds, reg_preds, anchors = self.model(samples)
+#         cls_loss, reg_loss = self.loss(cls_preds, reg_preds, anchors, targets)
+#         loss = cls_loss.mean() + reg_loss.mean()
+#         loss.backward()
+
+#         if self.max_norm is not None:
+#             torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
+
+#         self.optimizer.step()
+
+#         if self.writer is not None:
+#             step = engine.state.iteration
+#             # log learning_rate
+#             current_lr = self.optimizer.param_groups[0]['lr']
+#             self.writer.add_scalar(tag='learning_rate', scalar_value=current_lr, global_step=step)
+#             self.writer.add_scalar(tag='FocalLoss', scalar_value=loss.item(), global_step=step)
+#             self.writer.add_scalar(tag='Regression', scalar_value=reg_loss.mean().item(), global_step=step)
+#             self.writer.add_scalar(tag='Classfication', scalar_value=cls_loss.mean().item(), global_step=step)
+
+#         return loss.item()
 
 
 class Evaluator(Engine):
