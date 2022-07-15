@@ -74,9 +74,9 @@ class Trainer(Engine):
         if self.scaler is not None:
             # scales the loss, and calls backward() to create scaled gradients
             self.scaler.scale(loss).backward()
-            # unscale_() is optional, serving cases where you need to modify or inspect gradients between the backward pass(es) and step()
-            self.scaler.unscale_(self.optimizer)
             if self.max_norm is not None:
+                # unscale_() is optional, serving cases where you need to modify or inspect gradients between the backward pass(es) and step()
+                self.scaler.unscale_(self.optimizer)
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_norm, self.norm_type)
             self.scaler.step(self.optimizer)
             # update the scale for next iteration
