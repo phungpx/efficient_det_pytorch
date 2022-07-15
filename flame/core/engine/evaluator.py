@@ -32,7 +32,6 @@ class Evaluator(Module):
     def init(self):
         assert 'model' in self.frame, 'The frame does not have model.'
         self.model = self.frame['model'].to(self.device)
-        print(f'[Info] parameters of model: {sum(param.numel() for param in self.model.parameters() if param.requires_grad)} params.')
 
     def _update(self, engine, batch):
         self.model.eval()

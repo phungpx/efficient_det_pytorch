@@ -61,7 +61,6 @@ screenlogger:
   module: flame.handlers.screenlogger
   class: ScreenLogger
   ScreenLogger:
-    logger: config['logger']
     eval_names:
       - '''test'''
 

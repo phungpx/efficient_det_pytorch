@@ -5,11 +5,24 @@ from ignite.engine import Events
 
 
 class ScreenLogger(Module):
-    def __init__(self, logger=None, writer=None, eval_names=None):
+    def __init__(self, eval_names=None):
         super(ScreenLogger, self).__init__()
-        self.writer = writer
-        self.logger = logger
         self.eval_names = eval_names if eval_names else []
+
+    def init(self):
+        assert 'logger' in self.frame, 'The frame does not have logger.'
+        self.model = self.frame['model']
+        self.writer = self.frame.get('writer', None)
+        self.logger = self.frame['logger']
+
+        assert 'engine' in self.frame, 'The frame does not have engine.'
+        self.frame['engine'].engine.add_event_handler(Events.STARTED, self._started)
+        self.frame['engine'].engine.add_event_handler(Events.COMPLETED, self._completed)
+
+        if len(self.eval_names):
+            assert 'metrics' in self.frame, 'The frame does not have metrics.'
+        self.frame['engine'].engine.add_event_handler(Events.EPOCH_COMPLETED, self._log_screen)
+
 
     def _started(self, engine):
         self.logger.info(f"Model Params: {sum(param.numel() for param in self.frame['model'].parameters() if param.requires_grad)} params.")
@@ -45,12 +58,3 @@ class ScreenLogger(Module):
                             )
 
             self.logger.info(msg[:-2])
-
-    def init(self):
-        assert 'engine' in self.frame, 'The frame does not have engine.'
-        self.frame['engine'].engine.add_event_handler(Events.STARTED, self._started)
-        self.frame['engine'].engine.add_event_handler(Events.COMPLETED, self._completed)
-
-        if len(self.eval_names):
-            assert 'metrics' in self.frame, 'The frame does not have metrics.'
-        self.frame['engine'].engine.add_event_handler(Events.EPOCH_COMPLETED, self._log_screen)

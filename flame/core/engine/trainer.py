@@ -39,12 +39,10 @@ class Trainer(Engine):
         max_norm=None,
         norm_type=2,
         max_epochs=1,
-        writer=None,
     ):
         super(Trainer, self).__init__(dataset, device, max_epochs)
         self.max_norm = max_norm
         self.norm_type = norm_type
-        self.writer = writer
 
     def init(self):
         assert 'model' in self.frame, 'The frame does not have model.'
@@ -52,6 +50,7 @@ class Trainer(Engine):
         self.model = self.frame['model'].to(self.device)
         self.optimizer = self.frame['optim']
         self.loss = self.frame['loss']
+        self.writer = self.frame.get('writer', None)
 
     def _update(self, engine, batch):
         self.model.train()

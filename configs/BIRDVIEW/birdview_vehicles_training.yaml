@@ -147,8 +147,6 @@ screenlogger:
   module: flame.handlers.screenlogger
   class: ScreenLogger
   ScreenLogger:
-    writer: config['writer']
-    logger: config['logger']
     eval_names: ['''train''', '''valid''']
 
 history:
@@ -220,7 +218,6 @@ engine:
     max_epochs: 10000
     max_norm: 0.1
     norm_type: 2
-    writer: config['writer']
 
 extralibs:
   torch: torch
