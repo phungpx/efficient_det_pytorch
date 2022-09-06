@@ -63,14 +63,19 @@ class LabelmeDataset(Dataset):
         for shape in json_info['shapes']:
             label = shape['label']
             points = shape['points']
-            if label in self.classes and len(points) > 0:
-                x1 = min([point[0] for point in points])
-                y1 = min([point[1] for point in points])
-                x2 = max([point[0] for point in points])
-                y2 = max([point[1] for point in points])
-                bbox = (x1, y1, x2, y2)
+            if label in self.classes:
+                if shape['shape_type'] == 'polygon':
+                    x1 = min([point[0] for point in points])
+                    y1 = min([point[1] for point in points])
+                    x2 = max([point[0] for point in points])
+                    y2 = max([point[1] for point in points])
+                elif shape['shape_type'] == 'rectangle':
+                    x1, y1 = points[0][0], points[0][1]
+                    x2, y2 = points[1][0], points[1][1]
+                else:
+                    print(f"shape type: `{shape['shape_type']}` is invalid !.")
 
-                label_info.append({'label': self.classes[label], 'bbox': bbox})
+                label_info.append({'label': self.classes[label], 'bbox': (x1, y1, x2, y2)})
 
         if not len(label_info):
             label_info.append({'label': -1, 'bbox': (0, 0, 1, 1)})

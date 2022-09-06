@@ -1,0 +1,125 @@
+data:
+  test:
+    module: torch.utils.data
+    class: DataLoader
+    DataLoader:
+      dataset:
+        module: flame.core.data.labelme_dataset
+        class: LabelmeDataset
+        LabelmeDataset:
+          model_name: '''D0'''
+          dirnames:
+            - '''dataset/CORNER/valid/'''
+          image_patterns: ['''*.*g''', '''*.*G''']
+          label_patterns: ['''*.json''']
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          classes:
+            BLX: 0
+            BLX_BACK: 0
+            BLX_OLD: 0
+            BLX_BACK_OLD: 0
+            CMND: 0
+            CMND_BACK: 0
+            CCCD: 0
+            CCCD_BACK: 0
+            CMCC: 0
+            CCCD_front_chip: 0
+            CCCD_back_chip: 0
+            CMQD_A: 0
+            CMQD_A_BACK: 0
+            CMQD_B: 0
+            CMQD_B_BACK: 0
+            CMQD_C: 0
+            CMQD_C_BACK: 0
+            CMQD_D: 0
+            CMQD_D_BACK: 0
+            CMQD_B_VT: 0
+            CMQD_B_VT_BACK: 0
+            PASSPORT: 0
+            PASSPORT_OTHER: 0
+            top_left: 1
+            top_right: 1
+            bottom_left: 1
+            bottom_right: 1
+      batch_size: 16
+      shuffle: False
+      num_workers: 12
+      pin_memory: True
+      drop_last: False
+      collate_fn: 'lambda batch:tuple(zip(*batch))'
+
+model:
+  module: flame.core.model.efficient_det
+  class: Model
+  Model:
+    num_classes: 2
+    model_name: '''D0'''
+    backbone_pretrained: False
+    scales: ['2 ** (-2 / 3)', '2 ** (-1 / 3)', '2 ** 0', '2 ** (1 / 3)', '2 ** (2 / 3)']
+    aspect_ratios: [0.5, 1., 2.]  # anchor_width / anchor_height
+    iou_threshold: 0.2
+    score_threshold: 0.2
+
+metrics:
+  module: flame.handlers.metric_evaluator
+  class: Metrics
+  Metrics:
+    metrics:
+      coco_eval:
+        module: flame.core.metric.COCO_eval
+        class: COCOEvaluator
+        COCOEvaluator:
+          model_name: '''D0'''
+          detection_path: '''checkpoint/CORNER/efficientdet-d0/2208091730/det_val.json'''
+          ground_truth_path: '''checkpoint/CORNER/efficientdet-d0/2208091730/gt_val.json'''
+          classes:
+            'card': 0
+            'corner': 1
+          output_transform: 'lambda x: (x[0], x[1], x[2])'
+    attach_to:
+      engine: '''test'''
+
+logger:
+  module: flame.handlers.logger
+  class: Logger
+  Logger:
+    logdir: '''checkpoint/CORNER/efficientdet-d0/2208091730/'''
+    logname: '''CORNER'''
+    run_mode: '''testing'''
+
+screenlogger:
+  module: flame.handlers.screenlogger
+  class: ScreenLogger
+  ScreenLogger:
+    eval_names:
+      - '''test'''
+
+checkpoint_loader:
+  module: flame.handlers.checkpoint
+  class: CheckpointLoader
+  CheckpointLoader:
+    checkpoint_path: '''checkpoint/CORNER/efficientdet-d0/2208091730/best_model_115_focal_loss=-0.3609.pt'''
+    mode: '''test'''
+
+predictor:
+  module: flame.handlers.region_predictor
+  class: RegionPredictor
+  RegionPredictor:
+    evaluator_name: '''engine'''
+    output_dir: '''checkpoint/CORNER/efficientdet-d0/2208091730/best_model_115_focal_loss=-0.3609/'''
+    model_name: '''D0'''
+    classes:
+      CARD: [[0, 0, 255], 0]
+      CORNER: [[0, 255, 0], 1]
+    output_transform: 'lambda x: (x[0], x[-1])'
+
+engine:
+  module: flame.core.engine.evaluator
+  class: Evaluator
+  Evaluator:
+    dataset: config['data']['test']
+    device: '''cuda'''
+
+extralibs:
+  torch: torch

@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     versions = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
     if args.version not in versions:
-        print(f'{version} is invalid.')
+        print(f'{args.version} is invalid.')
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     backbone = ResNet(backbone_name=args.version, pretrained=args.pretrained).to(device)
